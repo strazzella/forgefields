@@ -1727,3 +1727,348 @@ a.ff-brandbar__title:focus {
     box-shadow: none;
     outline: none;
 }
+
+.ff-media-preview {
+    max-width: 160px;
+    height: auto;
+    display: block;
+}
+
+/* Media field wrapper */
+.ff-media-wrap {
+    display: block;
+    margin: 8px 0 16px;
+}
+
+.ff-media-preview-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ff-media-preview {
+    max-height: 80px;
+    border-radius: 8px;
+    display: block;
+}
+
+.ff-media-fileline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.ff-media-select,
+.ff-media-clear {
+    margin-right: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Keep buttons tidy inside table cells */
+.ff-options-card .button,
+.ff-admin .button {
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* WYSIWYG spacing */
+.wp-editor-wrap {
+    margin-top: 6px;
+}
+
+/* ---------- Forge Fields modern admin styles ---------- */
+.ff-mb .form-table,
+.ff-options-card .form-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px; /* row gaps */
+}
+
+.ff-mb th,
+.ff-options-card th {
+    width: 180px;
+    text-align: left;
+    padding: 0;
+    color: #2c3338;
+    font-weight: 600;
+}
+
+.ff-mb td,
+.ff-options-card td {
+    padding: 0;
+}
+
+/* Inputs, selects, textareas */
+#poststuff .postbox .ff-admin .ff-mb input[type="text"],
+#poststuff .postbox .ff-admin .ff-mb input[type="password"],
+#poststuff .postbox .ff-admin .ff-mb input[type="email"],
+#poststuff .postbox .ff-admin .ff-mb input[type="url"],
+#poststuff .postbox .ff-admin .ff-mb input[type="number"],
+#poststuff .postbox .ff-admin .ff-mb input[type="range"],
+#poststuff .postbox .ff-admin .ff-mb .regular-text,
+#poststuff .postbox .ff-admin .ff-mb select,
+#poststuff .postbox .ff-admin .ff-mb textarea {
+    width: min(100%, 640px);
+    max-width: 640px;
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.4;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+}
+
+/* Global Options card – wide but bounded */
+.wrap.ff-admin.ff-global .ff-options-card input[type="text"],
+.wrap.ff-admin.ff-global .ff-options-card input[type="password"],
+.wrap.ff-admin.ff-global .ff-options-card input[type="email"],
+.wrap.ff-admin.ff-global .ff-options-card input[type="url"],
+.wrap.ff-admin.ff-global .ff-options-card input[type="number"],
+.wrap.ff-admin.ff-global .ff-options-card .regular-text,
+.wrap.ff-admin.ff-global .ff-options-card select,
+.wrap.ff-admin.ff-global .ff-options-card textarea {
+    width: 100%;
+    max-width: var(--ff-field-max-w); /* you already set this to 720px */
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    line-height: 1.4;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+}
+
+.ff-mb input:focus,
+.ff-mb select:focus,
+.ff-mb textarea:focus,
+.ff-options-card input:focus,
+.ff-options-card select:focus,
+.ff-options-card textarea:focus {
+    outline: 0;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+}
+
+/* Buttons */
+.ff-mb .button,
+.ff-options-card .button,
+.ff-subbar__btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 6px 12px;
+}
+
+/* Media (image/file) controls */
+.ff-mb .ff-media-wrap,
+.ff-options-card .ff-media-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.ff-mb .ff-media-preview,
+.ff-options-card .ff-media-preview {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #f6f7f7;
+    border: 1px solid #dcdcde;
+    display: block;
+}
+
+.ff-mb .ff-media-fileline,
+.ff-options-card .ff-media-fileline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #50575e;
+}
+
+.ff-mb .ff-media-nofile,
+.ff-options-card .ff-media-nofile {
+    color: #8c8f94;
+}
+
+/* WYSIWYG container polish */
+.ff-mb .wp-editor-wrap,
+.ff-options-card .wp-editor-wrap {
+    border: 1px solid #ccd0d4;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.ff-mb .wp-editor-container,
+.ff-options-card .wp-editor-container {
+    border: 0;
+}
+.ff-mb .quicktags-toolbar,
+.ff-options-card .quicktags-toolbar {
+    border-bottom: 1px solid #e7eaee;
+}
+
+/* Range + number little layout helper */
+.ff-mb .ff-range-wrap,
+.ff-options-card .ff-range-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Card wrapper shared by metabox + globals */
+.ff-editor-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    max-width: 100%;
+}
+
+/* Tighten the default WP editor chrome */
+.ff-editor-card .wp-editor-wrap {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fafafa;
+}
+
+.ff-editor-card .wp-media-buttons {
+    margin: 6px 8px;
+}
+
+.ff-editor-card .wp-media-buttons .button {
+    border-radius: 6px;
+}
+
+.ff-editor-card .mce-top-part,
+.ff-editor-card .quicktags-toolbar {
+    border-bottom: 1px solid #e5e7eb !important;
+    background: #f9fafb !important;
+}
+
+/* Tabs (Visual / Code) */
+.ff-editor-card .wp-switch-editor {
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    padding: 6px 10px;
+    margin: 0 2px 0 0;
+    border-radius: 6px;
+}
+.ff-editor-card .wp-switch-editor.switch-tmce,
+.ff-editor-card .wp-switch-editor.switch-html {
+    box-shadow: none;
+}
+.ff-editor-card .wp-switch-editor:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+.ff-editor-card .wp-switch-editor.active {
+    background: #e5edff;
+    color: #1e40af;
+}
+
+.ff-editor-card .wp-editor-area {
+    border: 0 !important;
+    background: #fff;
+    padding: 10px !important;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+/* Ensure icon fonts render even if a theme overrides fonts */
+.ff-admin .dashicons,
+.ff-admin .mce-ico {
+    font-family: "dashicons" !important;
+}
+
+/* FF Global – make Quicktags (Code) view fill the card width */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box; /* include borders in width calc */
+}
+
+/* keep the toolbar from nudging the textarea width */
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* (optional) if you see a tiny right gap, remove inner padding on the card */
+.wrap.ff-admin.ff-global .ff-editor-card {
+    padding: 0; /* comment out if you prefer the padding */
+}
+.wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons,
+.wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar,
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
+    padding-left: 10px;
+    padding-right: 10px; /* re-add comfortable gutters after zeroing card padding */
+}
+
+/* ===== Forge Fields — Global WYSIWYG: match edit screen look ===== */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+    background: #fafafa !important;
+}
+
+/* Top toolbars (TinyMCE + Quicktags) */
+.wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
+    border-bottom: 1px solid #e5e7eb !important;
+    background: #f9fafb !important;
+}
+
+/* Visual / Code tabs */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor {
+    border: 0 !important;
+    background: transparent !important;
+    color: #64748b !important;
+    padding: 6px 10px !important;
+    margin: 0 2px 0 0 !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+.wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor.active {
+    background: #e5edff !important;
+    color: #1e40af !important;
+}
+
+/* Editor area */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
+    border: 0 !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    width: 100% !important; /* keep full width */
+}
+
+/* Make all inner wrappers fill the card width */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap,
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
+.wrap.ff-admin.ff-global .ff-editor-card textarea.wp-editor-area {
+    width: 100% !important;
+}
+
+/* Keep Code (Quicktags) height stable when toggling */
+.wrap.ff-admin.ff-global .wp-editor-wrap.html-active .wp-editor-area {
+    min-height: 260px !important;
+}
+
+/* Cosmetic: Add Media button rounding to match */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button {
+    border-radius: 6px !important;
+}
+
+div#wp-ff_global_4353453-wrap {
+    margin: 0;
+}

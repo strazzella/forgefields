@@ -29,6 +29,11 @@ document.addEventListener("DOMContentLoaded", function () {
             '<option value="range">Range</option>' +
             '<option value="password">Password</option>' +
             "</optgroup>" +
+            '<optgroup label="Content">' +
+            '<option value="image">Image</option>' +
+            '<option value="file">File</option>' +
+            '<option value="wysiwyg">WYSIWYG Editor</option>' +
+            "</optgroup>" +
             "</select>" +
             "</div>"
         );
@@ -111,32 +116,39 @@ document.addEventListener("DOMContentLoaded", function () {
             row.className = "ff-field-row";
 
             row.innerHTML = `
-                <td class="ff-field-handle">≡</td>
-                <td>
-                    <input type="text"
-                           class="regular-text ff-field-label"
-                           placeholder="Field Label">
-                </td>
-                <td>
-                    <input type="text"
-                           class="regular-text ff-field-name"
-                           placeholder="field_name">
-                </td>
-                <td>
-                    <select class="ff-field-type">
-                        <option value="text">Text</option>
-                        <option value="textarea">Textarea</option>
-                        <option value="number">Number</option>
-                        <option value="email">Email</option>
-                        <option value="url">URL</option>
-                        <option value="range">Range</option>
-                        <option value="password">Password</option>
-                    </select>
-                </td>
-                <td>
-                    <a href="#" class="ff-field-remove">Remove</a>
-                </td>
-            `;
+        <td class="ff-field-handle">≡</td>
+        <td>
+            <input type="text"
+                   class="regular-text ff-field-label"
+                   placeholder="Field Label">
+        </td>
+        <td>
+            <input type="text"
+                   class="regular-text ff-field-name"
+                   placeholder="field_name">
+        </td>
+        <td>
+            <select class="ff-field-type">
+                <optgroup label="Basic">
+                    <option value="text">Text</option>
+                    <option value="textarea">Textarea</option>
+                    <option value="number">Number</option>
+                    <option value="email">Email</option>
+                    <option value="url">URL</option>
+                    <option value="range">Range</option>
+                    <option value="password">Password</option>
+                </optgroup>
+                <optgroup label="Content">
+                    <option value="image">Image</option>
+                    <option value="file">File</option>
+                    <option value="wysiwyg">WYSIWYG Editor</option>
+                </optgroup>
+            </select>
+        </td>
+        <td>
+            <a href="#" class="ff-field-remove">Remove</a>
+        </td>
+    `;
 
             return row;
         }
@@ -544,3 +556,121 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
         true
     ); // <= capture phase
 })();
+
+// Keep Quicktags (Code) textarea from shrinking on toggle
+document.addEventListener("click", function (e) {
+    const btn = e.target.closest(
+        ".ff-options-card .wp-switch-editor.switch-html"
+    );
+    if (!btn) return;
+    const wrap = btn.closest(".wp-editor-wrap");
+    if (!wrap) return;
+    const ta = wrap.querySelector("textarea.wp-editor-area");
+    if (ta) {
+        ta.style.minHeight = "260px";
+        ta.style.height = "260px";
+    }
+});
+
+jQuery(function ($) {
+    // range -> number
+    $(document).on("input change", ".ff-range-slider", function () {
+        var $num = $($(this).data("target"));
+        if ($num.length) $num.val(this.value);
+    });
+
+    // number -> range (and clamp within min/max)
+    $(document).on("input change", ".ff-range-number", function () {
+        var $rng = $($(this).data("target"));
+        if ($rng.length) {
+            var min = parseFloat($rng.attr("min")) || 0;
+            var max = parseFloat($rng.attr("max")) || 100;
+            var val = parseFloat(this.value);
+            if (isNaN(val)) val = min;
+            val = Math.min(max, Math.max(min, val));
+            this.value = val;
+            $rng.val(val);
+        }
+    });
+});
+
+(function ($) {
+    // Guard: ensure we bind only once across all admin screens
+    if (window.ffMediaBound) {
+        return;
+    }
+    window.ffMediaBound = true;
+
+    function openFFFrame($wrap, $input) {
+        var type = $wrap.data("type"); // "image" or "file"
+        var frame = wp.media({
+            title: type === "image" ? "Select Image" : "Select File",
+            button: {
+                text: "Use this " + (type === "image" ? "image" : "file"),
+            },
+            multiple: false,
+            library: type === "image" ? { type: "image" } : {},
+        });
+
+        frame.on("select", function () {
+            var att = frame.state().get("selection").first().toJSON();
+
+            // Save the ID in the hidden input
+            $input.val(att.id).trigger("change");
+
+            if (type === "image") {
+                var url =
+                    att.sizes && att.sizes.thumbnail
+                        ? att.sizes.thumbnail.url
+                        : att.url;
+                $wrap.find(".ff-media-preview").attr("src", url).show();
+            } else {
+                $wrap
+                    .find(".ff-media-fileurl")
+                    .attr("href", att.url)
+                    .text(att.filename)
+                    .show();
+                $wrap.find(".ff-media-nofile").hide();
+            }
+            $wrap.find(".ff-media-clear").show();
+        });
+
+        frame.open();
+    }
+
+    // Namespaced delegated bindings (works on both edit + global)
+    $(document)
+        .off("click.ffMedia", ".ff-media-select")
+        .on("click.ffMedia", ".ff-media-select", function (e) {
+            e.preventDefault();
+            var id = $(this).data("target");
+            var $input = $("#" + id);
+            if (!$input.length) return;
+            var $wrap = $input.closest(".ff-media-wrap");
+            openFFFrame($wrap, $input);
+        });
+
+    $(document)
+        .off("click.ffMedia", ".ff-media-clear")
+        .on("click.ffMedia", ".ff-media-clear", function (e) {
+            e.preventDefault();
+            var id = $(this).data("target");
+            var $input = $("#" + id);
+            if (!$input.length) return;
+            var $wrap = $input.closest(".ff-media-wrap");
+
+            $input.val("").trigger("change");
+
+            if ($wrap.data("type") === "image") {
+                $wrap.find(".ff-media-preview").attr("src", "").hide();
+            } else {
+                $wrap
+                    .find(".ff-media-fileurl")
+                    .attr("href", "")
+                    .text("")
+                    .hide();
+                $wrap.find(".ff-media-nofile").show();
+            }
+            $(this).hide();
+        });
+})(jQuery);

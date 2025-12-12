@@ -303,83 +303,187 @@ function ff_register_field_group( array $group ) {
 /**
  * Attach meta boxes for all registered groups on posts/pages.
  */
-add_action( 'add_meta_boxes', function () {
-    global $ff_field_groups;
-
-    if ( empty( $ff_field_groups ) || ! is_array( $ff_field_groups ) ) {
+add_action('add_meta_boxes', function () {
+    // Prefer the helper over a global
+    $groups = ff_get_all_groups();
+    if (empty($groups) || !is_array($groups)) {
         return;
     }
 
-    foreach ( $ff_field_groups as $group_id => $group ) {
-
-        $location = isset( $group['location'] ) ? $group['location'] : 'page';
+    foreach ($groups as $group_id => $group) {
+        $location = isset($group['location']) ? $group['location'] : 'page';
 
         // Only attach to real post editors for now.
-        if ( $location !== 'page' && $location !== 'post' ) {
-            // 'global' will later become an options-style screen.
-            continue;
+        if (!in_array($location, ['page','post'], true)) {
+            continue; // 'global' is handled on your options screen
         }
 
         add_meta_box(
             'ff_field_group_' . $group_id,
-            esc_html( $group['title'] ),
-            'ff_render_field_group_metabox',
-            $location,           // post_type: 'post' or 'page'
+            esc_html($group['title']),
+            'ff_render_field_group_metabox', // <- this function must exist (renderer I sent)
+            $location,                       // 'post' or 'page'
             'normal',
             'default',
-            [ 'group_id' => $group_id ]
+            ['group_id' => $group_id]
         );
     }
 });
+
 
 /**
  * Render fields for a given Forge Fields meta box.
  */
 function ff_render_field_group_metabox( $post, $box ) {
-    global $ff_field_groups;
-
-    $group_id = isset( $box['args']['group_id'] ) ? $box['args']['group_id'] : null;
-
-    if ( ! $group_id || ! isset( $ff_field_groups[ $group_id ] ) ) {
+    // Make sure the group exists
+    $group_id = isset( $box['args']['group_id'] ) ? $box['args']['group_id'] : '';
+    $groups   = ff_get_all_groups(); // or use your global if that’s how you store them
+    if ( ! $group_id || empty( $groups[ $group_id ] ) ) {
+        echo '<p>Group not found.</p>';
         return;
     }
 
-    $group        = $ff_field_groups[ $group_id ];
-    $fields       = is_array( $group['fields'] ) ? $group['fields'] : [];
-    $field_types  = ff_get_field_types();
+    $group  = $groups[ $group_id ];
+    $fields = is_array( $group['fields'] ?? null ) ? $group['fields'] : [];
 
-    // Nonce for this specific group.
-    wp_nonce_field( 'ff_save_group_' . $group_id, 'ff_group_nonce_' . $group_id );
-
-    echo '<div class="ff-admin">';
+    wp_nonce_field( 'ff_save_post_fields', 'ff_meta_nonce' );
+    echo '<div class="ff-mb">';
     echo '<table class="form-table"><tbody>';
 
     foreach ( $fields as $field ) {
-        if ( empty( $field['name'] ) ) {
-            continue;
-        }
+        $name  = $field['name']  ?? '';
+        if ( $name === '' ) continue;
+        $label = $field['label'] ?? $name;
+        $type  = $field['type']  ?? 'text';
 
-        $name  = $field['name'];
-        $label = isset( $field['label'] ) ? $field['label'] : $name;
-        $type  = isset( $field['type'] ) ? $field['type'] : 'text';
-
-        $id   = 'ff_' . esc_attr( $name );
-        $meta = get_post_meta( $post->ID, $name, true );
+        // Meta key (adjust if you use a different convention)
+        $meta_key = '_ff_' . $name;
+        $value    = get_post_meta( $post->ID, $meta_key, true );
 
         echo '<tr>';
-        echo '<th scope="row"><label for="' . $id . '">' . esc_html( $label ) . '</label></th>';
+        echo '<th scope="row"><label for="'. esc_attr( $meta_key ) .'">'. esc_html( $label ) .'</label></th>';
         echo '<td>';
 
-        // Look up type renderer, fall back to "text".
-        $render_cb = isset( $field_types[ $type ]['render'] )
-            ? $field_types[ $type ]['render']
-            : $field_types['text']['render'];
+        switch ( $type ) {
+            case 'wysiwyg':
+    $editor_id     = 'ff_meta_' . sanitize_key( $name );
+    $textarea_name = "ff_meta[$name]";
+    $content       = is_string( $value ) ? $value : '';
 
-        if ( is_callable( $render_cb ) ) {
-            call_user_func( $render_cb, $field, $meta, $post );
-        } else {
-            // Extremely safe fallback: simple text field.
-            ff_render_type_text( $field, $meta, $post );
+    echo '<div class="ff-editor-card">';
+
+    wp_editor(
+        $content,
+        $editor_id,
+        [
+            'textarea_name' => $textarea_name,
+            'textarea_rows' => 12,
+            'media_buttons' => true,
+            'tinymce'       => [
+                'branding'      => false,
+                'menubar'       => false,
+                'statusbar'     => false,
+                'toolbar1'      => 'formatselect,bold,italic,underline,|,bullist,numlist,blockquote,|,link,unlink,|,alignleft,aligncenter,alignright,|,removeformat',
+                'toolbar2'      => '',
+            ],
+            'quicktags'     => true,
+            'editor_height' => 260,
+            'editor_class'  => 'ff-editor',
+        ]
+    );
+
+    echo '</div>';
+    break;
+
+            case 'image':
+                $img_src = '';
+                if ( $value ) {
+                    $src = wp_get_attachment_image_src( (int) $value, 'thumbnail' );
+                    if ( $src ) $img_src = $src[0];
+                }
+                ?>
+                <div class="ff-media-wrap" data-type="image">
+                    <input type="hidden" name="<?php echo esc_attr( $meta_key ); ?>" id="<?php echo esc_attr( $meta_key ); ?>" value="<?php echo esc_attr( $value ); ?>">
+                    <div class="ff-media-preview-wrap" style="margin-bottom:8px;">
+                        <img class="ff-media-preview" src="<?php echo esc_url( $img_src ); ?>" style="<?php echo $img_src ? '' : 'display:none;'; ?>max-height:80px;border-radius:4px;">
+                    </div>
+                    <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $meta_key ); ?>">Select Image</button>
+                    <button type="button" class="button ff-media-clear"  data-target="<?php echo esc_attr( $meta_key ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
+                </div>
+                <?php
+                break;
+
+            case 'file':
+                $file_url  = $value ? wp_get_attachment_url( (int) $value ) : '';
+                $file_name = $file_url ? wp_basename( $file_url ) : '';
+                ?>
+                <div class="ff-media-wrap" data-type="file">
+                    <input type="hidden" name="<?php echo esc_attr( $meta_key ); ?>" id="<?php echo esc_attr( $meta_key ); ?>" value="<?php echo esc_attr( $value ); ?>">
+                    <div class="ff-media-fileline" style="margin-bottom:8px;">
+                        <span class="dashicons dashicons-media-document" aria-hidden="true"></span>
+                        <a class="ff-media-fileurl" href="<?php echo esc_url( $file_url ); ?>" target="_blank" style="<?php echo $file_url ? '' : 'display:none;'; ?>"><?php echo esc_html( $file_name ); ?></a>
+                        <span class="ff-media-nofile" style="<?php echo $file_url ? 'display:none;' : ''; ?>">No file selected.</span>
+                    </div>
+                    <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $meta_key ); ?>">Select File</button>
+                    <button type="button" class="button ff-media-clear"  data-target="<?php echo esc_attr( $meta_key ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
+                </div>
+                <?php
+                break;
+
+            case 'textarea':
+                echo '<textarea class="large-text" rows="4" name="'.esc_attr($meta_key).'" id="'.esc_attr($meta_key).'">'.esc_textarea((string)$value).'</textarea>';
+                break;
+
+            case 'number':
+                echo '<input type="number" class="small-text" name="'.esc_attr($meta_key).'" id="'.esc_attr($meta_key).'" value="'.esc_attr((string)$value).'">';
+                break;
+
+            case 'range':
+    // Defaults can be overridden per field (optional)
+    $min = isset($field['min']) ? (int) $field['min'] : 0;
+    $max = isset($field['max']) ? (int) $field['max'] : 100;
+    $step = isset($field['step']) ? (int) $field['step'] : 1;
+
+    $val = ($value === '' ? $min : (int) $value);
+
+    $slider_id = esc_attr($meta_key) . '_slider';
+    $num_id    = esc_attr($meta_key) . '_num';
+    ?>
+    <div class="ff-range-wrap">
+        <input
+            type="range"
+            class="ff-range-slider"
+            id="<?php echo $slider_id; ?>"
+            name="<?php echo esc_attr($meta_key); ?>"
+            min="<?php echo esc_attr($min); ?>"
+            max="<?php echo esc_attr($max); ?>"
+            step="<?php echo esc_attr($step); ?>"
+            value="<?php echo esc_attr($val); ?>"
+            data-target="#<?php echo $num_id; ?>"
+        />
+        <input
+            type="number"
+            class="small-text ff-range-number"
+            id="<?php echo $num_id; ?>"
+            min="<?php echo esc_attr($min); ?>"
+            max="<?php echo esc_attr($max); ?>"
+            step="<?php echo esc_attr($step); ?>"
+            value="<?php echo esc_attr($val); ?>"
+            data-target="#<?php echo $slider_id; ?>"
+        />
+    </div>
+    <?php
+    break;
+
+
+            case 'email':
+            case 'url':
+            case 'password':
+            case 'text':
+            default:
+                $input = in_array( $type, ['email','url','password'], true ) ? $type : 'text';
+                echo '<input type="'.$input.'" class="regular-text" name="'.esc_attr($meta_key).'" id="'.esc_attr($meta_key).'" value="'.esc_attr((string)$value).'">';
+                break;
         }
 
         echo '</td></tr>';
@@ -389,86 +493,54 @@ function ff_render_field_group_metabox( $post, $box ) {
     echo '</div>';
 }
 
+
 /**
  * Save meta values for all registered field groups.
  */
 add_action( 'save_post', function( $post_id ) {
-    global $ff_field_groups;
+    if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) return;
+    if ( ! isset($_POST['ff_meta_nonce']) || ! wp_verify_nonce($_POST['ff_meta_nonce'], 'ff_save_post_fields') ) return;
+    if ( ! current_user_can('edit_post', $post_id) ) return;
 
-    if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-        return;
-    }
-    if ( wp_is_post_revision( $post_id ) ) {
-        return;
-    }
-    if ( empty( $ff_field_groups ) || ! is_array( $ff_field_groups ) ) {
-        return;
-    }
+    // Figure out which groups applied to this screen (same source as renderer)
+    $groups = ff_get_all_groups();
 
-    $post        = get_post( $post_id );
-    $field_types = ff_get_field_types();
+    foreach ( $groups as $group ) {
+        $location = $group['location'] ?? 'page';
+        if ( ! in_array( $location, ['post','page'], true ) ) continue; // ignore 'global'
+        foreach ( (array) ($group['fields'] ?? []) as $field ) {
+            $name = $field['name'] ?? '';
+            $type = $field['type'] ?? 'text';
+            if ( $name === '' ) continue;
 
-    if ( ! $post ) {
-        return;
-    }
+            $key = '_ff_' . $name;
+            if ( ! array_key_exists( $key, $_POST ) ) continue;
 
-    foreach ( $ff_field_groups as $group_id => $group ) {
-
-        $location = isset( $group['location'] ) ? $group['location'] : 'page';
-
-        // Only save for matching post types.
-        if (
-            ( $location === 'post' && $post->post_type !== 'post' ) ||
-            ( $location === 'page' && $post->post_type !== 'page' )
-        ) {
-            continue;
-        }
-
-        $nonce_key = 'ff_group_nonce_' . $group_id;
-        if (
-            ! isset( $_POST[ $nonce_key ] ) ||
-            ! wp_verify_nonce( $_POST[ $nonce_key ], 'ff_save_group_' . $group_id )
-        ) {
-            continue;
-        }
-
-        if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
-            continue;
-        }
-
-        foreach ( $group['fields'] as $field ) {
-            if ( empty( $field['name'] ) ) {
-                continue;
+            switch ( $type ) {
+                case 'wysiwyg':
+                    $val = wp_kses_post( wp_unslash( $_POST[$key] ) );
+                    break;
+                case 'image':
+                case 'file':
+                    $val = (int) $_POST[$key];
+                    break;
+                case 'number':
+                    $val = is_numeric( $_POST[$key] ) ? 0 + $_POST[$key] : '';
+                    break;
+                default:
+                    $val = sanitize_text_field( wp_unslash( $_POST[$key] ) );
+                    break;
             }
 
-            $name = $field['name'];
-            $type = isset( $field['type'] ) ? $field['type'] : 'text';
-
-            if ( isset( $_POST[ $name ] ) ) {
-                $raw = wp_unslash( $_POST[ $name ] );
-
-                // Look up type sanitizer, fall back to text sanitizer.
-                $sanitize_cb = isset( $field_types[ $type ]['sanitize'] )
-                    ? $field_types[ $type ]['sanitize']
-                    : $field_types['text']['sanitize'];
-
-                if ( is_callable( $sanitize_cb ) ) {
-                    $value = call_user_func( $sanitize_cb, $raw, $field, $post_id );
-                } else {
-                    $value = sanitize_text_field( $raw );
-                }
-
-                // Global filters for further validation if needed.
-                $value = apply_filters( 'ff_sanitize_value', $value, $field, $post_id );
-                $value = apply_filters( "ff_sanitize_value_{$type}", $value, $field, $post_id );
-
-                update_post_meta( $post_id, $name, $value );
+            if ( $val === '' || $val === 0 ) {
+                delete_post_meta( $post_id, $key );
             } else {
-                delete_post_meta( $post_id, $name );
+                update_post_meta( $post_id, $key, $val );
             }
         }
     }
-} );
+});
+
 
 /**
  * Front-end helper:

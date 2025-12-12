@@ -80,29 +80,28 @@ add_action( 'init', function() {
  * - On Forge Fields screens (list/edit/global)
  * - On post/page editors where the metabox appears
  */
-add_action( 'admin_enqueue_scripts', 'ff_enqueue_admin_assets' );
+add_action( 'admin_enqueue_scripts', function ( $hook ) {
+    // Detect our plugin screens
+    $page         = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+    $is_ff_screen = ( strpos( $hook, 'forge-fields' ) !== false )
+                    || in_array( $page, [ 'forge-fields','forge-fields-edit','forge-fields-global' ], true );
 
-function ff_enqueue_admin_assets( $hook ) {
-
-    // Any Forge Fields screen (list, edit, global, etc.)
-    $is_ff_screen = ( strpos( $hook, 'forge-fields' ) !== false );
-
-    // Post / page editors where meta boxes are shown
+    // Classic post/page editors (meta boxes)
     $is_editor_screen = in_array( $hook, [ 'post.php', 'post-new.php' ], true );
 
-    // If it's neither, bail early.
     if ( ! $is_ff_screen && ! $is_editor_screen ) {
         return;
     }
 
-    wp_enqueue_script(
-        'ff-admin-fields',
-        FF_URL . 'assets/js/admin-fields.js',
-        [],
-        '0.1.0',
-        true
-    );
+    // Core deps
+    wp_enqueue_media();                // image/file picker
+    if ( function_exists( 'wp_enqueue_editor' ) ) {
+        wp_enqueue_editor();           // WYSIWYG editor
+    }
+    wp_enqueue_style( 'dashicons' );
+    wp_enqueue_style( 'editor-buttons' ); // TinyMCE/Quicktags toolbar styling
 
+    // Your assets
     wp_enqueue_style(
         'ff-admin-fields',
         FF_URL . 'assets/css/admin-fields.css',
@@ -110,13 +109,20 @@ function ff_enqueue_admin_assets( $hook ) {
         '0.1.0'
     );
 
-    wp_enqueue_style( 'dashicons' );
+    wp_enqueue_script(
+        'ff-admin-fields',
+        FF_URL . 'assets/js/admin-fields.js',
+        [ 'jquery', 'media-editor', 'media-views', 'wp-util' ],
+        '0.1.0',
+        true
+    );
 
-    // Extra WP admin styles only needed on Forge Fields list/edit screens
+    // Optional: WP admin base styles on Forge Fields pages
     if ( $is_ff_screen ) {
         wp_enqueue_style( 'common' );
-        // wp_enqueue_style( 'list-tables' ); // optional if you want table styling
+        // wp_enqueue_style( 'list-tables' );
     }
-}
+});
+
 
 

@@ -1055,30 +1055,82 @@ function ff_render_global_options_page() {
     $notices = [];
 
     // Handle save
-    if ( isset( $_POST['ff_save_global'] ) ) {
+    // Handle save
+if ( isset( $_POST['ff_save_global'] ) ) {
 
-        check_admin_referer( 'ff_save_global' );
+    check_admin_referer( 'ff_save_global' );
 
-        $raw = isset( $_POST['ff_global'] ) && is_array( $_POST['ff_global'] )
-            ? $_POST['ff_global']
-            : [];
+    $raw = isset( $_POST['ff_global'] ) && is_array( $_POST['ff_global'] )
+        ? $_POST['ff_global']
+        : [];
 
-        $new_values = [];
-
-        foreach ( $raw as $field_name => $value_raw ) {
-            $name = sanitize_key( $field_name );
-
-            // keep empty string valid (allows clearing a value)
-            $new_values[ $name ] = sanitize_text_field( wp_unslash( $value_raw ) );
+    // Build a name => type map from the defined global fields
+    $type_map = [];
+    foreach ( $global_groups as $group ) {
+        if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
+            continue;
         }
-
-        update_option( 'ff_global_fields', $new_values );
-        $stored  = $new_values; // use fresh values for display
-        $notices[] = [
-            'type'    => 'updated',
-            'message' => 'Global fields saved.',
-        ];
+        foreach ( $group['fields'] as $f ) {
+            if ( empty( $f['name'] ) ) {
+                continue;
+            }
+            $type_map[ $f['name'] ] = isset( $f['type'] ) ? $f['type'] : 'text';
+        }
     }
+
+    $new_values = [];
+
+    foreach ( $raw as $field_name => $value_raw ) {
+        $name = sanitize_key( $field_name );
+        $type = isset( $type_map[ $name ] ) ? $type_map[ $name ] : 'text';
+
+        switch ( $type ) {
+            case 'number':
+                $new_values[ $name ] = is_array( $value_raw ) ? 0 : floatval( $value_raw );
+                break;
+
+            case 'range':
+                $new_values[ $name ] = is_array( $value_raw ) ? 0 : intval( $value_raw );
+                break;
+
+            case 'email':
+                $new_values[ $name ] = is_array( $value_raw ) ? '' : sanitize_email( $value_raw );
+                break;
+
+            case 'url':
+                $new_values[ $name ] = is_array( $value_raw ) ? '' : esc_url_raw( $value_raw );
+                break;
+
+            case 'password':
+            case 'text':
+            case 'textarea':
+                $new_values[ $name ] = is_array( $value_raw ) ? '' : sanitize_text_field( wp_unslash( $value_raw ) );
+                break;
+
+            case 'wysiwyg':
+                // Keep post content HTML (TinyMCE output)
+                $new_values[ $name ] = is_array( $value_raw ) ? '' : wp_kses_post( wp_unslash( $value_raw ) );
+                break;
+
+            case 'image': // store attachment ID
+            case 'file':
+                $new_values[ $name ] = is_array( $value_raw ) ? 0 : absint( $value_raw );
+                break;
+
+            default:
+                $new_values[ $name ] = is_array( $value_raw ) ? '' : sanitize_text_field( wp_unslash( $value_raw ) );
+                break;
+        }
+    }
+
+    update_option( 'ff_global_fields', $new_values );
+    $stored  = $new_values; // use fresh values for display
+    $notices[] = [
+        'type'    => 'updated',
+        'message' => 'Global fields saved.',
+    ];
+}
+
 
     ?>
     <div class="wrap ff-admin ff-global ff-has-brandbar">
@@ -1161,14 +1213,41 @@ function ff_render_global_options_page() {
                                                 break;
 
                                             case 'range':
-                                                // basic range; you can tweak min/max/step later
-                                                printf(
-                                                    '<input type="range" name="ff_global[%1$s]" id="%2$s" value="%3$s" min="0" max="100" />',
-                                                    esc_attr( $name ),
-                                                    esc_attr( $id ),
-                                                    esc_attr( $value )
-                                                );
+                                                $min  = isset($field['min']) ? (int) $field['min'] : 0;
+                                                $max  = isset($field['max']) ? (int) $field['max'] : 100;
+                                                $step = isset($field['step']) ? (int) $field['step'] : 1;
+
+                                                $val = ($value === '' ? $min : (int) $value);
+
+                                                $slider_id = $id . '_slider';
+                                                $num_id    = $id . '_num';
+                                                ?>
+                                                <div class="ff-range-wrap">
+                                                    <input
+                                                        type="range"
+                                                        class="ff-range-slider"
+                                                        id="<?php echo esc_attr($slider_id); ?>"
+                                                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                                                        min="<?php echo esc_attr($min); ?>"
+                                                        max="<?php echo esc_attr($max); ?>"
+                                                        step="<?php echo esc_attr($step); ?>"
+                                                        value="<?php echo esc_attr($val); ?>"
+                                                        data-target="#<?php echo esc_attr($num_id); ?>"
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        class="small-text ff-range-number"
+                                                        id="<?php echo esc_attr($num_id); ?>"
+                                                        min="<?php echo esc_attr($min); ?>"
+                                                        max="<?php echo esc_attr($max); ?>"
+                                                        step="<?php echo esc_attr($step); ?>"
+                                                        value="<?php echo esc_attr($val); ?>"
+                                                        data-target="#<?php echo esc_attr($slider_id); ?>"
+                                                    />
+                                                </div>
+                                                <?php
                                                 break;
+
 
                                             case 'password':
                                                 printf(
@@ -1192,6 +1271,67 @@ function ff_render_global_options_page() {
                                                     esc_attr( $input_type )
                                                 );
                                                 break;
+                                            case 'wysiwyg':
+                                                $editor_id = $id; // e.g. ff_global_<name>
+                                                echo '<div class="ff-editor-card">';
+                                                wp_editor(
+                                                    is_string( $value ) ? $value : '',
+                                                    $editor_id,
+                                                    [
+                                                        'textarea_name' => "ff_global[$name]",  // <-- correct target
+                                                        'textarea_rows' => 12,
+                                                        'media_buttons' => true,
+                                                        'tinymce'       => [
+                                                            'branding'      => false,
+                                                            'menubar'       => false,
+                                                            'statusbar'     => false,
+                                                            'toolbar1'      => 'formatselect,bold,italic,underline,|,bullist,numlist,blockquote,|,link,unlink,|,alignleft,aligncenter,alignright,|,removeformat',
+                                                            'toolbar2'      => '',
+                                                        ],
+                                                        'quicktags'     => true,
+                                                        'editor_height' => 260,
+                                                        'editor_class'  => 'ff-editor',
+                                                    ]
+                                                );
+                                                echo '</div>';
+                                                break;
+
+                                        case 'image':
+                                            $img_src = '';
+                                            if ( $value ) {
+                                                $src = wp_get_attachment_image_src( (int) $value, 'thumbnail' );
+                                                if ( $src ) {
+                                                    $img_src = $src[0];
+                                                }
+                                            }
+                                            ?>
+                                            <div class="ff-media-wrap" data-type="image">
+                                                <input type="hidden" name="ff_global[<?php echo esc_attr( $name ); ?>]" id="<?php echo esc_attr( $id ); ?>" value="<?php echo esc_attr( $value ); ?>">
+                                                <div class="ff-media-preview-wrap" style="margin-bottom:8px;">
+                                                    <img class="ff-media-preview" src="<?php echo esc_url( $img_src ); ?>" style="<?php echo $img_src ? '' : 'display:none;'; ?>max-height:80px;border-radius:4px;">
+                                                </div>
+                                                <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $id ); ?>">Select Image</button>
+                                                <button type="button" class="button ff-media-clear" data-target="<?php echo esc_attr( $id ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
+                                            </div>
+                                            <?php
+                                            break;
+
+                                        case 'file':
+                                            $file_url  = $value ? wp_get_attachment_url( (int) $value ) : '';
+                                            $file_name = $file_url ? wp_basename( $file_url ) : '';
+                                            ?>
+                                            <div class="ff-media-wrap" data-type="file">
+                                                <input type="hidden" name="ff_global[<?php echo esc_attr( $name ); ?>]" id="<?php echo esc_attr( $id ); ?>" value="<?php echo esc_attr( $value ); ?>">
+                                                <div class="ff-media-fileline" style="margin-bottom:8px;">
+                                                    <span class="dashicons dashicons-media-document" aria-hidden="true"></span>
+                                                    <a class="ff-media-fileurl" href="<?php echo esc_url( $file_url ); ?>" target="_blank" style="<?php echo $file_url ? '' : 'display:none;'; ?>"><?php echo esc_html( $file_name ); ?></a>
+                                                    <span class="ff-media-nofile" style="<?php echo $file_url ? 'display:none;' : ''; ?>">No file selected.</span>
+                                                </div>
+                                                <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $id ); ?>">Select File</button>
+                                                <button type="button" class="button ff-media-clear" data-target="<?php echo esc_attr( $id ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
+                                            </div>
+                                            <?php
+                                            break;
                                         }
                                         ?>
                                     </td>
@@ -1363,6 +1503,7 @@ function ff_render_field_group_edit() {
     // --- NEW: grouped type list (future-proof if you add more groups) ---
     $type_groups = [
         'Basic' => [ 'text', 'textarea', 'number', 'email', 'url', 'range', 'password' ],
+        'Content' => [ 'image', 'file', 'wysiwyg' ],
     ];
 
     ?>
@@ -1479,9 +1620,23 @@ function ff_render_field_group_edit() {
                                     <?php foreach ( $type_groups as $group_label => $opts ) : ?>
                                         <optgroup label="<?php echo esc_attr( $group_label ); ?>">
                                             <?php foreach ( $opts as $t ) : ?>
-                                                <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type, $t ); ?>>
-                                                    <?php echo esc_html( ucfirst( $t ) ); ?>
-                                                </option>
+                                                <?php
+                                                    $pretty = [
+                                                        'text'     => 'Text',
+                                                        'textarea' => 'Textarea',
+                                                        'number'   => 'Number',
+                                                        'email'    => 'Email',
+                                                        'url'      => 'URL',
+                                                        'range'    => 'Range',
+                                                        'password' => 'Password',
+                                                        'image'    => 'Image',
+                                                        'file'     => 'File',
+                                                        'wysiwyg'  => 'WYSIWYG Editor',
+                                                    ];
+                                                    ?>
+                                                    <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type, $t ); ?>>
+                                                        <?php echo esc_html( $pretty[ $t ] ?? ucfirst( $t ) ); ?>
+                                                    </option>
                                             <?php endforeach; ?>
                                         </optgroup>
                                     <?php endforeach; ?>
@@ -1525,7 +1680,23 @@ function ff_render_field_group_edit() {
                                 <?php foreach ( $type_groups as $group_label => $opts ) : ?>
                                     <optgroup label="<?php echo esc_attr( $group_label ); ?>">
                                         <?php foreach ( $opts as $t ) : ?>
-                                            <option value="<?php echo esc_attr( $t ); ?>"><?php echo esc_html( ucfirst( $t ) ); ?></option>
+                                            <?php
+                                                $pretty = [
+                                                    'text'     => 'Text',
+                                                    'textarea' => 'Textarea',
+                                                    'number'   => 'Number',
+                                                    'email'    => 'Email',
+                                                    'url'      => 'URL',
+                                                    'range'    => 'Range',
+                                                    'password' => 'Password',
+                                                    'image'    => 'Image',
+                                                    'file'     => 'File',
+                                                    'wysiwyg'  => 'WYSIWYG Editor',
+                                                ];
+                                                ?>
+                                                <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type, $t ); ?>>
+                                                    <?php echo esc_html( $pretty[ $t ] ?? ucfirst( $t ) ); ?>
+                                                </option>
                                         <?php endforeach; ?>
                                     </optgroup>
                                 <?php endforeach; ?>
