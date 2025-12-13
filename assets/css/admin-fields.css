@@ -2072,3 +2072,15 @@ a.ff-brandbar__title:focus {
 div#wp-ff_global_4353453-wrap {
     margin: 0;
 }
+
+.wrap.ff-admin .notice {
+    width: 15%;
+}
+
+input#ff_global_range_num {
+    width: 75px;
+}
+
+input#ff_global_range_slider {
+    width: 300px;
+}
