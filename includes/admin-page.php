@@ -1802,6 +1802,11 @@ function ff_render_field_group_edit() {
                                                                     'image'    => 'Image',
                                                                     'file'     => 'File',
                                                                     'wysiwyg'  => 'WYSIWYG Editor',
+                                                                    'select'  => 'Select',
+                                                                    'checkbox'  => 'Checkbox',
+                                                                    'radio'  => 'Radio',
+                                                                    'button_group'  => 'Button Group',
+                                                                    'true_false'  => 'True/False',
                                                                 ];
                                                                 ?>
                                                                 <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type, $t ); ?>>

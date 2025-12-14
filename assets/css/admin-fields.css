@@ -343,9 +343,16 @@ th.column-title.sorted.desc .sorting-indicator::before {
 .ff-field-remove {
     color: #b91c1c;
 }
+
 .ff-field-actions .ff-remove-field:hover,
 .ff-field-remove:hover {
-    color: #7f1d1d;
+    color: #b91c1c;
+    text-decoration: underline;
+}
+
+.ff-field-remove:active,
+.ff-field-remove:focus {
+    color: #b91c1c;
 }
 
 /* Descriptions under inputs */
@@ -2083,4 +2090,12 @@ input#ff_global_range_num {
 
 input#ff_global_range_slider {
     width: 300px;
+}
+
+.ff-field-setting.ff-setting-choices textarea {
+    min-height: 80px;
+}
+
+tr.ff-field-settings td {
+    padding-left: 40px;
 }
