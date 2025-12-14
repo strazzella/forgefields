@@ -79,51 +79,49 @@ add_action('in_admin_header', function () {
         return trim($classes . ' ff-has-brandbar ff-has-subbar');
     });
 
-// CSS: keep it simple & stronger
-add_action('admin_head', function () {
-    $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-    if (!in_array($page, ['forge-fields','forge-fields-edit'], true)) {
-        return;
-    }
-    echo '<style>
-        /* hidden by default */
-        tr.ff-field-settings { display:none !important; }
-        /* shown when JS says so */
-        tr.ff-field-settings.is-visible { display:table-row !important; }
-    </style>';
-});
+    // CSS: keep it simple & stronger
+    add_action('admin_head', function () {
+        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
+        if (!in_array($page, ['forge-fields','forge-fields-edit'], true)) {
+            return;
+        }
+        echo '<style>
+            /* hidden by default */
+            tr.ff-field-settings { display:none !important; }
+            /* shown when JS says so */
+            tr.ff-field-settings.is-visible { display:table-row !important; }
+        </style>';
+    });
 
+    // JS: init + on-change + handle new rows
+    add_action('admin_footer', function () {
+        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
+        if ($page !== 'forge-fields-edit') return;
+        ?>
+        <script>
+        (function(){
+    // Only these types use the Choices textarea
+    const choiceTypes = ['select','checkbox','radio','button_group'];
 
-// JS: init + on-change + handle new rows
-add_action('admin_footer', function () {
-    $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-    if ($page !== 'forge-fields-edit') return;
-    ?>
-    <script>
-    (function(){
-      const choiceTypes = ['select','checkbox','radio','button_group','true_false'];
-
-      function updateRow(row) {
+    function updateRow(row) {
         const select = row.querySelector('.ff-field-type');
         const settings = row.nextElementSibling;
         if (!select || !settings || !settings.matches('[data-ff-settings]')) return;
         const shouldShow = choiceTypes.indexOf(select.value) !== -1;
         settings.style.display = shouldShow ? '' : 'none';
         settings.classList.toggle('is-hidden', !shouldShow);
-      }
+    }
 
-      // Initial pass over all rows
-      document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
+    // Initial pass
+    document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
 
-      // Live changes
-      document.addEventListener('change', function(e){
+    // Live changes
+    document.addEventListener('change', function(e){
         if (e.target && e.target.classList.contains('ff-field-type')) {
-          const row = e.target.closest('tr.ff-field-row');
-          if (row) updateRow(row);
+        const row = e.target.closest('tr.ff-field-row');
+        if (row) updateRow(row);
         }
-      });
-
-      // If you add rows dynamically, you can re-run updateRow(newRow) after insertion
+    });
     })();
     </script>
     <?php
@@ -1759,7 +1757,7 @@ function ff_render_field_group_edit() {
                     $type  = isset( $field['type'] )  ? $field['type']  : 'text';
                     ?>
                     <?php
-                    $choice_types = ['select','checkbox','radio','button_group','true_false'];
+                    $choice_types = ['select','checkbox','radio','button_group'];
                     $choices_raw  = isset($field['choices']) ? (string) $field['choices'] : '';
                     $is_choice    = in_array($type, $choice_types, true);
                     ?>
