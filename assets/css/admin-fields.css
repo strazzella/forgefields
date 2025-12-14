@@ -355,6 +355,10 @@ th.column-title.sorted.desc .sorting-indicator::before {
     color: #b91c1c;
 }
 
+button.button-link.ff-field-remove {
+    color: #b91c1c;
+}
+
 /* Descriptions under inputs */
 .wrap.ff-admin .description {
     color: var(--ff-text-muted);

@@ -1847,64 +1847,82 @@ function ff_render_field_group_edit() {
 
 
  <!-- Template for new rows -->
-            <script type="text/html" id="ff-field-row-template">
-                <tr class="ff-field-row">
-                    <td class="ff-field-handle">≡</td>
+<script type="text/html" id="ff-field-row-template">
+<tr class="ff-field-row" data-index="__INDEX__">
+    <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
 
-                    <td>
-                        <input type="text"
-                               name="ff_fields[__INDEX__][label]"
-                               value=""
-                               placeholder="Hero Heading"
-                               class="regular-text ff-field-label">
-                    </td>
+    <td>
+        <input type="text"
+               name="ff_fields[__INDEX__][label]"
+               value=""
+               class="regular-text ff-field-label"
+               data-field-part="label">
+    </td>
 
-                    <td>
-                        <input type="text"
-                               name="ff_fields[__INDEX__][name]"
-                               value=""
-                               placeholder="hero_heading"
-                               class="regular-text ff-field-name">
-                    </td>
+    <td>
+        <input type="text"
+               name="ff_fields[__INDEX__][name]"
+               value=""
+               class="regular-text ff-field-name"
+               data-field-part="name">
+    </td>
 
-                    <td>
-                        <div class="ff-select-wrap">
-                            <select name="ff_fields[__INDEX__][type]" class="ff-field-type">
-                                <?php foreach ( $type_groups as $group_label => $opts ) : ?>
-                                    <optgroup label="<?php echo esc_attr( $group_label ); ?>">
-                                        <?php foreach ( $opts as $t ) : ?>
-                                            <?php
-                                                $pretty = [
-                                                    'text'     => 'Text',
-                                                    'textarea' => 'Textarea',
-                                                    'number'   => 'Number',
-                                                    'email'    => 'Email',
-                                                    'url'      => 'URL',
-                                                    'range'    => 'Range',
-                                                    'password' => 'Password',
-                                                    'image'    => 'Image',
-                                                    'file'     => 'File',
-                                                    'wysiwyg'  => 'WYSIWYG Editor',
-                                                ];
-                                                ?>
-                                                <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type, $t ); ?>>
-                                                    <?php echo esc_html( $pretty[ $t ] ?? ucfirst( $t ) ); ?>
-                                                </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </td>
+    <td>
+        <div class="ff-select-wrap">
+            <select name="ff_fields[__INDEX__][type]" class="ff-field-type" data-field-part="type">
+                <?php foreach ( $type_groups as $group_label => $opts ) : ?>
+                    <optgroup label="<?php echo esc_attr( $group_label ); ?>">
+                        <?php foreach ( $opts as $t ) : ?>
+                            <?php
+                                $pretty = [
+                                    'text'     => 'Text',
+                                    'textarea' => 'Textarea',
+                                    'number'   => 'Number',
+                                    'email'    => 'Email',
+                                    'url'      => 'URL',
+                                    'range'    => 'Range',
+                                    'password' => 'Password',
+                                    'image'    => 'Image',
+                                    'file'     => 'File',
+                                    'wysiwyg'  => 'WYSIWYG Editor',
+                                    'select'  => 'Select',
+                                    'checkbox'  => 'Checkbox',
+                                    'radio'  => 'Radio',
+                                    'button_group'  => 'Button Group',
+                                    'true_false'  => 'True/False',
+                                ];
+                            ?>
+                            <option value="<?php echo esc_attr( $t ); ?>">
+                                <?php echo esc_html( $pretty[$t] ?? ucfirst($t) ); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </optgroup>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </td>
 
-                    <td class="ff-field-actions">
-                        <button type="button"
-                                class="button-link delete ff-remove-field">
-                            Remove
-                        </button>
-                    </td>
-                </tr>
-            </script>
+    <td class="ff-field-actions">
+        <button type="button" class="button-link ff-field-remove">Remove</button>
+    </td>
+</tr>
+
+<tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
+    <td colspan="5">
+        <div class="ff-field-setting ff-setting-choices">
+            <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
+            <textarea name="ff_fields[__INDEX__][choices]"
+                      rows="3"
+                      class="large-text"
+                      placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"></textarea>
+            <p class="description" style="margin-top:6px;">
+                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.  
+                For <strong>True/False</strong> this setting is ignored.
+            </p>
+        </div>
+    </td>
+</tr>
+</script>
 
   
         </form>

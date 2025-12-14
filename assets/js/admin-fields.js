@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const tbody = document.querySelector("#ff-fields-body");
     const addBtn = document.querySelector("#ff-add-field");
+    const rowTemplate = document.getElementById("ff-field-row-template");
 
     // Build select HTML with a non-selectable “Basic” group for brand-new rows
     function buildTypeSelectHTML(nameAttr) {
@@ -111,79 +112,51 @@ document.addEventListener("DOMContentLoaded", function () {
         renumberRows();
 
         // Create a brand-new, empty field row when there are none to clone
-        function createEmptyRow() {
-            const row = document.createElement("tr");
-            row.className = "ff-field-row";
-
-            row.innerHTML = `
-        <td class="ff-field-handle">≡</td>
-        <td>
-            <input type="text"
-                   class="regular-text ff-field-label"
-                   placeholder="Field Label">
-        </td>
-        <td>
-            <input type="text"
-                   class="regular-text ff-field-name"
-                   placeholder="field_name">
-        </td>
-        <td>
-            <select class="ff-field-type">
-                <optgroup label="Basic">
-                    <option value="text">Text</option>
-                    <option value="textarea">Textarea</option>
-                    <option value="number">Number</option>
-                    <option value="email">Email</option>
-                    <option value="url">URL</option>
-                    <option value="range">Range</option>
-                    <option value="password">Password</option>
-                </optgroup>
-                <optgroup label="Content">
-                    <option value="image">Image</option>
-                    <option value="file">File</option>
-                    <option value="wysiwyg">WYSIWYG Editor</option>
-                </optgroup>
-            </select>
-        </td>
-        <td>
-            <a href="#" class="ff-field-remove">Remove</a>
-        </td>
-    `;
-
-            return row;
-        }
-
         // -------------------------------
-        // Add new field
+        // Add new field (uses PHP template)
         // -------------------------------
-        if (addBtn) {
-            addBtn.addEventListener("click", function (e) {
-                e.preventDefault();
+        function addFieldRow() {
+            const index = tbody.querySelectorAll(".ff-field-row").length;
 
-                const lastRow = tbody.querySelector(".ff-field-row:last-child");
-                let newRow;
+            if (rowTemplate) {
+                // Use the template from admin-page.php so markup + groups stay in sync.
+                const html = rowTemplate.innerHTML.replace(/__INDEX__/g, index);
+                const tmp = document.createElement("tbody");
+                tmp.innerHTML = html;
 
-                if (lastRow) {
-                    // Clone last row
-                    newRow = lastRow.cloneNode(true);
+                const rows = Array.from(tmp.querySelectorAll("tr"));
+                rows.forEach(function (r) {
+                    tbody.appendChild(r);
+                    if (r.classList.contains("ff-field-row")) {
+                        attachRowEvents(r);
+                    }
+                });
+            } else {
+                // Fallback: clone last existing field row only (should rarely be used).
+                const rows = tbody.querySelectorAll(".ff-field-row");
+                const lastRow = rows[rows.length - 1] || null;
+                if (!lastRow) return;
 
-                    // Clear values in the clone
-                    const inputs = newRow.querySelectorAll("input, select");
-                    inputs.forEach(function (el) {
-                        if (el.tagName === "INPUT") {
-                            el.value = "";
-                        } else if (el.tagName === "SELECT") {
-                            el.selectedIndex = 0;
-                        }
+                const newRow = lastRow.cloneNode(true);
+                newRow
+                    .querySelectorAll("input, textarea")
+                    .forEach(function (el) {
+                        el.value = "";
                     });
-                } else {
-                    // No rows exist yet – create a fresh empty one
-                    newRow = createEmptyRow();
-                }
+                const sel = newRow.querySelector("select.ff-field-type");
+                if (sel) sel.selectedIndex = 0;
 
                 tbody.appendChild(newRow);
                 attachRowEvents(newRow);
-                renumberRows();
+            }
+
+            renumberRows();
+        }
+
+        if (addBtn) {
+            addBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                addFieldRow();
             });
         }
 
