@@ -359,6 +359,40 @@ button.button-link.ff-field-remove {
     color: #b91c1c;
 }
 
+.ff-field-row .ff-remove,
+.ff-fields-table .ff-remove,
+a.ff-remove {
+    color: #b91c1c !important;
+    text-decoration: none !important;
+}
+
+a.ff-remove:hover {
+    text-decoration: underline !important;
+}
+
+a.remove-field {
+    color: #b91c1c !important;
+    text-decoration: none !important;
+}
+
+a.remove-field:hover {
+    text-decoration: underline !important;
+}
+
+/* Forge Fields: "Remove" links */
+a.ff-field-remove {
+    color: #b32d2e !important;
+    text-decoration: none !important;
+}
+
+a.ff-field-remove:hover {
+    text-decoration: underline !important;
+}
+
+span.sorting-indicator {
+    margin-top: 7px;
+}
+
 /* Descriptions under inputs */
 .wrap.ff-admin .description {
     color: var(--ff-text-muted);
@@ -877,10 +911,10 @@ button#ff-add-field {
     cursor: not-allowed;
 }
 
-.widefat tfoot tr td,
-.widefat tfoot tr th,
-.widefat thead tr td,
-.widefat thead tr th {
+.wrap.ff-admin .widefat tfoot tr td,
+.wrap.ff-admin .widefat tfoot tr th,
+.wrap.ff-admin .widefat thead tr td,
+.wrap.ff-admin .widefat thead tr th {
     font-weight: 600;
 }
 
@@ -1651,10 +1685,6 @@ h1.ff-subbar__title {
     font-weight: 400;
 }
 
-.notice.notice-success.inline.is-dismissible {
-    border-radius: 8px;
-}
-
 /* ===== FF confirm modal ===== */
 .ff-confirm.is-hidden {
     display: none;
@@ -2084,10 +2114,6 @@ div#wp-ff_global_4353453-wrap {
     margin: 0;
 }
 
-.wrap.ff-admin .notice {
-    width: 15%;
-}
-
 input#ff_global_range_num {
     width: 75px;
 }
@@ -2102,4 +2128,8 @@ input#ff_global_range_slider {
 
 tr.ff-field-settings td {
     padding-left: 40px;
+}
+
+input#_ff_range_slider {
+    width: 300px;
 }

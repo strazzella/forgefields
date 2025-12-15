@@ -1567,7 +1567,7 @@ function ff_render_field_group_edit() {
             ? $_POST['ff_fields']
             : [];
 
-        $fields = [];
+                $fields = [];
 
         foreach ( $fields_raw as $field_raw ) {
             $name  = isset( $field_raw['name'] )  ? sanitize_key( $field_raw['name'] )  : '';
@@ -1593,18 +1593,36 @@ function ff_render_field_group_edit() {
                     : '';
             }
 
-            // Build row
-                $row = [
-                    'name'  => $name,
-                    'label' => $label,
-                    'type'  => $type,
-                ];
-                if ( $choices_raw !== '' ) {
-                    $row['choices'] = $choices_raw; // store the raw string (easy to edit/display)
-                }
+            // Validation: real choice fields must have at least one choice
+            if ( in_array( $type, [ 'select', 'checkbox', 'radio', 'button_group' ], true )
+                 && $choices_raw === '' ) {
 
-                $fields[] = $row;
+                $field_label_for_error = $label !== '' ? $label : $name;
+
+                $notices[] = [
+                    'type'    => 'error',
+                    'message' => sprintf(
+                        'Field "%s" is a choice field, but no choices were provided. Please enter at least one choice or change the field type.',
+                        $field_label_for_error
+                    ),
+                ];
             }
+
+            // Build row
+            $row = [
+                'name'  => $name,
+                'label' => $label,
+                'type'  => $type,
+            ];
+
+            // Only store choices if there is something there
+            if ( $choices_raw !== '' ) {
+                $row['choices'] = $choices_raw; // store the raw string (easy to edit/display)
+            }
+
+            $fields[] = $row;
+        }
+
 
         // Basic validation: title required
         if ( $title === '' ) {
@@ -1901,7 +1919,7 @@ function ff_render_field_group_edit() {
     </td>
 
     <td class="ff-field-actions">
-        <button type="button" class="button-link ff-field-remove">Remove</button>
+        <a href="#" class="ff-field-remove">Remove</a>
     </td>
 </tr>
 
