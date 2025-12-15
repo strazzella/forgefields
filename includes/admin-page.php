@@ -1428,24 +1428,47 @@ switch ( $type ) {
         break;
 
     case 'radio':
-    case 'button_group':
-        $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
-        $current     = is_scalar( $value ) ? (string) $value : '';
-        foreach ( $choices_map as $v => $lbl ) {
-            $field_id = $id . '_' . sanitize_key( (string) $v );
-            printf(
-                '<label for="%1$s" style="display:inline-block;margin-right:12px;">
-                    <input type="radio" name="ff_global[%2$s]" id="%1$s" value="%3$s" %4$s>
-                    %5$s
-                </label>',
-                esc_attr( $field_id ),
-                esc_attr( $name ),
-                esc_attr( $v ),
-                checked( $current, (string) $v, false ),
-                esc_html( $lbl )
-            );
-        }
-        break;
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_scalar( $value ) ? (string) $value : '';
+
+    foreach ( $choices_map as $v => $lbl ) {
+        $field_id = $id . '_' . sanitize_key( (string) $v );
+        printf(
+            '<label for="%1$s" style="display:inline-block;margin-right:12px;">
+                <input type="radio" name="ff_global[%2$s]" id="%1$s" value="%3$s" %4$s>
+                %5$s
+            </label>',
+            esc_attr( $field_id ),
+            esc_attr( $name ),
+            esc_attr( $v ),
+            checked( $current, (string) $v, false ),
+            esc_html( $lbl )
+        );
+    }
+    break;
+
+case 'button_group':
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_scalar( $value ) ? (string) $value : '';
+
+    echo '<div class="ff-button-group" role="radiogroup">';
+    foreach ( $choices_map as $v => $lbl ) {
+        $field_id = $id . '_' . sanitize_key( (string) $v );
+        printf(
+            '<label class="ff-button-group__btn" for="%1$s">
+                <input class="ff-button-group__input" type="radio" name="ff_global[%2$s]" id="%1$s" value="%3$s" %4$s>
+                <span class="ff-button-group__label">%5$s</span>
+            </label>',
+            esc_attr( $field_id ),
+            esc_attr( $name ),
+            esc_attr( $v ),
+            checked( $current, (string) $v, false ),
+            esc_html( $lbl )
+        );
+    }
+    echo '</div>';
+    break;
+
 
     case 'checkbox':
         $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
