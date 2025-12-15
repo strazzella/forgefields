@@ -156,6 +156,13 @@ add_action('in_admin_header', function () {
         );
     }
 
+    if ($page === 'forge-fields-global') {
+    $right_html = sprintf(
+        '<button type="submit" class="button button-primary ff-subbar__btn"
+                 form="ff-global-form" name="ff_save_global" value="1">Save Global Fields</button>'
+    );
+}
+
     ff_render_admin_subbar($subtitle, '', 'Add New', $right_html);
 });
 
@@ -1243,7 +1250,7 @@ if ( $action && $group_id && isset( $groups[ $group_id ] ) ) {
             <p>No global field groups found. Create a field group with
                <strong>Location = Global</strong> first.</p>
         <?php else : ?>
-            <form method="post" action="">
+            <form method="post" action="" id="ff-global-form">
                 <?php wp_nonce_field( 'ff_save_global' ); ?>
 
                 <?php foreach ( $global_groups as $group_id => $group ) :
@@ -1515,14 +1522,6 @@ case 'button_group':
 
                 <?php endforeach; ?>
 
-                <p class="submit">
-                    <button type="submit"
-                            class="button button-primary"
-                            name="ff_save_global"
-                            value="1">
-                        Save Global Fields
-                    </button>
-                </p>
             </form>
         <?php endif; ?>
     </div>
