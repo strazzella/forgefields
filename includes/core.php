@@ -453,81 +453,98 @@ function ff_render_field_group_metabox( $post, $box ) {
             /**
              * CHOICE TYPES – THIS IS THE BIT YOU WERE MISSING
              */
-            case 'select':
-                $choices = function_exists( 'ff_parse_choices_string' )
-                    ? ff_parse_choices_string( $field['choices'] ?? '' )
-                    : [];
-                $current = is_scalar( $value ) ? (string) $value : '';
-                echo '<div class="ff-select-wrap">';
-                echo '<select name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'">';
-                foreach ( $choices as $val => $lbl ) {
-                    printf(
-                        '<option value="%1$s"%3$s>%2$s</option>',
-                        esc_attr( $val ),
-                        esc_html( $lbl ),
-                        selected( $current, (string) $val, false )
-                    );
-                }
-                echo '</select>';
-                echo '</div>';
-                break;
+      case 'select':
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_scalar( $value ) ? (string) $value : '';
 
-            case 'radio':
-            case 'button_group':
-                $choices = function_exists( 'ff_parse_choices_string' )
-                    ? ff_parse_choices_string( $field['choices'] ?? '' )
-                    : [];
-                $current = is_scalar( $value ) ? (string) $value : '';
-                foreach ( $choices as $val => $lbl ) {
-                    $field_id = $meta_key . '_' . sanitize_key( (string) $val );
-                    printf(
-                        '<label for="%1$s" style="display:inline-block;margin-right:12px;">
-                            <input type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
-                            %5$s
-                        </label>',
-                        esc_attr( $field_id ),
-                        esc_attr( $meta_key ),
-                        esc_attr( $val ),
-                        checked( $current, (string) $val, false ),
-                        esc_html( $lbl )
-                    );
-                }
-                break;
+    echo '<select name="'. esc_attr($meta_key) .'" id="'. esc_attr($meta_key) .'">';
+    foreach ( $choices_map as $v => $lbl ) {
+        printf(
+            '<option value="%1$s"%3$s>%2$s</option>',
+            esc_attr( $v ),
+            esc_html( $lbl ),
+            selected( $current, (string) $v, false )
+        );
+    }
+    echo '</select>';
+    break;
 
-            case 'checkbox':
-                $choices = function_exists( 'ff_parse_choices_string' )
-                    ? ff_parse_choices_string( $field['choices'] ?? '' )
-                    : [];
-                $current = is_array( $value ) ? array_map( 'strval', $value ) : [];
-                foreach ( $choices as $val => $lbl ) {
-                    $field_id = $meta_key . '_' . sanitize_key( (string) $val );
-                    printf(
-                        '<label for="%1$s" style="display:inline-block;margin-right:12px;">
-                            <input type="checkbox" name="%2$s[]" id="%1$s" value="%3$s" %4$s>
-                            %5$s
-                        </label>',
-                        esc_attr( $field_id ),
-                        esc_attr( $meta_key ),
-                        esc_attr( $val ),
-                        in_array( (string) $val, $current, true ) ? 'checked' : '',
-                        esc_html( $lbl )
-                    );
-                }
-                break;
+case 'radio':
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_scalar( $value ) ? (string) $value : '';
 
-            case 'true_false':
-                $checked = ! empty( $value );
-                printf(
-                    '<label>
-                        <input type="checkbox" name="%1$s" id="%1$s" value="1" %2$s>
-                        %3$s
-                    </label>',
-                    esc_attr( $meta_key ),
-                    checked( $checked, true, false ),
-                    esc_html__( 'Enabled', 'forge-fields' )
-                );
-                break;
+    foreach ( $choices_map as $v => $lbl ) {
+        $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+        printf(
+            '<label for="%1$s" style="display:inline-block;margin-right:12px;">
+                <input type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
+                %5$s
+            </label>',
+            esc_attr( $field_id ),
+            esc_attr( $meta_key ),
+            esc_attr( $v ),
+            checked( $current, (string) $v, false ),
+            esc_html( $lbl )
+        );
+    }
+    break;
 
+case 'button_group':
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_scalar( $value ) ? (string) $value : '';
+
+    echo '<div class="ff-button-group" role="radiogroup">';
+    foreach ( $choices_map as $v => $lbl ) {
+        $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+        printf(
+            '<label class="ff-button-group__btn" for="%1$s">
+                <input class="ff-button-group__input" type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
+                <span class="ff-button-group__label">%5$s</span>
+            </label>',
+            esc_attr( $field_id ),
+            esc_attr( $meta_key ),
+            esc_attr( $v ),
+            checked( $current, (string) $v, false ),
+            esc_html( $lbl )
+        );
+    }
+    echo '</div>';
+    break;
+
+case 'checkbox':
+    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+    $current     = is_array( $value ) ? array_map( 'strval', $value ) : [];
+
+    foreach ( $choices_map as $v => $lbl ) {
+        $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+        printf(
+            '<label for="%1$s" style="display:inline-block;margin-right:12px;">
+                <input type="checkbox" name="%2$s[]" id="%1$s" value="%3$s" %4$s>
+                %5$s
+            </label>',
+            esc_attr( $field_id ),
+            esc_attr( $meta_key ),
+            esc_attr( $v ),
+            in_array( (string) $v, $current, true ) ? 'checked' : '',
+            esc_html( $lbl )
+        );
+    }
+    break;
+
+case 'true_false':
+    $checked = ! empty( $value );
+    printf(
+        '<label>
+            <input type="checkbox" name="%1$s" id="%2$s" value="1" %3$s>
+            %4$s
+        </label>',
+        esc_attr( $meta_key ),
+        esc_attr( $meta_key ),
+        checked( $checked, true, false ),
+        esc_html__( 'Enabled', 'forge-fields' )
+    );
+    break;
+    
             /**
              * BASIC TYPES
              */
@@ -786,5 +803,27 @@ function ff_get_global( $name, $default = '' ) {
     }
 
     return $value;
+}
+
+if ( ! function_exists( 'ff_parse_choices_string' ) ) {
+    function ff_parse_choices_string( $raw ) {
+        $out = [];
+        foreach ( preg_split( '/\r\n|\r|\n/', (string) $raw ) as $line ) {
+            $line = trim( (string) $line );
+            if ( $line === '' ) { continue; }
+
+            if ( strpos( $line, '|' ) !== false ) {
+                list( $value, $label ) = array_map( 'trim', explode( '|', $line, 2 ) );
+            } elseif ( strpos( $line, ':' ) !== false ) {
+                list( $value, $label ) = array_map( 'trim', explode( ':', $line, 2 ) );
+            } else {
+                $label = $line;
+                $value = sanitize_key( $line );
+            }
+
+            $out[ sanitize_key( $value ) ] = sanitize_text_field( $label );
+        }
+        return $out;
+    }
 }
 

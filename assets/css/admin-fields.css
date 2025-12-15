@@ -2133,3 +2133,32 @@ tr.ff-field-settings td {
 input#_ff_range_slider {
     width: 300px;
 }
+
+.ff-button-group {
+    display: inline-flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ff-button-group__input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ff-button-group__btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    user-select: none;
+    background: #fff;
+}
+
+.ff-button-group__btn:has(.ff-button-group__input:checked) {
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1 inset;
+}
