@@ -1874,7 +1874,6 @@ function ff_render_field_group_edit() {
                                 <textarea name="ff_fields[<?php echo $index; ?>][choices]" rows="3" class="large-text" placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea( $choices_raw ); ?></textarea>
                                 <p class="description" style="margin-top:6px;">
                                     Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
-                                    For <strong>True/False</strong> this setting is ignored.
                                 </p>
                             </div>
                         </td>
@@ -1954,8 +1953,7 @@ function ff_render_field_group_edit() {
                       class="large-text"
                       placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"></textarea>
             <p class="description" style="margin-top:6px;">
-                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.  
-                For <strong>True/False</strong> this setting is ignored.
+                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
             </p>
         </div>
     </td>
