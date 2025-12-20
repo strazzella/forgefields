@@ -1,0 +1,12 @@
+{
+  "name": "vince/forge-fields",
+  "type": "wordpress-plugin",
+  "require": {},
+  "require-dev": {
+    "phpstan/phpstan": "^1.11",
+    "php-stubs/wordpress-stubs": "^6.4"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

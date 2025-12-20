@@ -2162,3 +2162,11 @@ input#_ff_range_slider {
     border-color: #2271b1;
     box-shadow: 0 0 0 1px #2271b1 inset;
 }
+
+/* Make radio + checkbox labels clickable */
+.ff-admin input[type="radio"] + *,
+.ff-admin input[type="checkbox"] + *,
+.ff-admin label:has(input[type="radio"]),
+.ff-admin label:has(input[type="checkbox"]) {
+    cursor: pointer;
+}

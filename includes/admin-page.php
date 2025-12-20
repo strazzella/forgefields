@@ -68,6 +68,98 @@ if ( ! function_exists( 'ff_parse_choices_string' ) ) {
     }
 }
 
+/**
+ * Normalize and validate a choices textarea.
+ *
+ * - Accepts lines in: "value : Label", "value|Label", or "value"
+ * - Produces canonical lines: "value : Label"
+ * - Soft-warns when it had to sanitize/clean inputs
+ * - Hard-errors when result would be broken (no choices, empty value, duplicates)
+ *
+ * @return array { normalized: string, warnings: string[], errors: string[] }
+ */
+/**
+ * Normalize a choices textarea into a canonical format.
+ *
+ * Returns:
+ * [
+ *   'normalized' => string,
+ *   'errors'     => array,
+ *   'warnings'   => array,
+ * ]
+ */
+function ff_normalize_choices_string( $raw ) {
+
+    $lines     = preg_split( '/\r\n|\r|\n/', (string) $raw );
+    $normalized = [];
+    $errors     = [];
+    $warnings   = [];
+
+    foreach ( $lines as $i => $line ) {
+
+        $line = trim( $line );
+        if ( $line === '' ) {
+            continue;
+        }
+
+        $value = '';
+        $label = '';
+
+        // value | Label
+        if ( strpos( $line, '|' ) !== false ) {
+            [ $value, $label ] = array_map( 'trim', explode( '|', $line, 2 ) );
+
+        // value : Label
+        } elseif ( strpos( $line, ':' ) !== false ) {
+            [ $value, $label ] = array_map( 'trim', explode( ':', $line, 2 ) );
+
+        // value (single word)
+        } else {
+            $value = $line;
+            $label = '';
+        }
+
+        // Validate value
+        $value = sanitize_key( $value );
+        if ( $value === '' ) {
+            $errors[] = sprintf(
+                'Line %d is invalid. Each choice must have a value.',
+                $i + 1
+            );
+            continue;
+        }
+
+        // Normalize output
+        if ( $label === '' ) {
+            // IMPORTANT: keep single-word format
+            $normalized[] = $value;
+        } else {
+            $label = sanitize_text_field( $label );
+            if ( $label === '' ) {
+                $errors[] = sprintf(
+                    'Line %d has an empty label.',
+                    $i + 1
+                );
+                continue;
+            }
+
+            $normalized[] = $value . ' : ' . $label;
+        }
+    }
+
+    if ( empty( $normalized ) ) {
+        $errors[] = 'At least one valid choice is required.';
+    }
+
+    return [
+        'normalized' => implode( "\n", $normalized ),
+        'errors'     => $errors,
+        'warnings'   => $warnings,
+    ];
+}
+
+
+
 
 add_action('in_admin_header', function () {
     $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
@@ -1536,6 +1628,103 @@ case 'button_group':
 add_shortcode( 'ff_global', 'ff_global_shortcode' ); **/
 
 /**
+ * Normalize a choices textarea into a canonical stored string.
+ *
+ * Option A behavior:
+ * - "value" stays "value" (one token line)
+ * - "value|Label" becomes "value : Label"
+ * - "value : Label" stays "value : Label"
+ *
+ * Returns: [ $normalized_string, $warnings_array, $errors_array ]
+ */
+function ff_normalize_choices_textarea( $raw_text ) {
+    $warnings = [];
+    $errors   = [];
+
+    $lines = preg_split( '/\r\n|\r|\n/', (string) $raw_text );
+    $out_lines = [];
+    $seen_values = [];
+
+    foreach ( $lines as $i => $line ) {
+        $original = trim( (string) $line );
+        if ( $original === '' ) {
+            continue;
+        }
+
+        $has_pipe  = ( strpos( $original, '|' ) !== false );
+        $has_colon = ( strpos( $original, ':' ) !== false );
+
+        // Parse into $value_raw and $label_raw only if delimiter exists.
+        if ( $has_pipe ) {
+            list( $value_raw, $label_raw ) = array_map( 'trim', explode( '|', $original, 2 ) );
+        } elseif ( $has_colon ) {
+            list( $value_raw, $label_raw ) = array_map( 'trim', explode( ':', $original, 2 ) );
+        } else {
+            $value_raw = $original;
+            $label_raw = '';
+        }
+
+        $value_sanitized = sanitize_key( $value_raw );
+
+        // If they used a delimiter but value becomes empty after sanitizing, that's invalid.
+        if ( ( $has_pipe || $has_colon ) && $value_sanitized === '' ) {
+            $errors[] = sprintf(
+                'Line %d: Invalid choice value "%s". Use letters/numbers/underscores/dashes before the ":" or "|".',
+                $i + 1,
+                $value_raw
+            );
+            continue;
+        }
+
+        // If it was a "bare" line (no delimiter), still require a usable value.
+        if ( ! $has_pipe && ! $has_colon && $value_sanitized === '' ) {
+            $errors[] = sprintf(
+                'Line %d: Invalid choice "%s". Use at least one letter or number.',
+                $i + 1,
+                $original
+            );
+            continue;
+        }
+
+        // Warn if we had to clean the value.
+        if ( $value_raw !== $value_sanitized ) {
+            $warnings[] = sprintf(
+                'Line %d: Value "%s" was cleaned to "%s".',
+                $i + 1,
+                $value_raw,
+                $value_sanitized
+            );
+        }
+
+        // Default label if delimiter used but label is empty.
+        $label_clean = sanitize_text_field( (string) $label_raw );
+        if ( ( $has_pipe || $has_colon ) && $label_clean === '' ) {
+            $label_clean = $value_sanitized;
+        }
+
+        // Duplicate values are ambiguous; treat as error.
+        if ( isset( $seen_values[ $value_sanitized ] ) ) {
+            $errors[] = sprintf(
+                'Line %d: Duplicate choice value "%s". Each choice value must be unique.',
+                $i + 1,
+                $value_sanitized
+            );
+            continue;
+        }
+        $seen_values[ $value_sanitized ] = true;
+
+        // OPTION A: bare lines stay bare.
+        if ( ! $has_pipe && ! $has_colon ) {
+            $out_lines[] = $value_sanitized;
+        } else {
+            $out_lines[] = $value_sanitized . ' : ' . $label_clean;
+        }
+    }
+
+    return [ implode( "\n", $out_lines ), $warnings, $errors ];
+}
+
+/**
  * EDIT / ADD-NEW SCREEN
  * -------------------------------------------------------------------------
  * - If ?group=<id> is present and found: edit that group.
@@ -1606,7 +1795,7 @@ function ff_render_field_group_edit() {
                 $name = sanitize_key( strtolower( str_replace( ' ', '_', $label ) ) );
             }
 
-            // If this field is a "choice" type, capture the raw choices textarea
+            // Capture the raw choices textarea (only relevant types will use it)
             $choice_types = [ 'select', 'checkbox', 'radio', 'button_group', 'true_false' ];
             $choices_raw  = '';
             if ( in_array( $type, $choice_types, true ) ) {
@@ -1615,19 +1804,44 @@ function ff_render_field_group_edit() {
                     : '';
             }
 
-            // Validation: real choice fields must have at least one choice
-            if ( in_array( $type, [ 'select', 'checkbox', 'radio', 'button_group' ], true )
-                 && $choices_raw === '' ) {
+            
+            // Normalize + validate ONLY for real choice lists (true_false ignores choices)
+            $choices_to_save = $choices_raw;
 
-                $field_label_for_error = $label !== '' ? $label : $name;
+            if ( in_array( $type, [ 'select', 'checkbox', 'radio', 'button_group' ], true ) ) {
 
-                $notices[] = [
-                    'type'    => 'error',
-                    'message' => sprintf(
-                        'Field "%s" is a choice field, but no choices were provided. Please enter at least one choice or change the field type.',
-                        $field_label_for_error
-                    ),
-                ];
+                $result = ff_normalize_choices_string( $choices_raw );
+
+                if ( ! empty( $result['errors'] ) ) {
+                    $field_label_for_error = $label !== '' ? $label : $name;
+
+                    foreach ( $result['errors'] as $msg ) {
+                        $notices[] = [
+                            'type'    => 'error',
+                            'message' => sprintf( 'Field "%s": %s', $field_label_for_error, $msg ),
+                        ];
+                    }
+
+                    // Keep raw so user can fix it (we also block saving later because $notices not empty)
+                    $choices_to_save = $choices_raw;
+
+                } else {
+                    // Save normalized canonical "value : Label"
+                    $choices_to_save = $result['normalized'];
+
+                    // One warning per field if we had to clean anything
+                    if ( ! empty( $result['warnings'] ) ) {
+                        $field_label_for_error = $label !== '' ? $label : $name;
+
+                        $notices[] = [
+                            'type'    => 'warning',
+                            'message' => sprintf(
+                                'Field "%s": choices were cleaned and normalized on save.',
+                                $field_label_for_error
+                            ),
+                        ];
+                    }
+                }
             }
 
             // Build row
@@ -1637,12 +1851,13 @@ function ff_render_field_group_edit() {
                 'type'  => $type,
             ];
 
-            // Only store choices if there is something there
-            if ( $choices_raw !== '' ) {
-                $row['choices'] = $choices_raw; // store the raw string (easy to edit/display)
+            // Store choices only for types that need them (prevents junk being stored on non-choice types)
+            if ( in_array( $type, [ 'select', 'checkbox', 'radio', 'button_group' ], true ) ) {
+                $row['choices'] = $choices_to_save;
             }
 
             $fields[] = $row;
+
         }
 
 
@@ -1862,18 +2077,18 @@ function ff_render_field_group_edit() {
                         </td>
                     </tr>
                     <tr
-  class="ff-field-settings<?php echo $is_choice ? '' : ' is-hidden'; ?>"
-  data-index="<?php echo esc_attr( $index ); ?>"
-  data-ff-settings
-  <?php echo $is_choice ? '' : 'style="display:none"'; ?>
->
+                    class="ff-field-settings<?php echo $is_choice ? '' : ' is-hidden'; ?>"
+                    data-index="<?php echo esc_attr( $index ); ?>"
+                    data-ff-settings
+                    <?php echo $is_choice ? '' : 'style="display:none"'; ?>
+                >
 
                         <td colspan="5">
                             <div class="ff-field-setting ff-setting-choices">
                                 <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
                                 <textarea name="ff_fields[<?php echo $index; ?>][choices]" rows="3" class="large-text" placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea( $choices_raw ); ?></textarea>
                                 <p class="description" style="margin-top:6px;">
-                                    Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
+                                    Supported formats: <code>value : Label</code> or <code>value</code>.
                                 </p>
                             </div>
                         </td>
@@ -1883,100 +2098,100 @@ function ff_render_field_group_edit() {
             </table>
 
 
- <!-- Template for new rows -->
-<script type="text/html" id="ff-field-row-template">
-<tr class="ff-field-row" data-index="__INDEX__">
-    <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
+            <!-- Template for new rows -->
+            <script type="text/html" id="ff-field-row-template">
+            <tr class="ff-field-row" data-index="__INDEX__">
+                <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
 
-    <td>
-        <input type="text"
-               name="ff_fields[__INDEX__][label]"
-               value=""
-               class="regular-text ff-field-label"
-               data-field-part="label">
-    </td>
+                <td>
+                    <input type="text"
+                        name="ff_fields[__INDEX__][label]"
+                        value=""
+                        class="regular-text ff-field-label"
+                        data-field-part="label">
+                </td>
 
-    <td>
-        <input type="text"
-               name="ff_fields[__INDEX__][name]"
-               value=""
-               class="regular-text ff-field-name"
-               data-field-part="name">
-    </td>
+                <td>
+                    <input type="text"
+                        name="ff_fields[__INDEX__][name]"
+                        value=""
+                        class="regular-text ff-field-name"
+                        data-field-part="name">
+                </td>
 
-    <td>
-        <div class="ff-select-wrap">
-            <select name="ff_fields[__INDEX__][type]" class="ff-field-type" data-field-part="type">
-                <?php foreach ( $type_groups as $group_label => $opts ) : ?>
-                    <optgroup label="<?php echo esc_attr( $group_label ); ?>">
-                        <?php foreach ( $opts as $t ) : ?>
-                            <?php
-                                $pretty = [
-                                    'text'     => 'Text',
-                                    'textarea' => 'Textarea',
-                                    'number'   => 'Number',
-                                    'email'    => 'Email',
-                                    'url'      => 'URL',
-                                    'range'    => 'Range',
-                                    'password' => 'Password',
-                                    'image'    => 'Image',
-                                    'file'     => 'File',
-                                    'wysiwyg'  => 'WYSIWYG Editor',
-                                    'select'  => 'Select',
-                                    'checkbox'  => 'Checkbox',
-                                    'radio'  => 'Radio',
-                                    'button_group'  => 'Button Group',
-                                    'true_false'  => 'True/False',
-                                ];
-                            ?>
-                            <option value="<?php echo esc_attr( $t ); ?>">
-                                <?php echo esc_html( $pretty[$t] ?? ucfirst($t) ); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </optgroup>
-                <?php endforeach; ?>
-            </select>
-        </div>
-    </td>
+                <td>
+                    <div class="ff-select-wrap">
+                        <select name="ff_fields[__INDEX__][type]" class="ff-field-type" data-field-part="type">
+                            <?php foreach ( $type_groups as $group_label => $opts ) : ?>
+                                <optgroup label="<?php echo esc_attr( $group_label ); ?>">
+                                    <?php foreach ( $opts as $t ) : ?>
+                                        <?php
+                                            $pretty = [
+                                                'text'     => 'Text',
+                                                'textarea' => 'Textarea',
+                                                'number'   => 'Number',
+                                                'email'    => 'Email',
+                                                'url'      => 'URL',
+                                                'range'    => 'Range',
+                                                'password' => 'Password',
+                                                'image'    => 'Image',
+                                                'file'     => 'File',
+                                                'wysiwyg'  => 'WYSIWYG Editor',
+                                                'select'  => 'Select',
+                                                'checkbox'  => 'Checkbox',
+                                                'radio'  => 'Radio',
+                                                'button_group'  => 'Button Group',
+                                                'true_false'  => 'True/False',
+                                            ];
+                                        ?>
+                                        <option value="<?php echo esc_attr( $t ); ?>">
+                                            <?php echo esc_html( $pretty[$t] ?? ucfirst($t) ); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </td>
 
-    <td class="ff-field-actions">
-        <a href="#" class="ff-field-remove">Remove</a>
-    </td>
-</tr>
+                <td class="ff-field-actions">
+                    <a href="#" class="ff-field-remove">Remove</a>
+                </td>
+            </tr>
 
-<tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
-    <td colspan="5">
-        <div class="ff-field-setting ff-setting-choices">
-            <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
-            <textarea name="ff_fields[__INDEX__][choices]"
-                      rows="3"
-                      class="large-text"
-                      placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"></textarea>
-            <p class="description" style="margin-top:6px;">
-                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
-            </p>
-        </div>
-    </td>
-</tr>
-</script>
+            <tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
+                <td colspan="5">
+                    <div class="ff-field-setting ff-setting-choices">
+                        <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
+                        <textarea name="ff_fields[__INDEX__][choices]"
+                                rows="3"
+                                class="large-text"
+                                placeholder="value : Label&#10;"></textarea>
+                        <p class="description" style="margin-top:6px;">
+                            Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
+                        </p>
+                    </div>
+                </td>
+            </tr>
+            </script>
 
-  
-        </form>
-        <!-- FF confirm modal -->
-        <div id="ff-confirm" class="ff-confirm is-hidden" role="dialog" aria-modal="true" aria-labelledby="ff-confirm-title" aria-describedby="ff-confirm-desc">
-        <div class="ff-confirm__overlay" data-ff-close></div>
-        <div class="ff-confirm__dialog" role="document" tabindex="-1">
-            <h2 id="ff-confirm-title" class="ff-confirm__title">Remove field?</h2>
-            <p id="ff-confirm-desc" class="ff-confirm__desc">
-            This will remove <strong class="ff-confirm__field-name">this field</strong> from the group.
-            </p>
-            <div class="ff-confirm__actions">
-            <button type="button" class="button" data-ff-close>Cancel</button>
-            <button type="button" class="button ff-button-danger" id="ff-confirm-yes">Remove</button>
-            </div>
-            <button type="button" class="ff-confirm__x" aria-label="Close" data-ff-close>×</button>
-        </div>
-        </div>
-    </div>
-    <?php
+            
+                    </form>
+                    <!-- FF confirm modal -->
+                    <div id="ff-confirm" class="ff-confirm is-hidden" role="dialog" aria-modal="true" aria-labelledby="ff-confirm-title" aria-describedby="ff-confirm-desc">
+                    <div class="ff-confirm__overlay" data-ff-close></div>
+                    <div class="ff-confirm__dialog" role="document" tabindex="-1">
+                        <h2 id="ff-confirm-title" class="ff-confirm__title">Remove field?</h2>
+                        <p id="ff-confirm-desc" class="ff-confirm__desc">
+                        This will remove <strong class="ff-confirm__field-name">this field</strong> from the group.
+                        </p>
+                        <div class="ff-confirm__actions">
+                        <button type="button" class="button" data-ff-close>Cancel</button>
+                        <button type="button" class="button ff-button-danger" id="ff-confirm-yes">Remove</button>
+                        </div>
+                        <button type="button" class="ff-confirm__x" aria-label="Close" data-ff-close>×</button>
+                    </div>
+                    </div>
+                </div>
+                <?php
 }
