@@ -3,49 +3,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/**
- * Helper: get all groups from the option, always as an array,
- * and normalise some defaults (including status).
- */
-function ff_get_all_groups() {
-    $groups = get_option( 'ff_field_groups', [] );
-
-    if ( ! is_array( $groups ) ) {
-        $groups = [];
-    }
-
-    foreach ( $groups as $group_id => $group ) {
-        if ( ! is_array( $group ) ) {
-            unset( $groups[ $group_id ] );
-            continue;
-        }
-
-        // Ensure ID is set.
-        if ( empty( $group['id'] ) ) {
-            $group['id'] = $group_id;
-        }
-
-        // Default status: active.
-        if ( empty( $group['status'] ) ) {
-            $group['status'] = 'active';
-        }
-
-        // Normalise fields.
-        if ( empty( $group['fields'] ) || ! is_array( $group['fields'] ) ) {
-            $group['fields'] = [];
-        }
-
-        // Default location.
-        if ( empty( $group['location'] ) ) {
-            $group['location'] = 'page';
-        }
-
-        $groups[ $group_id ] = $group;
-    }
-
-    return $groups;
-}
-
 if ( ! function_exists( 'ff_parse_choices_string' ) ) {
     function ff_parse_choices_string( $raw ) {
         $out = [];
@@ -330,14 +287,6 @@ function ff_render_admin_subbar( $title, $cta_url = '', $cta_label = 'Add New', 
     </div>
 <?php }
 
-
-/**
- * Helper: save all groups back to the option.
- */
-function ff_save_all_groups( array $groups ) {
-    update_option( 'ff_field_groups', $groups );
-}
-
 /**
  * Register menu + submenus.
  */
@@ -556,7 +505,7 @@ if ( $action && $group_id && isset( $groups[ $group_id ] ) ) {
                 $original = $groups[ $group_id ];
 
                 // New ID for the copy.
-                $new_id = uniqid( 'ff_group_' );
+                $new_id = ff_generate_group_id();
 
                 // Clone the group and adjust.
                 $copy           = $original;
@@ -1879,7 +1828,7 @@ function ff_render_field_group_edit() {
 
             // New group? Generate ID.
             if ( $posted_group_id === '' || $posted_group_id === 'new' ) {
-                $posted_group_id = uniqid( 'ff_group_' );
+                $posted_group_id = ff_generate_group_id();
                 $is_new          = false;
             }
 

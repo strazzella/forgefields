@@ -10,6 +10,21 @@ global $ff_field_groups;
 $ff_field_groups = [];
 
 /**
+ * Generate a unique Forge Fields group ID.
+ */
+function ff_generate_group_id() {
+    return uniqid( 'ff_group_' );
+}
+
+/**
+ * Get all saved field groups from the database.
+ */
+function ff_get_all_groups() {
+    $groups = get_option( 'ff_field_groups', [] );
+
+    return is_array( $groups ) ? $groups : [];
+}
+/**
  * -------------------------------------------------------------------------
  * FIELD TYPE REGISTRY (first step of abstraction)
  * -------------------------------------------------------------------------
@@ -298,6 +313,53 @@ function ff_register_field_group( array $group ) {
     }
 
     $ff_field_groups[ $group['id'] ] = $group;
+}
+
+/**
+ * Load saved field groups, migrate legacy data if needed,
+ * and register active groups at runtime.
+ */
+function ff_boot_field_groups() {
+    $groups = get_option( 'ff_field_groups', null );
+
+    if ( $groups === null ) {
+        $legacy = get_option( 'ff_field_group', [] );
+
+        if ( is_array( $legacy ) && ! empty( $legacy ) ) {
+            if ( empty( $legacy['id'] ) ) {
+                $legacy['id'] = 'ff_legacy_group';
+            }
+
+            $groups = [ $legacy['id'] => $legacy ];
+            update_option( 'ff_field_groups', $groups );
+            delete_option( 'ff_field_group' );
+        } else {
+            $groups = [];
+            update_option( 'ff_field_groups', $groups );
+        }
+    }
+
+    if ( ! is_array( $groups ) || empty( $groups ) ) {
+        return;
+    }
+
+    foreach ( $groups as $group ) {
+        if ( ! is_array( $group ) ) {
+            continue;
+        }
+
+        $status = isset( $group['status'] ) ? $group['status'] : 'active';
+
+        if ( $status !== 'active' ) {
+            continue;
+        }
+
+        if ( empty( $group['id'] ) ) {
+            $group['id'] = ff_generate_group_id();
+        }
+
+        ff_register_field_group( $group );
+    }
 }
 
 /**
@@ -727,10 +789,10 @@ add_action( 'save_post', function( $post_id ) {
             }
 
             // Save or delete
-            if ( $val === '' || $val === 0 || $val === [] ) {
-                delete_post_meta( $post_id, $key );
+            if ( $val === '' || $val === [] || $val === null ) {
+                delete_post_meta( $post_id, '_ff_' . $name );
             } else {
-                update_post_meta( $post_id, $key, $val );
+                update_post_meta( $post_id, '_ff_' . $name, $val );
             }
         }
     }
@@ -746,33 +808,19 @@ add_action( 'save_post', function( $post_id ) {
  *   echo ff_get_field( 'hero_heading', 'global' ); // global/options
  *   echo ff_get_field( 'hero_heading', 'option' ); // alias for global
  */
-function ff_get_field( $name, $context = 0 ) {
-    $name = sanitize_key( $name );
-
-    if ( ! $name ) {
+function ff_get_field( $field_name, $post_id = null ) {
+    if ( ! $field_name ) {
         return '';
     }
 
-    // Global / options context, ACF-style.
-    if (
-        $context === 'global' ||
-        $context === 'option' ||
-        $context === 'options'
-    ) {
-        $all = get_option( 'ff_global_fields', [] );
-
-        if ( ! is_array( $all ) ) {
-            $all = [];
-        }
-
-        $value = isset( $all[ $name ] ) ? $all[ $name ] : '';
-
-        return is_string( $value ) ? $value : '';
+    // Global/options lookup
+    if ( $post_id === 'global' || $post_id === 'option' ) {
+        $global = get_option( 'ff_global_fields', [] );
+        return isset( $global[ $field_name ] ) ? $global[ $field_name ] : '';
     }
 
-    // Default: treat $context as a post ID (post/page fields).
-    $post_id = intval( $context );
-    if ( ! $post_id ) {
+    // Current post fallback
+    if ( $post_id === null ) {
         $post_id = get_the_ID();
     }
 
@@ -780,13 +828,9 @@ function ff_get_field( $name, $context = 0 ) {
         return '';
     }
 
-    // Your meta boxes save with a "_ff_" prefix (e.g. "_ff_plan")
-    $meta_key = '_ff_' . $name;
+    $value = get_post_meta( $post_id, '_ff_' . $field_name, true );
 
-    $value = get_post_meta( $post_id, $meta_key, true );
-
-    // Normalise return to string for consistency
-    return is_string( $value ) ? $value : '';
+    return $value;
 }
 
 /**
@@ -827,3 +871,9 @@ if ( ! function_exists( 'ff_parse_choices_string' ) ) {
     }
 }
 
+/**
+ * Save all field groups back to the database.
+ */
+function ff_save_all_groups( array $groups ) {
+    update_option( 'ff_field_groups', $groups );
+}
