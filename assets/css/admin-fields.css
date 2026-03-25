@@ -2,175 +2,181 @@
 
 /* ---------- tokens ---------- */
 .ff-admin {
-    --ff-bg: #fff;
-    --ff-bg-muted: #f6f7f7;
-    --ff-surface: #ffffff;
-    --ff-border: #d0d5dd;
-    --ff-border-strong: #c7ccd6;
-    --ff-text: #1f2937;
-    --ff-text-muted: #6b7280;
-    --ff-primary: #2271b1; /* WP/ACF-ish */
-    --ff-success: #1e824c;
-    --ff-warn: #b45309;
-    --ff-danger: #b91c1c;
+  --ff-bg: #fff;
+  --ff-bg-muted: #f6f7f7;
+  --ff-surface: #ffffff;
+  --ff-border: #d0d5dd;
+  --ff-border-strong: #c7ccd6;
+  --ff-text: #1f2937;
+  --ff-text-muted: #6b7280;
+  --ff-primary: #2271b1; /* WP/ACF-ish */
+  --ff-success: #1e824c;
+  --ff-warn: #b45309;
+  --ff-danger: #b91c1c;
 
-    --ff-r-2: 3px;
-    --ff-r-3: 4px;
-    --ff-r-4: 6px;
-    --ff-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --ff-r-2: 3px;
+  --ff-r-3: 4px;
+  --ff-r-4: 6px;
+  --ff-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 
-    --ff-f-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
-        system-ui, sans-serif;
-    --ff-f-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        "Liberation Mono", "Courier New", monospace;
+  --ff-f-ui:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui,
+    sans-serif;
+  --ff-f-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 
-    --ff-12: 12px;
-    --ff-13: 13px;
-    --ff-14: 14px;
+  --ff-12: 12px;
+  --ff-13: 13px;
+  --ff-14: 14px;
 }
 
 /* unify font/box-sizing just under our wrap */
 .wrap.ff-admin * {
-    box-sizing: border-box;
-    font-family: var(--ff-f-ui);
+  box-sizing: border-box;
+  font-family: var(--ff-f-ui);
 }
 
 /* ---------- global layout ---------- */
 .ff-edit,
 .ff-list,
 .ff-global {
-    padding: 24px 20px;
+  padding: 24px 20px;
 }
 .page-title-action {
-    border-radius: var(--ff-r-3);
+  border-radius: var(--ff-r-3);
 }
 
 /* ---------- subsubsub -> ACF-like pills ---------- */
 .wrap.ff-admin .subsubsub {
-    margin: 6px 0 14px;
-    gap: 8px;
-    display: flex;
-    flex-wrap: wrap;
+  margin: 6px 0 14px;
+  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
 }
 .wrap.ff-admin .subsubsub a {
-    padding: 3px 8px;
-    text-decoration: none;
-    color: #1d2327;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+  padding: 3px 8px;
+  text-decoration: none;
+  color: #1d2327;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 .wrap.ff-admin .subsubsub a .count {
-    color: var(--ff-text-muted);
+  color: var(--ff-text-muted);
 }
 .wrap.ff-admin .subsubsub a.current {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 /* ---------- search bar ---------- */
 .ff-search-form {
-    margin: 10px 0 12px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
+  margin: 10px 0 12px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 .ff-search-input {
-    max-width: 280px;
-    padding: 7px 10px;
-    border: 1px solid var(--ff-border);
-    border-radius: var(--ff-r-3);
+  max-width: 280px;
+  padding: 7px 10px;
+  border: 1px solid var(--ff-border);
+  border-radius: var(--ff-r-3);
 }
 .ff-search-input:focus {
-    outline: none;
-    border-color: var(--ff-primary);
-    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  outline: none;
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
 }
 .ff-search-clear {
-    padding: 0 8px;
-    font-size: 18px;
-    line-height: 30px;
-    height: 30px;
+  padding: 0 8px;
+  font-size: 18px;
+  line-height: 30px;
+  height: 30px;
 }
 
 /* ---------- selects (edit/global only keep yours) ---------- */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
-    appearance: none;
-    padding: 8px 32px 8px 10px;
-    border: 1px solid var(--ff-border);
-    border-radius: var(--ff-r-3);
-    background: #fff;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    cursor: pointer;
+  appearance: none;
+  padding: 8px 32px 8px 10px;
+  border: 1px solid var(--ff-border);
+  border-radius: var(--ff-r-3);
+  background: #fff;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  cursor: pointer;
 }
 .wrap.ff-admin.ff-edit .ff-select-wrap::after,
 .wrap.ff-admin.ff-global .ff-select-wrap::after {
-    content: "▾";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--ff-text-muted);
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ff-text-muted);
 }
 
 /* LIST SCREEN — Bulk actions: keep caret INSIDE the dropdown */
 .wrap.ff-admin.ff-list .tablenav .bulkactions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap {
-    position: relative;
-    display: inline-block;
-    width: 200px; /* controls overall control width */
-    min-width: 160px;
+  position: relative;
+  display: inline-block;
+  width: 200px; /* controls overall control width */
+  min-width: 160px;
 }
 
 /* select fills wrapper so pseudo-caret overlays inside */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select {
-    width: 100%; /* <<< key fix */
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    height: 32px;
-    line-height: 20px;
-    padding: 6px 30px 6px 10px; /* room for caret on the right */
-    border: 1px solid var(--ff-color-border);
-    border-radius: 6px;
-    background: #fff;
-    background-image: none !important; /* remove WP svg caret */
-    box-shadow: none;
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%; /* <<< key fix */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 32px;
+  line-height: 20px;
+  padding: 6px 30px 6px 10px; /* room for caret on the right */
+  border: 1px solid var(--ff-color-border);
+  border-radius: 6px;
+  background: #fff;
+  background-image: none !important; /* remove WP svg caret */
+  box-shadow: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select:focus {
-    outline: none;
-    border-color: var(--ff-color-focus);
-    box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
+  outline: none;
+  border-color: var(--ff-color-focus);
+  box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
 }
 
 /* caret drawn by the wrapper, now inside because select is width:100% */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap::after {
-    content: "▾";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-    color: var(--ff-color-text-muted);
-    pointer-events: none;
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--ff-color-text-muted);
+  pointer-events: none;
 }
 
 /* align Apply button */
 .wrap.ff-admin.ff-list .tablenav .bulkactions .button.action {
-    height: 32px;
-    line-height: 30px;
-    padding: 0 10px;
-    margin: 0;
+  height: 32px;
+  line-height: 30px;
+  padding: 0 10px;
+  margin: 0;
 }
 
 /* ---------- inputs/textarea ---------- */
@@ -180,398 +186,398 @@
 .ff-admin input[type="number"],
 .ff-admin input[type="email"],
 .ff-admin textarea {
-    padding: 8px 10px;
-    border: 1px solid var(--ff-border);
-    border-radius: 8px;
-    background: #fff;
-    transition: all 0.15s;
-    width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--ff-border);
+  border-radius: 8px;
+  background: #fff;
+  transition: all 0.15s;
+  width: 100%;
 }
 .ff-admin input:focus,
 .ff-admin textarea:focus {
-    outline: none;
-    border-color: var(--ff-primary);
-    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  outline: none;
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
 }
 .ff-admin.ff-edit input,
 .ff-admin.ff-edit textarea,
 .ff-admin.ff-edit select#ff_location,
 .ff-admin.ff-edit .ff-select-wrap select {
-    max-width: 520px;
+  max-width: 520px;
 }
 
 /* ---------- table (list) ---------- */
 .wrap.ff-admin.ff-list .ff-list-table {
-    margin-top: 12px;
+  margin-top: 12px;
 }
 .wrap.ff-admin.ff-list .ff-list-table thead.ff-list-bar,
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar {
-    background: var(--ff-bg-muted);
-    border-top: 1px solid #e3e5ea;
-    border-bottom: 1px solid #e3e5ea;
+  background: var(--ff-bg-muted);
+  border-top: 1px solid #e3e5ea;
+  border-bottom: 1px solid #e3e5ea;
 }
 .wrap.ff-admin.ff-list .ff-list-table th {
-    font-weight: 600;
+  font-weight: 600;
 }
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:hover {
-    background: #fbfcfd;
+  background: #fbfcfd;
 }
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a {
-    color: #0a4b78;
-    text-decoration: none;
+  color: #0a4b78;
+  text-decoration: none;
 }
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a:hover {
-    color: #0b5a91;
+  color: #0b5a91;
 }
 
 /* Sort indicator (clean) */
 th.sortable a,
 th.sorted a {
-    display: inline-flex;
-    align-items: center;
+  display: inline-flex;
+  align-items: center;
 }
 th.column-title .sorting-indicator::before {
-    content: "\25B2";
-    font-size: 10px;
-    margin-left: 4px;
-    opacity: 0.35;
-    color: #0b5a91;
+  content: "\25B2";
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: 0.35;
+  color: #0b5a91;
 }
 th.column-title.sorted.asc .sorting-indicator::before {
-    opacity: 1;
+  opacity: 1;
 }
 th.column-title.sorted.desc .sorting-indicator::before {
-    content: "\25BC";
-    opacity: 1;
+  content: "\25BC";
+  opacity: 1;
 }
 
 /* Row actions only on hover/focus (like ACF) */
 .wrap.ff-admin.ff-list .row-actions {
-    opacity: 0;
-    transition: opacity 0.12s;
+  opacity: 0;
+  transition: opacity 0.12s;
 }
 .wrap.ff-admin.ff-list tr:hover .row-actions,
 .wrap.ff-admin.ff-list tr.ff-row-focus .row-actions {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* ---------- chips/pills ---------- */
 .ff-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 22px;
-    line-height: 22px;
-    padding: 0 8px;
-    border: 1px solid var(--ff-border);
-    border-radius: 999px;
-    background: #fff;
-    font-size: 12px;
-    box-shadow: var(--ff-shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--ff-border);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+  box-shadow: var(--ff-shadow);
 }
 .ff-chip--mono {
-    font-family: var(--ff-f-mono);
-    background: #f3f4f6;
-    border-color: #e5e7eb;
+  font-family: var(--ff-f-mono);
+  background: #f3f4f6;
+  border-color: #e5e7eb;
 }
 .ff-count-link {
-    text-decoration: none;
+  text-decoration: none;
 }
 .ff-count-link:hover .ff-chip {
-    background: #eef2f7;
+  background: #eef2f7;
 }
 
 /* status pills */
 .ff-status {
-    display: inline-flex;
-    align-items: center;
-    height: 22px;
-    padding: 0 8px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #111827;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
 }
 .ff-status--active {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
 }
 .ff-status--inactive {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #e5e7eb;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
 }
 .ff-status--trash {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 /* Key copy */
 .ff-copy-key {
-    margin-left: 6px;
+  margin-left: 6px;
 }
 .ff-copy-key.is-copied {
-    color: #198754;
+  color: #198754;
 }
 
 /* ---------- edit screen fields table ---------- */
 .wrap.ff-admin.ff-edit table.widefat {
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
 }
 .wrap.ff-admin.ff-edit table.widefat thead th {
-    background: var(--ff-bg-muted);
+  background: var(--ff-bg-muted);
 }
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
-    background: #fbfcfd;
+  background: #fbfcfd;
 }
 .ff-field-handle {
-    cursor: grab;
-    width: 28px;
-    text-align: center;
-    color: #9aa0a6;
+  cursor: grab;
+  width: 28px;
+  text-align: center;
+  color: #9aa0a6;
 }
 .ff-field-handle::after {
-    content: "⋮⋮";
-    font-size: 14px;
-    opacity: 0.7;
+  content: "⋮⋮";
+  font-size: 14px;
+  opacity: 0.7;
 } /* why: clearer grab affordance */
 .ff-field-actions .ff-remove-field,
 .ff-field-remove {
-    color: #b91c1c;
+  color: #b91c1c;
 }
 
 .ff-field-actions .ff-remove-field:hover,
 .ff-field-remove:hover {
-    color: #b91c1c;
-    text-decoration: underline;
+  color: #b91c1c;
+  text-decoration: underline;
 }
 
 .ff-field-remove:active,
 .ff-field-remove:focus {
-    color: #b91c1c;
+  color: #b91c1c;
 }
 
 button.button-link.ff-field-remove {
-    color: #b91c1c;
+  color: #b91c1c;
 }
 
 .ff-field-row .ff-remove,
 .ff-fields-table .ff-remove,
 a.ff-remove {
-    color: #b91c1c !important;
-    text-decoration: none !important;
+  color: #b91c1c !important;
+  text-decoration: none !important;
 }
 
 a.ff-remove:hover {
-    text-decoration: underline !important;
+  text-decoration: underline !important;
 }
 
 a.remove-field {
-    color: #b91c1c !important;
-    text-decoration: none !important;
+  color: #b91c1c !important;
+  text-decoration: none !important;
 }
 
 a.remove-field:hover {
-    text-decoration: underline !important;
+  text-decoration: underline !important;
 }
 
 /* Forge Fields: "Remove" links */
 a.ff-field-remove {
-    color: #b32d2e !important;
-    text-decoration: none !important;
+  color: #b32d2e !important;
+  text-decoration: none !important;
 }
 
 a.ff-field-remove:hover {
-    text-decoration: underline !important;
+  text-decoration: underline !important;
 }
 
 span.sorting-indicator {
-    margin-top: 7px;
+  margin-top: 7px;
 }
 
 /* Descriptions under inputs */
 .wrap.ff-admin .description {
-    color: var(--ff-text-muted);
+  color: var(--ff-text-muted);
 }
 
 /* ---------- focus reset only inside our wrap (WP native remains elsewhere) ---------- */
 #wpbody-content .wrap.ff-admin a:focus,
 #wpbody-content .wrap.ff-admin button:focus {
-    outline: none;
-    box-shadow: none;
+  outline: none;
+  box-shadow: none;
 }
 #wpbody-content .wrap.ff-admin th a:focus {
-    outline: none;
-    box-shadow: none;
+  outline: none;
+  box-shadow: none;
 }
 
 /* ---------- range/password helpers (optional) ---------- */
 .ff-password-wrap {
-    position: relative;
-    max-width: 520px;
+  position: relative;
+  max-width: 520px;
 }
 .ff-password-wrap .ff-password-input {
-    padding-right: 34px;
+  padding-right: 34px;
 }
 .ff-password-toggle {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent;
-    border: 0;
-    cursor: pointer;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 .ff-range-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    max-width: 340px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 340px;
 }
 .ff-range-number {
-    width: 72px;
-    text-align: center;
-    border: 1px solid var(--ff-border);
-    border-radius: var(--ff-r-3);
-    background: #fff;
+  width: 72px;
+  text-align: center;
+  border: 1px solid var(--ff-border);
+  border-radius: var(--ff-r-3);
+  background: #fff;
 }
 
 /* ---------- misc ---------- */
 .bulkactions input.button.action {
-    margin-top: 2px;
+  margin-top: 2px;
 }
 
 select#ff-bulk-action-selector-bottom {
-    border: 1px solid var(--ff-border);
+  border: 1px solid var(--ff-border);
 }
 
 input.button.action {
-    border: 1px solid var(--ff-border) !important;
+  border: 1px solid var(--ff-border) !important;
 }
 
 button#ff-add-field {
-    border: 1px solid var(--ff-border);
+  border: 1px solid var(--ff-border);
 }
 
 /* Card chrome */
 .wrap.ff-admin.ff-list table.ff-list-table {
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    overflow: hidden; /* rounds the header too */
-    background: #fff;
-    box-shadow: var(--ff-shadow);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden; /* rounds the header too */
+  background: #fff;
+  box-shadow: var(--ff-shadow);
 }
 
 /* Header & footer */
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
-    background: var(--ff-bg-muted);
-    border-bottom: 1px solid #e5e7eb;
-    padding: 10px 12px;
-    font-weight: 600;
+  background: var(--ff-bg-muted);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  font-weight: 600;
 }
 
 /* Cell sizing */
 .wrap.ff-admin.ff-list table.ff-list-table td,
 .wrap.ff-admin.ff-list table.ff-list-table th {
-    padding: 10px 12px;
-    vertical-align: middle;
+  padding: 10px 12px;
+  vertical-align: middle;
 }
 
 /* Primary/title column link */
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a {
-    color: #0a4b78;
-    text-decoration: none;
+  color: #0a4b78;
+  text-decoration: none;
 }
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a:hover {
-    color: #0b5a91;
+  color: #0b5a91;
 }
 
 /* Subtle row separators + striping to mirror edit table */
 .wrap.ff-admin.ff-list .ff-list-table tbody tr {
-    border-top: 1px solid #f1f5f9;
+  border-top: 1px solid #f1f5f9;
 }
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:nth-child(odd) {
-    background: #fafbfc;
+  background: #fafbfc;
 }
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:hover {
-    background: #fbfcfd;
+  background: #fbfcfd;
 }
 
 /* Checkbox col a bit tighter */
 .wrap.ff-admin.ff-list .ff-list-table .check-column {
-    width: 34px;
-    padding-left: 10px;
+  width: 34px;
+  padding-left: 10px;
 }
 
 /* Row actions only on hover/focus (we already keep focus via JS) */
 .wrap.ff-admin.ff-list .row-actions {
-    opacity: 0;
-    transition: opacity 0.12s ease-in-out;
+  opacity: 0;
+  transition: opacity 0.12s ease-in-out;
 }
 .wrap.ff-admin.ff-list tr:hover .row-actions,
 .wrap.ff-admin.ff-list tr.ff-row-focus .row-actions {
-    opacity: 1;
+  opacity: 1;
 }
 
 /* Chips already exist; just tighten in table context */
 .wrap.ff-admin.ff-list .ff-chip {
-    height: 20px;
-    line-height: 20px;
-    padding: 0 7px;
-    font-size: 11px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 7px;
+  font-size: 11px;
 }
 .wrap.ff-admin.ff-list .ff-chip--mono {
-    background: #f3f4f6;
-    border-color: #e5e7eb;
+  background: #f3f4f6;
+  border-color: #e5e7eb;
 }
 
 /* Status pill tone matches edit table */
 .wrap.ff-admin.ff-list .ff-status {
-    height: 20px;
-    line-height: 20px;
-    font-size: 11px;
-    padding: 0 8px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 11px;
+  padding: 0 8px;
 }
 
 /* Sort indicator spacing */
 .wrap.ff-admin.ff-list th.column-title .sorting-indicator::before {
-    margin-left: 6px;
+  margin-left: 6px;
 }
 
 /* Footer */
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar th {
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 0;
 }
 
 /* Optional: slimmer tablenav below the table */
 .wrap.ff-admin.ff-list .tablenav.bottom {
-    border: 0;
-    padding: 10px 0 4px;
+  border: 0;
+  padding: 10px 0 4px;
 }
 
 .wrap.ff-admin.ff-edit .ff-field-handle {
-    width: 28px;
-    position: relative;
-    cursor: grab;
+  width: 28px;
+  position: relative;
+  cursor: grab;
 }
 .wrap.ff-admin.ff-edit .ff-field-handle::after {
-    content: "⋮⋮";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    opacity: 0.7;
-    line-height: 1;
+  content: "⋮⋮";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 14px;
+  opacity: 0.7;
+  line-height: 1;
 }
 .wrap.ff-admin.ff-edit .ff-field-handle:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 /* ===========================
@@ -580,85 +586,90 @@ button#ff-add-field {
 
 .wrap.ff-admin .button,
 .wrap.ff-admin .button-primary {
-    --ff-btn-radius: 8px;
-    --ff-btn-h: 36px;
-    --ff-btn-pad-x: 14px;
+  --ff-btn-radius: 8px;
+  --ff-btn-h: 36px;
+  --ff-btn-pad-x: 14px;
 
-    height: var(--ff-btn-h);
-    line-height: calc(var(--ff-btn-h) - 2px);
-    padding: 0 var(--ff-btn-pad-x);
-    border-radius: var(--ff-btn-radius);
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    transition: background-color 0.15s ease, border-color 0.15s ease,
-        color 0.15s ease, box-shadow 0.15s ease, transform 0.02s ease;
+  height: var(--ff-btn-h);
+  line-height: calc(var(--ff-btn-h) - 2px);
+  padding: 0 var(--ff-btn-pad-x);
+  border-radius: var(--ff-btn-radius);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.02s ease;
 }
 
 /* Secondary / ghost */
 .wrap.ff-admin .button {
-    background: #ffffff;
-    color: #0f172a;
-    border: 1px solid var(--ff-color-border);
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid var(--ff-color-border);
 }
 .wrap.ff-admin .button:hover {
-    background: #f8fafc;
-    border-color: var(--ff-color-border-strong);
+  background: #f8fafc;
+  border-color: var(--ff-color-border-strong);
 }
 .wrap.ff-admin .button:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 /* Primary / filled */
 .wrap.ff-admin .button-primary {
-    background: #2271b1; /* WP primary hue */
-    border: 1px solid #1f63a0;
-    color: #ffffff;
+  background: #2271b1; /* WP primary hue */
+  border: 1px solid #1f63a0;
+  color: #ffffff;
 }
 .wrap.ff-admin .button-primary:hover {
-    background: #1b5e94;
-    border-color: #184f7c;
+  background: #1b5e94;
+  border-color: #184f7c;
 }
 .wrap.ff-admin .button-primary:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 /* Focus ring (both) */
 .wrap.ff-admin .button:focus,
 .wrap.ff-admin .button-primary:focus {
-    outline: none;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05),
-        0 0 0 2px rgba(34, 113, 177, 0.25);
+  outline: none;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05),
+    0 0 0 2px rgba(34, 113, 177, 0.25);
 }
 
 /* Disabled */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-disabled,
 .wrap.ff-admin .button-primary[disabled] {
-    opacity: 0.6;
-    pointer-events: none;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* Link-style buttons (e.g., "Remove", "Copy") */
 .wrap.ff-admin .button-link {
-    padding: 0;
-    height: auto;
-    border: 0;
-    background: transparent;
-    color: #2563eb;
-    box-shadow: none;
+  padding: 0;
+  height: auto;
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  box-shadow: none;
 }
 .wrap.ff-admin .button-link:hover {
-    color: #1e40af;
-    text-decoration: underline;
+  color: #1e40af;
+  text-decoration: underline;
 }
 
 /* Spacing helpers around your footer actions */
 .wrap.ff-admin .submit .button-primary {
-    min-width: 160px; /* makes the Save button feel substantial */
+  min-width: 160px; /* makes the Save button feel substantial */
 }
 .wrap.ff-admin #ff-add-field {
-    margin-top: 12px;
+  margin-top: 12px;
 }
 
 /* ===========================
@@ -666,43 +677,45 @@ button#ff-add-field {
    Append after your existing button styles
    =========================== */
 .wrap.ff-admin {
-    --ff-elev-0: 0 1px 2px rgba(16, 24, 40, 0.05);
-    --ff-elev-1: 0 2px 6px rgba(16, 24, 40, 0.08),
-        0 1px 2px rgba(16, 24, 40, 0.06);
-    --ff-elev-2: 0 4px 12px rgba(16, 24, 40, 0.12),
-        0 2px 4px rgba(16, 24, 40, 0.06);
-    --ff-press: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --ff-elev-0: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --ff-elev-1:
+    0 2px 6px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.06);
+  --ff-elev-2:
+    0 4px 12px rgba(16, 24, 40, 0.12), 0 2px 4px rgba(16, 24, 40, 0.06);
+  --ff-press: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Base elevation (secondary + primary) */
 .wrap.ff-admin .button,
 .wrap.ff-admin .button-primary {
-    box-shadow: var(--ff-elev-0);
+  box-shadow: var(--ff-elev-0);
 }
 
 /* Hover lift */
 .wrap.ff-admin .button:hover,
 .wrap.ff-admin .button-primary:hover {
-    box-shadow: var(--ff-elev-1);
+  box-shadow: var(--ff-elev-1);
 }
 
 /* Active press (slightly reduce elevation and nudge) */
 .wrap.ff-admin .button:active,
 .wrap.ff-admin .button-primary:active {
-    transform: translateY(1px);
-    box-shadow: var(--ff-elev-0), var(--ff-press);
+  transform: translateY(1px);
+  box-shadow: var(--ff-elev-0), var(--ff-press);
 }
 
 /* Focus: elevation + ring (keeps your existing focus ring) */
 .wrap.ff-admin .button:focus,
 .wrap.ff-admin .button-primary:focus {
-    box-shadow: var(--ff-elev-1), 0 0 0 2px rgba(34, 113, 177, 0.25); /* focus ring */
+  box-shadow:
+    var(--ff-elev-1),
+    0 0 0 2px rgba(34, 113, 177, 0.25); /* focus ring */
 }
 
 /* Disabled: flatten and reduce glow */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-primary[disabled] {
-    box-shadow: var(--ff-elev-0);
+  box-shadow: var(--ff-elev-0);
 }
 
 /* assets/css/admin-fields.css — append at the end */
@@ -710,50 +723,52 @@ button#ff-add-field {
 /* EDIT/GLOBAL selects — show caret like Bulk actions */
 .wrap.ff-admin.ff-edit .ff-select-wrap,
 .wrap.ff-admin.ff-global .ff-select-wrap {
-    position: relative;
-    display: inline-block;
-    min-width: 180px;
+  position: relative;
+  display: inline-block;
+  min-width: 180px;
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
-    width: 100%; /* important so caret overlays inside */
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    height: 36px;
-    line-height: 22px;
-    padding: 8px 34px 8px 10px; /* room for caret */
-    border: 1px solid var(--ff-color-border);
-    border-radius: 6px;
-    background: #fff;
-    background-image: none !important; /* kill native arrow */
-    box-shadow: none;
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%; /* important so caret overlays inside */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 36px;
+  line-height: 22px;
+  padding: 8px 34px 8px 10px; /* room for caret */
+  border: 1px solid var(--ff-color-border);
+  border-radius: 6px;
+  background: #fff;
+  background-image: none !important; /* kill native arrow */
+  box-shadow: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-global .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-edit select#ff_location:focus {
-    outline: none;
-    border-color: var(--ff-color-focus);
-    box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
+  outline: none;
+  border-color: var(--ff-color-focus);
+  box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
 }
 
 /* caret inside the wrapper */
 .wrap.ff-admin.ff-edit .ff-select-wrap::after,
 .wrap.ff-admin.ff-global .ff-select-wrap::after {
-    content: "▾";
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 12px;
-    color: var(--ff-color-text-muted);
-    pointer-events: none;
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--ff-color-text-muted);
+  pointer-events: none;
 }
 
 /* ===========================
@@ -762,73 +777,83 @@ button#ff-add-field {
 
 /* Search input: rounded, icon, ring on focus */
 .wrap.ff-admin.ff-list .ff-search-input {
-    height: 36px;
-    line-height: 22px;
-    width: 260px;
-    max-width: 100%;
-    padding: 8px 12px 8px 36px; /* left room for icon */
-    border: 1px solid var(--ff-color-border);
-    border: 1px solid var(--ff-border);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>');
-    background-repeat: no-repeat;
-    background-position: 10px center;
+  height: 36px;
+  line-height: 22px;
+  width: 260px;
+  max-width: 100%;
+  padding: 8px 12px 8px 36px; /* left room for icon */
+  border: 1px solid var(--ff-color-border);
+  border: 1px solid var(--ff-border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>');
+  background-repeat: no-repeat;
+  background-position: 10px center;
 }
 .wrap.ff-admin.ff-list .ff-search-input::placeholder {
-    color: #9aa1ab;
+  color: #9aa1ab;
 }
 .wrap.ff-admin.ff-list .ff-search-input:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2),
-        0 1px 2px rgba(16, 24, 40, 0.05);
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(29, 109, 246, 0.2),
+    0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
 /* Keep spacing with the search button */
 .wrap.ff-admin.ff-list .ff-search-form {
-    gap: 10px;
+  gap: 10px;
 }
 
 /* Make the search submit use your modern primary button rules automatically */
 .wrap.ff-admin.ff-list .ff-search-form .button.button-primary {
-    height: 36px;
-    line-height: 34px;
-    padding: 0 14px;
-    border-radius: 8px;
+  height: 36px;
+  line-height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
 }
 
 /* "Add New" – unify with your secondary button look */
 .wrap.ff-admin .page-title-action {
-    display: inline-flex;
-    align-items: center;
-    height: 36px;
-    line-height: 34px;
-    padding: 0 14px;
-    border-radius: 8px;
-    border: 1px solid var(--ff-border);
-    background: #fff;
-    color: #0f172a;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    text-decoration: none;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    transition: background-color 0.15s, border-color 0.15s, box-shadow 0.15s,
-        transform 0.02s;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  line-height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ff-border);
+  background: #fff;
+  color: #0f172a;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.02s;
 }
 .wrap.ff-admin .page-title-action:hover {
-    background: #f8fafc;
-    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08),
-        0 1px 2px rgba(16, 24, 40, 0.06);
+  background: #f8fafc;
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06);
 }
 .wrap.ff-admin .page-title-action:active {
-    transform: translateY(1px);
+  transform: translateY(1px);
 }
 .wrap.ff-admin .page-title-action:focus {
-    outline: none;
-    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.08),
-        0 1px 2px rgba(16, 24, 40, 0.06), 0 0 0 2px rgba(34, 113, 177, 0.25);
+  outline: none;
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06),
+    0 0 0 2px rgba(34, 113, 177, 0.25);
 }
 
 /* LIST — kill stray borders on the checkbox column and cells */
@@ -836,86 +861,92 @@ button#ff-add-field {
 .wrap.ff-admin.ff-list table.ff-list-table th,
 .wrap.ff-admin.ff-list table.ff-list-table td.check-column,
 .wrap.ff-admin.ff-list table.ff-list-table th.check-column {
-    border-top-color: transparent !important;
-    border-bottom-color: transparent !important;
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
 }
 
 /* Use a single consistent separator per row */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-    box-shadow: inset 0 -1px #e9edf3; /* bottom hairline */
+  box-shadow: inset 0 -1px #e9edf3; /* bottom hairline */
 }
 
 /* Also draw a hairline just under the header for the first body row */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child {
-    box-shadow: inset 0 -1px #e9edf3, inset 0 1px #e9edf3;
+  box-shadow:
+    inset 0 -1px #e9edf3,
+    inset 0 1px #e9edf3;
 }
 
 /* Ensure the table itself isn't collapsing borders into darker lines */
 .wrap.ff-admin.ff-list table.ff-list-table {
-    border-collapse: separate;
-    border-spacing: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 /* EDIT/GLOBAL selects — match text input “soft” look */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
-    /* size matches your inputs */
-    height: 36px;
-    line-height: 22px;
-    padding: 8px 34px 8px 10px;
+  /* size matches your inputs */
+  height: 36px;
+  line-height: 22px;
+  padding: 8px 34px 8px 10px;
 
-    /* soft border + subtle elevation */
-    border: 1px solid var(--ff-color-border);
-    border: 1px solid var(--ff-border);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
+  /* soft border + subtle elevation */
+  border: 1px solid var(--ff-color-border);
+  border: 1px solid var(--ff-border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
 
-    /* tidy rendering */
-    background-clip: padding-box;
-    transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+  /* tidy rendering */
+  background-clip: padding-box;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background-color 0.15s;
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-global .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-edit select#ff_location:hover {
-    border-color: var(--ff-color-border-strong);
-    box-shadow: var(
-        --ff-elev-1,
-        0 2px 6px rgba(16, 24, 40, 0.08),
-        0 1px 2px rgba(16, 24, 40, 0.06)
-    );
+  border-color: var(--ff-color-border-strong);
+  box-shadow: var(
+    --ff-elev-1,
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06)
+  );
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-global .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-edit select#ff_location:focus {
-    outline: none;
-    border-color: var(--ff-color-focus);
-    box-shadow: var(
-            --ff-elev-1,
-            0 2px 6px rgba(16, 24, 40, 0.08),
-            0 1px 2px rgba(16, 24, 40, 0.06)
-        ),
-        0 0 0 2px rgba(29, 109, 246, 0.2); /* ring, same as inputs */
+  outline: none;
+  border-color: var(--ff-color-focus);
+  box-shadow:
+    var(
+      --ff-elev-1,
+      0 2px 6px rgba(16, 24, 40, 0.08),
+      0 1px 2px rgba(16, 24, 40, 0.06)
+    ),
+    0 0 0 2px rgba(29, 109, 246, 0.2); /* ring, same as inputs */
 }
 
 /* Disabled look parity */
 .wrap.ff-admin.ff-edit .ff-select-wrap select:disabled,
 .wrap.ff-admin.ff-global .ff-select-wrap select:disabled {
-    background: #f8fafc;
-    border-color: #e5e7eb;
-    box-shadow: none;
-    color: #9aa1ab;
-    cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #e5e7eb;
+  box-shadow: none;
+  color: #9aa1ab;
+  cursor: not-allowed;
 }
 
 .wrap.ff-admin .widefat tfoot tr td,
 .wrap.ff-admin .widefat tfoot tr th,
 .wrap.ff-admin .widefat thead tr td,
 .wrap.ff-admin .widefat thead tr th {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 /* ===========================
@@ -924,82 +955,82 @@ button#ff-add-field {
 
 /* LIST table (Field Groups) */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-    background: #fff !important; /* base row */
+  background: #fff !important; /* base row */
 }
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(even) {
-    background: #fff !important; /* kill zebra */
+  background: #fff !important; /* kill zebra */
 }
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
-    background: #f7f9fc !important; /* subtle hover */
+  background: #f7f9fc !important; /* subtle hover */
 }
 
 /* EDIT table (Fields builder) */
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
-    background: #fff !important;
+  background: #fff !important;
 }
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
-    background: #fff !important; /* kill zebra */
+  background: #fff !important; /* kill zebra */
 }
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
-    background: #f7f9fc !important; /* keep hover */
+  background: #f7f9fc !important; /* keep hover */
 }
 
 /* Optional: smooth transition for hover */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr,
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
-    transition: background-color 0.12s ease-in-out;
+  transition: background-color 0.12s ease-in-out;
 }
 
 /* EDIT PAGE — remove zebra stripes; keep hover */
 .wrap.ff-admin.ff-edit table.widefat {
-    border-collapse: separate;
-    border-spacing: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr,
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
-    background: #fff !important; /* no stripes */
+  background: #fff !important; /* no stripes */
 }
 
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
-    transition: background-color 0.12s ease-in-out;
+  transition: background-color 0.12s ease-in-out;
 }
 
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
-    background: #f7f9fc !important; /* keep hover */
+  background: #f7f9fc !important; /* keep hover */
 }
 
 /* Keep header/footer neutral */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
-    background: #f5f6f8;
-    border-bottom: 1px solid #e5e7eb;
+  background: #f5f6f8;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* EDIT PAGE — force row hover to show (WP paints cells) */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td {
-    background: #fff !important; /* base, no stripes */
-    transition: background-color 0.12s ease-in-out;
+  background: #fff !important; /* base, no stripes */
+  transition: background-color 0.12s ease-in-out;
 }
 
 /* actual hover (stronger selector to beat WP) */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr:hover > td {
-    background: #f7f9fc !important; /* same as list table */
+  background: #f7f9fc !important; /* same as list table */
 }
 
 /* header/footer stay neutral */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
-    background: #f5f6f8;
-    border-bottom: 1px solid #e5e7eb;
+  background: #f5f6f8;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 /* optional: subtle hairline separators without stripes */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td + td {
-    box-shadow: none; /* no cell borders */
+  box-shadow: none; /* no cell borders */
 }
 
 /* ===========================================
@@ -1008,48 +1039,48 @@ button#ff-add-field {
 
 /* ---------- Field Groups LIST table ---------- */
 .wrap.ff-admin.ff-list table.ff-list-table {
-    border-collapse: separate; /* avoid doubled lines */
-    border-spacing: 0;
+  border-collapse: separate; /* avoid doubled lines */
+  border-spacing: 0;
 }
 
 /* base (no stripes) */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-    background: #fff;
-    transition: background-color 0.12s ease-in-out;
+  background: #fff;
+  transition: background-color 0.12s ease-in-out;
 }
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
-    background: #f7f9fc;
+  background: #f7f9fc;
 }
 
 /* hairlines */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr > td {
-    border-bottom: 1px solid #e9edf3 !important; /* soft divider */
+  border-bottom: 1px solid #e9edf3 !important; /* soft divider */
 }
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child > td {
-    border-top: 1px solid #e9edf3 !important; /* top edge under header */
+  border-top: 1px solid #e9edf3 !important; /* top edge under header */
 }
 
 /* ---------- EDIT Fields Builder table ---------- */
 .wrap.ff-admin.ff-edit table.widefat {
-    border-collapse: separate;
-    border-spacing: 0;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 /* base + hover (no stripes) */
 .wrap.ff-admin.ff-edit table.widefat tbody tr > td {
-    background: #fff !important;
-    transition: background-color 0.12s ease-in-out;
+  background: #fff !important;
+  transition: background-color 0.12s ease-in-out;
 }
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover > td {
-    background: #f7f9fc !important;
+  background: #f7f9fc !important;
 }
 
 /* hairlines */
 .wrap.ff-admin.ff-edit table.widefat tbody tr > td {
-    border-bottom: 1px solid #e9edf3 !important;
+  border-bottom: 1px solid #e9edf3 !important;
 }
 .wrap.ff-admin.ff-edit table.widefat tbody tr:first-child > td {
-    border-top: 1px solid #e9edf3 !important;
+  border-top: 1px solid #e9edf3 !important;
 }
 
 /* header/footer stay neutral */
@@ -1057,42 +1088,42 @@ button#ff-add-field {
 .wrap.ff-admin.ff-edit table.widefat tfoot th,
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
-    background: #f5f6f8;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 10px 12px;
+  background: #f5f6f8;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
 }
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 0;
 }
 
 /* EDIT PAGE — vertically center controls in rows */
 .wrap.ff-admin.ff-edit table.widefat td {
-    vertical-align: middle; /* center content vertically */
+  vertical-align: middle; /* center content vertically */
 }
 
 /* Ensure the Type select sits perfectly centered */
 .wrap.ff-admin.ff-edit .ff-select-wrap {
-    display: inline-flex; /* center the select within the cell */
-    align-items: center;
+  display: inline-flex; /* center the select within the cell */
+  align-items: center;
 }
 
 /* Normalize the select box metrics to match inputs */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
-    height: 36px; /* same as text inputs */
-    line-height: 36px; /* centers text baseline */
-    padding: 0 34px 0 10px; /* keep caret space; remove vertical padding */
-    margin: 0; /* kill browser defaults */
+  height: 36px; /* same as text inputs */
+  line-height: 36px; /* centers text baseline */
+  padding: 0 34px 0 10px; /* keep caret space; remove vertical padding */
+  margin: 0; /* kill browser defaults */
 }
 
 /* Firefox tweak: remove inner extra padding */
 @-moz-document url-prefix() {
-    .wrap.ff-admin.ff-edit .ff-select-wrap select,
-    .wrap.ff-admin.ff-edit select#ff_location {
-        padding-top: 0;
-        padding-bottom: 0;
-    }
+  .wrap.ff-admin.ff-edit .ff-select-wrap select,
+  .wrap.ff-admin.ff-edit select#ff_location {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 }
 
 /* ===========================================
@@ -1101,230 +1132,230 @@ button#ff-add-field {
 
 /* LIST: Field Groups table */
 .wrap.ff-admin.ff-list table.ff-list-table {
-    border-collapse: separate; /* required for border-radius on tables */
-    border-spacing: 0;
-    border-radius: 12px; /* <- increase here (10–14 looks great) */
-    overflow: hidden; /* clip hover/bg at corners */
+  border-collapse: separate; /* required for border-radius on tables */
+  border-spacing: 0;
+  border-radius: 12px; /* <- increase here (10–14 looks great) */
+  overflow: hidden; /* clip hover/bg at corners */
 }
 
 /* round header/footer corners */
 .wrap.ff-admin.ff-list table.ff-list-table thead th:first-child {
-    border-top-left-radius: 12px;
+  border-top-left-radius: 12px;
 }
 .wrap.ff-admin.ff-list table.ff-list-table thead th:last-child {
-    border-top-right-radius: 12px;
+  border-top-right-radius: 12px;
 }
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:first-child {
-    border-bottom-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:last-child {
-    border-bottom-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 /* EDIT: Fields builder table */
 .wrap.ff-admin.ff-edit table.widefat {
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 12px; /* <- same radius */
-    overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px; /* <- same radius */
+  overflow: hidden;
 }
 
 /* round header/footer on edit table too */
 .wrap.ff-admin.ff-edit table.widefat thead th:first-child {
-    border-top-left-radius: 12px;
+  border-top-left-radius: 12px;
 }
 .wrap.ff-admin.ff-edit table.widefat thead th:last-child {
-    border-top-right-radius: 12px;
+  border-top-right-radius: 12px;
 }
 .wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
-    border-bottom-left-radius: 12px;
+  border-bottom-left-radius: 12px;
 }
 .wrap.ff-admin.ff-edit table.widefat tfoot th:last-child {
-    border-bottom-right-radius: 12px;
+  border-bottom-right-radius: 12px;
 }
 
 /* assets/css/forge-fields-admin.css */
 /* ---- Optgroup headers in native selects (works across major browsers) ---- */
 .wrap.ff-admin select optgroup {
-    color: #8a94a6; /* faded */
-    font-weight: 600; /* readable but lighter than options */
-    letter-spacing: 0.02em;
-    font-size: 12px; /* some UAs ignore size; harmless if ignored */
+  color: #8a94a6; /* faded */
+  font-weight: 600; /* readable but lighter than options */
+  letter-spacing: 0.02em;
+  font-size: 12px; /* some UAs ignore size; harmless if ignored */
 }
 /* keep options normal */
 .wrap.ff-admin select optgroup option {
-    color: #0f172a;
-    text-transform: none;
-    letter-spacing: normal;
-    font-size: 13px;
+  color: #0f172a;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 13px;
 }
 
 /* Icon-only copy button (keeps pill intact) */
 .wrap.ff-admin .ff-copy-key {
-    /* inline, compact, neutral */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    margin-left: 6px;
-    padding: 0;
-    border: 1px solid var(--ff-border);
-    border-radius: 6px;
-    background: #fff;
-    box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
-    line-height: 1;
+  /* inline, compact, neutral */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid var(--ff-border);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
+  line-height: 1;
 }
 
 /* hide text but keep for a11y if any */
 .wrap.ff-admin .ff-copy-key .screen-reader-text {
-    position: absolute !important;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* glyph: copy (two rectangles) */
 .wrap.ff-admin .ff-copy-key::before {
-    content: "";
-    display: block;
-    width: 14px;
-    height: 14px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 14px 14px;
-    /* neutral copy icon */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>');
+  content: "";
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 14px 14px;
+  /* neutral copy icon */
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>');
 }
 
 .wrap.ff-admin .ff-copy-key:hover {
-    background: #f8fafc;
-    border-color: var(--ff-border-strong, #c7ccd6);
+  background: #f8fafc;
+  border-color: var(--ff-border-strong, #c7ccd6);
 }
 
 /* success state: soft green + checkmark */
 .wrap.ff-admin .ff-copy-key.is-copied {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 .wrap.ff-admin .ff-copy-key.is-copied::before {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23065f46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23065f46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>');
 }
 
 /* Pill for the key itself */
 .wrap.ff-admin .ff-group-key {
-    display: inline-block;
-    padding: 4px 10px;
-    border: 1px solid #e5e7eb;
-    border-radius: 999px;
-    background: #f3f4f6;
-    color: #111827;
-    font: 12px/1
-        var(
-            --ff-f-mono,
-            ui-monospace,
-            SFMono-Regular,
-            Menlo,
-            Consolas,
-            "Liberation Mono",
-            "Courier New",
-            monospace
-        );
-    vertical-align: middle;
-    margin-bottom: 4px;
+  display: inline-block;
+  padding: 4px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font: 12px/1
+    var(
+      --ff-f-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace
+    );
+  vertical-align: middle;
+  margin-bottom: 4px;
 }
 
 /* Icon-only copy button */
 .wrap.ff-admin .ff-copy-key {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    margin-left: 8px;
-    border: 1px solid var(--ff-color-border, #d0d5dd);
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    color: #64748b; /* base icon tint */
-    line-height: 0;
-    text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  border: 1px solid var(--ff-color-border, #d0d5dd);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  color: #64748b; /* base icon tint */
+  line-height: 0;
+  text-decoration: none;
 }
 
 .wrap.ff-admin .ff-copy-key:hover {
-    background: #f8fafc;
-    border-color: var(--ff-color-border-strong, #c7ccd6);
-    color: #475569;
+  background: #f8fafc;
+  border-color: var(--ff-color-border-strong, #c7ccd6);
+  color: #475569;
 }
 
 .wrap.ff-admin .ff-copy-key:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
 }
 
 .wrap.ff-admin .ff-copy-key svg {
-    width: 16px;
-    height: 16px;
-    display: block;
+  width: 16px;
+  height: 16px;
+  display: block;
 }
 
 /* Copied state */
 .wrap.ff-admin .ff-copy-key.is-copied {
-    color: #166534;
-    border-color: #86efac;
-    background: #ecfdf5;
+  color: #166534;
+  border-color: #86efac;
+  background: #ecfdf5;
 }
 
 /* ---------- Global screen: card + table reset ---------- */
 .wrap.ff-admin.ff-global {
-    /* Tweak how wide the content feels on this screen */
-    --ff-card-max-w: 1100px; /* container width */
-    --ff-field-max-w: 720px; /* input/select width */
+  /* Tweak how wide the content feels on this screen */
+  --ff-card-max-w: 1100px; /* container width */
+  --ff-field-max-w: 720px; /* input/select width */
 }
 
 /* Center the group “card” and give it proper chrome */
 .wrap.ff-admin.ff-global .ff-options-card {
-    max-width: var(--ff-card-max-w);
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    overflow: hidden;
-    margin: 10px 0 20px;
+  max-width: var(--ff-card-max-w);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  overflow: hidden;
+  margin: 10px 0 20px;
 }
 
 /* Make the WP form-table behave like a clean list inside a card */
 .wrap.ff-admin.ff-global .ff-options-card .form-table {
-    width: 100%;
-    margin: 0;
-    border-collapse: separate; /* allow rounded corners to clip properly */
-    border-spacing: 0;
+  width: 100%;
+  margin: 0;
+  border-collapse: separate; /* allow rounded corners to clip properly */
+  border-spacing: 0;
 }
 
 /* Kill WP’s default white cell backgrounds and add soft dividers */
 .wrap.ff-admin.ff-global .ff-options-card .form-table th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table td {
-    background: transparent !important;
-    border-bottom: 1px solid #e9edf3;
-    padding: 14px 20px;
-    vertical-align: middle;
+  background: transparent !important;
+  border-bottom: 1px solid #e9edf3;
+  padding: 14px 20px;
+  vertical-align: middle;
 }
 
 /* No divider under the last row */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child td {
-    border-bottom: 0;
+  border-bottom: 0;
 }
 
 /* Subtle hover (optional, matches your other tables) */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover td,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover th {
-    background: #f7f9fc;
+  background: #f7f9fc;
 }
 
 /* Keep fields a comfortable width and centered in the card */
@@ -1336,22 +1367,22 @@ button#ff-add-field {
 .wrap.ff-admin.ff-global textarea,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-global select {
-    max-width: var(--ff-field-max-w);
-    width: 100%;
+  max-width: var(--ff-field-max-w);
+  width: 100%;
 }
 
 /* Optional: make the Save button align nicely with the card */
 .wrap.ff-admin.ff-global .submit .button-primary {
-    min-width: 180px;
-    margin-top: 8px;
+  min-width: 180px;
+  margin-top: 8px;
 }
 
 textarea#ff_global_test {
-    min-height: 40px;
+  min-height: 40px;
 }
 
 textarea#ff_textarea {
-    min-height: 40px;
+  min-height: 40px;
 }
 
 /* ===========================================
@@ -1360,7 +1391,7 @@ textarea#ff_textarea {
    =========================================== */
 
 #poststuff .postbox .ff-admin {
-    --ff-field-max: 560px; /* tweak this to your taste (480–640px works well) */
+  --ff-field-max: 560px; /* tweak this to your taste (480–640px works well) */
 }
 
 /* Text-like inputs, selects, textareas */
@@ -1372,35 +1403,35 @@ textarea#ff_textarea {
 #poststuff .postbox .ff-admin .form-table td textarea,
 #poststuff .postbox .ff-admin .form-table td select,
 #poststuff .postbox .ff-admin .form-table td .ff-select-wrap {
-    width: 100%;
-    max-width: var(--ff-field-max);
+  width: 100%;
+  max-width: var(--ff-field-max);
 }
 
 /* Password wrapper (keeps the toggle aligned) */
 #poststuff .postbox .ff-admin .ff-password-wrap {
-    max-width: var(--ff-field-max);
-    width: 100%;
+  max-width: var(--ff-field-max);
+  width: 100%;
 }
 
 /* Range group: slider grows, number stays compact */
 #poststuff .postbox .ff-admin .ff-range-wrap {
-    max-width: var(--ff-field-max);
-    width: 100%;
+  max-width: var(--ff-field-max);
+  width: 100%;
 }
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-slider {
-    flex: 1 1 auto;
-    min-width: 0;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-number {
-    width: 74px; /* keep it small */
+  width: 74px; /* keep it small */
 }
 
 /* Keep things tidy on narrow admin screens */
 @media (max-width: 782px) {
-    /* WP admin breakpoint */
-    #poststuff .postbox .ff-admin {
-        --ff-field-max: 100%;
-    }
+  /* WP admin breakpoint */
+  #poststuff .postbox .ff-admin {
+    --ff-field-max: 100%;
+  }
 }
 
 /* ===========================
@@ -1410,437 +1441,437 @@ textarea#ff_textarea {
 /* Default text-like inputs stay pleasantly wide */
 #poststuff .ff-admin input.regular-text:not(.ff-number-input),
 #poststuff .ff-admin textarea {
-    width: min(100%, 640px);
-    max-width: 640px;
+  width: min(100%, 640px);
+  max-width: 640px;
 }
 
 /* Number (standalone integers) – compact */
 #poststuff .ff-admin input.ff-number-input {
-    width: 140px !important;
-    min-width: 140px;
-    padding-right: 28px; /* spinner space */
+  width: 140px !important;
+  min-width: 140px;
+  padding-right: 28px; /* spinner space */
 }
 
 /* Range slider layout */
 #poststuff .ff-admin .ff-range-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Slider itself – sensible width */
 #poststuff .ff-admin .ff-range-wrap .ff-range-slider {
-    width: 220px;
-    max-width: 40vw;
+  width: 220px;
+  max-width: 40vw;
 }
 
 /* Numeric box beside slider – compact */
 #poststuff .ff-admin .ff-range-wrap .ff-range-number {
-    width: 90px !important;
-    min-width: 90px;
-    padding: 6px 8px;
+  width: 90px !important;
+  min-width: 90px;
+  padding: 6px 8px;
 }
 
 span.dashicons {
-    opacity: 0.7;
+  opacity: 0.7;
 }
 
 /* BRAND TOP BAR */
 /* ===== Brand bar positioning (fixed under WP admin bar) ===== */
 .ff-has-brandbar .ff-brandbar {
-    position: fixed;
-    z-index: 1000;
-    top: 32px; /* under the black WP admin bar */
-    left: 160px; /* width of the WP admin menu */
-    width: calc(100% - 160px);
-    background: #2f3a4b;
-    color: #fff;
-    box-sizing: border-box;
+  position: fixed;
+  z-index: 1000;
+  top: 32px; /* under the black WP admin bar */
+  left: 160px; /* width of the WP admin menu */
+  width: calc(100% - 160px);
+  background: #2f3a4b;
+  color: #fff;
+  box-sizing: border-box;
 }
 
 /* When the left menu is collapsed (body has .folded) */
 .ff-has-brandbar.folded .ff-brandbar {
-    left: 36px; /* collapsed menu gutter */
-    width: calc(100% - 36px);
+  left: 36px; /* collapsed menu gutter */
+  width: calc(100% - 36px);
 }
 
 /* On small screens the menu overlays; let the bar span full width */
 @media (max-width: 960px) {
-    .ff-has-brandbar .ff-brandbar {
-        left: 0;
-        width: 100%;
-    }
+  .ff-has-brandbar .ff-brandbar {
+    left: 0;
+    width: 100%;
+  }
 }
 
 /* Push page content below the fixed bar */
 .ff-has-brandbar #wpcontent {
-    padding-top: 64px; /* ≈ bar height */
+  padding-top: 64px; /* ≈ bar height */
 }
 
 /* ===== Brand bar inner layout ===== */
 .ff-brandbar__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  height: 40px;
 }
 
 .ff-brandbar__left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0; /* allow text truncation */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* allow text truncation */
 }
 
 .ff-brandbar__logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.12);
-    font-weight: 600;
-    font-size: 12px;
-    line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .ff-brandbar__title {
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 1;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .ff-brandbar__subtitle {
-    opacity: 0.85;
-    font-size: 13px;
+  opacity: 0.85;
+  font-size: 13px;
 }
 
 /* Right-side button spacing */
 .ff-brandbar__right {
-    flex: 0 0 auto;
+  flex: 0 0 auto;
 }
 
 .ff-brandbar__btn.button {
-    padding: 6px 10px;
-    line-height: 1.2;
-    border-radius: 3px;
-    text-decoration: none;
+  padding: 6px 10px;
+  line-height: 1.2;
+  border-radius: 3px;
+  text-decoration: none;
 }
 
 /* slight elevation so the bar doesn't feel glued to the page */
 .ff-brandbar {
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
 }
 
 /* keep the left title from ever tucking under the admin menu gutter */
 .folded .ff-brandbar__inner,
 .auto-fold .ff-brandbar__inner {
-    padding-left: 40px;
+  padding-left: 40px;
 }
 
 /* keep the Add New from kissing the edge at narrow widths */
 .ff-brandbar__right {
-    padding-right: 16px;
+  padding-right: 16px;
 }
 
 /* nicer spacing between logo, title, subtitle */
 .ff-brandbar__logo {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 .ff-brandbar__title {
-    font-weight: 600;
-    margin-right: 6px;
+  font-weight: 600;
+  margin-right: 6px;
 }
 .ff-brandbar__subtitle {
-    opacity: 0.9;
+  opacity: 0.9;
 }
 
 /* make sure the CTA stays vertically centered */
 .ff-brandbar__inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* edge-to-edge white subbar (compensate for WP admin 20px content gutters) */
 .ff-subbar {
-    background: #fff;
-    margin: 0 -20px 16px; /* pull to the very edges */
-    padding: 22px 42px; /* room for title + button */
-    border-bottom: 1px solid #e2e4e7;
+  background: #fff;
+  margin: 0 -20px 16px; /* pull to the very edges */
+  padding: 22px 42px; /* room for title + button */
+  border-bottom: 1px solid #e2e4e7;
 }
 
 /* simple flex row: title + button on the left with consistent spacing */
 .ff-subbar__inner {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* button sits beside the title */
-    gap: 35px; /* spacing between title and button */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* button sits beside the title */
+  gap: 35px; /* spacing between title and button */
 }
 
 /* title + button polish */
 .ff-subbar__title {
-    margin: 0;
-    font-size: 26px;
-    line-height: 1.2;
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
 }
 
 a.button.button-primary.ff-subbar__btn {
-    margin: 0; /* ensure no stray margins */
-    border-radius: 8px;
-    padding: 5px 20px;
-    font-weight: 500;
-    font-size: 14px;
+  margin: 0; /* ensure no stray margins */
+  border-radius: 8px;
+  padding: 5px 20px;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 /* admin mobile has tighter gutters – pull less so we don't clip */
 @media (max-width: 782px) {
-    .ff-subbar {
-        margin: 0 -10px 16px; /* WP admin uses ~10px on small screens */
-        padding: 16px 20px;
-    }
-    .ff-subbar__title {
-        font-size: 22px;
-    }
+  .ff-subbar {
+    margin: 0 -10px 16px; /* WP admin uses ~10px on small screens */
+    padding: 16px 20px;
+  }
+  .ff-subbar__title {
+    font-size: 22px;
+  }
 }
 
 /* Toolbar row above the table */
 .ff-list .ff-list-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin: 12px 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 6px;
 }
 
 /* Remove default WP margins on filter links row */
 .ff-list .ff-list-toolbar .subsubsub {
-    margin: 0;
+  margin: 0;
 }
 
 /* Keep the search snug to the right */
 .ff-list .ff-search-form {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 /* Reasonable width for the search input */
 .ff-list .ff-search-form .regular-text.ff-search-input {
-    width: 260px;
+  width: 260px;
 }
 
 /* Stack nicely on small screens */
 @media (max-width: 782px) {
-    .ff-list .ff-list-toolbar {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    .ff-list .ff-search-form {
-        margin-left: 0;
-        width: 100%;
-    }
-    .ff-list .ff-search-form .regular-text.ff-search-input {
-        flex: 1 1 auto;
-        width: auto;
-    }
+  .ff-list .ff-list-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ff-list .ff-search-form {
+    margin-left: 0;
+    width: 100%;
+  }
+  .ff-list .ff-search-form .regular-text.ff-search-input {
+    flex: 1 1 auto;
+    width: auto;
+  }
 }
 
 /* Subbar action buttons */
 .ff-subbar__actions {
-    display: flex;
-    align-items: center;
-    gap: 14px; /* a bit more space between buttons */
+  display: flex;
+  align-items: center;
+  gap: 14px; /* a bit more space between buttons */
 }
 
 .ff-subbar__actions .button {
-    border-radius: 8px;
-    padding: 6px 16px; /* comfy hit area */
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-    height: auto; /* avoid the WP fixed-height look */
+  border-radius: 8px;
+  padding: 6px 16px; /* comfy hit area */
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  height: auto; /* avoid the WP fixed-height look */
 }
 
 /* keep primary looking crisp */
 .ff-subbar__actions .button.button-primary {
-    box-shadow: none;
+  box-shadow: none;
 }
 
 button#ff-add-field {
-    border: 1px solid #d0d5dd;
+  border: 1px solid #d0d5dd;
 }
 
 .ff-brandbar,
 .ff-subbar {
-    /* z-index already set in JS; here for safety */
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+  /* z-index already set in JS; here for safety */
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 h1.ff-subbar__title {
-    font-weight: 400;
+  font-weight: 400;
 }
 
 /* ===== FF confirm modal ===== */
 .ff-confirm.is-hidden {
-    display: none;
+  display: none;
 }
 
 .ff-confirm {
-    position: fixed;
-    inset: 0;
-    z-index: 100010; /* above menus & our bars */
+  position: fixed;
+  inset: 0;
+  z-index: 100010; /* above menus & our bars */
 }
 
 .ff-confirm__overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .ff-confirm__dialog {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: clamp(320px, 90vw, 420px);
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-    padding: 20px 20px 16px;
-    outline: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(320px, 90vw, 420px);
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+  padding: 20px 20px 16px;
+  outline: none;
 }
 
 .ff-confirm__title {
-    margin: 0 24px 8px 0;
-    font-size: 18px;
+  margin: 0 24px 8px 0;
+  font-size: 18px;
 }
 
 .ff-confirm__desc {
-    margin: 0 0 16px;
+  margin: 0 0 16px;
 }
 
 .ff-confirm__actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .ff-confirm__x {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    border: 0;
-    background: transparent;
-    font-size: 22px;
-    line-height: 1;
-    cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 /* red “danger” button */
 .ff-button-danger {
-    background: #dc3232;
-    border-color: #b32d2e;
-    color: #fff;
+  background: #dc3232;
+  border-color: #b32d2e;
+  color: #fff;
 }
 .ff-button-danger:hover,
 .ff-button-danger:focus {
-    background: #b32d2e;
-    border-color: #8a2426;
-    color: #fff;
+  background: #b32d2e;
+  border-color: #8a2426;
+  color: #fff;
 }
 
 .ff-brandbar__title {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 .ff-brandbar__title:hover,
 .ff-brandbar__title:focus {
-    color: inherit;
-    text-decoration: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 a.ff-brandbar__title:focus {
-    box-shadow: none;
-    outline: none;
+  box-shadow: none;
+  outline: none;
 }
 
 .ff-media-preview {
-    max-width: 160px;
-    height: auto;
-    display: block;
+  max-width: 160px;
+  height: auto;
+  display: block;
 }
 
 /* Media field wrapper */
 .ff-media-wrap {
-    display: block;
-    margin: 8px 0 16px;
+  display: block;
+  margin: 8px 0 16px;
 }
 
 .ff-media-preview-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .ff-media-preview {
-    max-height: 80px;
-    border-radius: 8px;
-    display: block;
+  max-height: 80px;
+  border-radius: 8px;
+  display: block;
 }
 
 .ff-media-fileline {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
 }
 
 .ff-media-select,
 .ff-media-clear {
-    margin-right: 8px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
+  margin-right: 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Keep buttons tidy inside table cells */
 .ff-options-card .button,
 .ff-admin .button {
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* WYSIWYG spacing */
 .wp-editor-wrap {
-    margin-top: 6px;
+  margin-top: 6px;
 }
 
 /* ---------- Forge Fields modern admin styles ---------- */
 .ff-mb .form-table,
 .ff-options-card .form-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 12px; /* row gaps */
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 12px; /* row gaps */
 }
 
 .ff-mb th,
 .ff-options-card th {
-    width: 180px;
-    text-align: left;
-    padding: 0;
-    color: #2c3338;
-    font-weight: 600;
+  width: 180px;
+  text-align: left;
+  padding: 0;
+  color: #2c3338;
+  font-weight: 600;
 }
 
 .ff-mb td,
 .ff-options-card td {
-    padding: 0;
+  padding: 0;
 }
 
 /* Inputs, selects, textareas */
@@ -1853,14 +1884,14 @@ a.ff-brandbar__title:focus {
 #poststuff .postbox .ff-admin .ff-mb .regular-text,
 #poststuff .postbox .ff-admin .ff-mb select,
 #poststuff .postbox .ff-admin .ff-mb textarea {
-    width: min(100%, 640px);
-    max-width: 640px;
-    border: 1px solid #ccd0d4;
-    border-radius: 8px;
-    padding: 10px 12px;
-    line-height: 1.4;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+  width: min(100%, 640px);
+  max-width: 640px;
+  border: 1px solid #ccd0d4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.4;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
 }
 
 /* Global Options card – wide but bounded */
@@ -1872,14 +1903,14 @@ a.ff-brandbar__title:focus {
 .wrap.ff-admin.ff-global .ff-options-card .regular-text,
 .wrap.ff-admin.ff-global .ff-options-card select,
 .wrap.ff-admin.ff-global .ff-options-card textarea {
-    width: 100%;
-    max-width: var(--ff-field-max-w); /* you already set this to 720px */
-    border: 1px solid #ccd0d4;
-    border-radius: 8px;
-    padding: 10px 12px;
-    line-height: 1.4;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
+  width: 100%;
+  max-width: var(--ff-field-max-w); /* you already set this to 720px */
+  border: 1px solid #ccd0d4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.4;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
 }
 
 .ff-mb input:focus,
@@ -1888,279 +1919,279 @@ a.ff-brandbar__title:focus {
 .ff-options-card input:focus,
 .ff-options-card select:focus,
 .ff-options-card textarea:focus {
-    outline: 0;
-    border-color: #2271b1;
-    box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+  outline: 0;
+  border-color: #2271b1;
+  box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
 }
 
 /* Buttons */
 .ff-mb .button,
 .ff-options-card .button,
 .ff-subbar__btn {
-    border-radius: 8px;
-    font-weight: 500;
-    padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 6px 12px;
 }
 
 /* Media (image/file) controls */
 .ff-mb .ff-media-wrap,
 .ff-options-card .ff-media-wrap {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .ff-mb .ff-media-preview,
 .ff-options-card .ff-media-preview {
-    width: 64px;
-    height: 64px;
-    object-fit: cover;
-    border-radius: 6px;
-    background: #f6f7f7;
-    border: 1px solid #dcdcde;
-    display: block;
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  display: block;
 }
 
 .ff-mb .ff-media-fileline,
 .ff-options-card .ff-media-fileline {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #50575e;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #50575e;
 }
 
 .ff-mb .ff-media-nofile,
 .ff-options-card .ff-media-nofile {
-    color: #8c8f94;
+  color: #8c8f94;
 }
 
 /* WYSIWYG container polish */
 .ff-mb .wp-editor-wrap,
 .ff-options-card .wp-editor-wrap {
-    border: 1px solid #ccd0d4;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #fff;
+  border: 1px solid #ccd0d4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
 }
 .ff-mb .wp-editor-container,
 .ff-options-card .wp-editor-container {
-    border: 0;
+  border: 0;
 }
 .ff-mb .quicktags-toolbar,
 .ff-options-card .quicktags-toolbar {
-    border-bottom: 1px solid #e7eaee;
+  border-bottom: 1px solid #e7eaee;
 }
 
 /* Range + number little layout helper */
 .ff-mb .ff-range-wrap,
 .ff-options-card .ff-range-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* Card wrapper shared by metabox + globals */
 .ff-editor-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-    max-width: 100%;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  max-width: 100%;
 }
 
 /* Tighten the default WP editor chrome */
 .ff-editor-card .wp-editor-wrap {
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fafafa;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafafa;
 }
 
 .ff-editor-card .wp-media-buttons {
-    margin: 6px 8px;
+  margin: 6px 8px;
 }
 
 .ff-editor-card .wp-media-buttons .button {
-    border-radius: 6px;
+  border-radius: 6px;
 }
 
 .ff-editor-card .mce-top-part,
 .ff-editor-card .quicktags-toolbar {
-    border-bottom: 1px solid #e5e7eb !important;
-    background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
 }
 
 /* Tabs (Visual / Code) */
 .ff-editor-card .wp-switch-editor {
-    border: 0;
-    background: transparent;
-    color: #64748b;
-    padding: 6px 10px;
-    margin: 0 2px 0 0;
-    border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  padding: 6px 10px;
+  margin: 0 2px 0 0;
+  border-radius: 6px;
 }
 .ff-editor-card .wp-switch-editor.switch-tmce,
 .ff-editor-card .wp-switch-editor.switch-html {
-    box-shadow: none;
+  box-shadow: none;
 }
 .ff-editor-card .wp-switch-editor:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
 }
 .ff-editor-card .wp-switch-editor.active {
-    background: #e5edff;
-    color: #1e40af;
+  background: #e5edff;
+  color: #1e40af;
 }
 
 .ff-editor-card .wp-editor-area {
-    border: 0 !important;
-    background: #fff;
-    padding: 10px !important;
-    font-size: 14px;
-    line-height: 1.55;
+  border: 0 !important;
+  background: #fff;
+  padding: 10px !important;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 /* Ensure icon fonts render even if a theme overrides fonts */
 .ff-admin .dashicons,
 .ff-admin .mce-ico {
-    font-family: "dashicons" !important;
+  font-family: "dashicons" !important;
 }
 
 /* FF Global – make Quicktags (Code) view fill the card width */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
-    width: 100% !important;
-    max-width: none !important;
-    box-sizing: border-box; /* include borders in width calc */
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box; /* include borders in width calc */
 }
 
 /* keep the toolbar from nudging the textarea width */
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
-    box-sizing: border-box;
-    width: 100%;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* (optional) if you see a tiny right gap, remove inner padding on the card */
 .wrap.ff-admin.ff-global .ff-editor-card {
-    padding: 0; /* comment out if you prefer the padding */
+  padding: 0; /* comment out if you prefer the padding */
 }
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons,
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
-    padding-left: 10px;
-    padding-right: 10px; /* re-add comfortable gutters after zeroing card padding */
+  padding-left: 10px;
+  padding-right: 10px; /* re-add comfortable gutters after zeroing card padding */
 }
 
 /* ===== Forge Fields — Global WYSIWYG: match edit screen look ===== */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap {
-    border: 1px solid #e5e7eb !important;
-    border-radius: 6px !important;
-    overflow: hidden !important;
-    background: #fafafa !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  background: #fafafa !important;
 }
 
 /* Top toolbars (TinyMCE + Quicktags) */
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
-    border-bottom: 1px solid #e5e7eb !important;
-    background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f9fafb !important;
 }
 
 /* Visual / Code tabs */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor {
-    border: 0 !important;
-    background: transparent !important;
-    color: #64748b !important;
-    padding: 6px 10px !important;
-    margin: 0 2px 0 0 !important;
-    border-radius: 6px !important;
-    box-shadow: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #64748b !important;
+  padding: 6px 10px !important;
+  margin: 0 2px 0 0 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
 }
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor.active {
-    background: #e5edff !important;
-    color: #1e40af !important;
+  background: #e5edff !important;
+  color: #1e40af !important;
 }
 
 /* Editor area */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
-    border: 0 !important;
-    padding: 10px !important;
-    font-size: 14px !important;
-    line-height: 1.55 !important;
-    width: 100% !important; /* keep full width */
+  border: 0 !important;
+  padding: 10px !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  width: 100% !important; /* keep full width */
 }
 
 /* Make all inner wrappers fill the card width */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card textarea.wp-editor-area {
-    width: 100% !important;
+  width: 100% !important;
 }
 
 /* Keep Code (Quicktags) height stable when toggling */
 .wrap.ff-admin.ff-global .wp-editor-wrap.html-active .wp-editor-area {
-    min-height: 260px !important;
+  min-height: 260px !important;
 }
 
 /* Cosmetic: Add Media button rounding to match */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button {
-    border-radius: 6px !important;
+  border-radius: 6px !important;
 }
 
 div#wp-ff_global_4353453-wrap {
-    margin: 0;
+  margin: 0;
 }
 
 input#ff_global_range_num {
-    width: 75px;
+  width: 75px;
 }
 
 input#ff_global_range_slider {
-    width: 300px;
+  width: 300px;
 }
 
 .ff-field-setting.ff-setting-choices textarea {
-    min-height: 80px;
+  min-height: 80px;
 }
 
 tr.ff-field-settings td {
-    padding-left: 40px;
+  padding-left: 40px;
 }
 
 input#_ff_range_slider {
-    width: 300px;
+  width: 300px;
 }
 
 .ff-button-group {
-    display: inline-flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .ff-button-group__input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ff-button-group__btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid #c3c4c7;
-    border-radius: 6px;
-    padding: 6px 10px;
-    cursor: pointer;
-    user-select: none;
-    background: #fff;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #c3c4c7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  user-select: none;
+  background: #fff;
 }
 
 .ff-button-group__btn:has(.ff-button-group__input:checked) {
-    border-color: #2271b1;
-    box-shadow: 0 0 0 1px #2271b1 inset;
+  border-color: #2271b1;
+  box-shadow: 0 0 0 1px #2271b1 inset;
 }
 
 /* Make radio + checkbox labels clickable */
@@ -2168,5 +2199,9 @@ input#_ff_range_slider {
 .ff-admin input[type="checkbox"] + *,
 .ff-admin label:has(input[type="radio"]),
 .ff-admin label:has(input[type="checkbox"]) {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+.ff-confirm__dialog .ff-confirm__actions button {
+  box-shadow: 1px 3px 7px 1px rgba(0, 0, 0, 0.1) !important;
 }

@@ -958,7 +958,7 @@ if ( $action && $group_id && isset( $groups[ $group_id ] ) ) {
                             </a>
                         </th>
 
-                        <th scope="col" class="manage-column ff-bar-title">Key</th>
+                        <th scope="col" class="manage-column ff-bar-title">Forge Key</th>
                         <th scope="col" class="manage-column ff-bar-title">Location</th>
                         <th scope="col" class="manage-column ff-bar-title">Fields</th>
                         <th scope="col" class="manage-column ff-bar-title">Status</th>
