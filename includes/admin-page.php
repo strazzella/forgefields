@@ -1223,10 +1223,17 @@ if ( $action && $group_id && isset( $groups[ $group_id ] ) ) {
                 break;
 
             case 'password':
+                $new_values[ $name ] = is_array( $value_raw )
+                    ? ''
+                    : ff_sanitize_type_password( wp_unslash( $value_raw ), [ 'name' => $name, 'type' => 'password' ], 0 );
+                break;
+
             case 'text':
             case 'textarea':
             case 'wysiwyg':
-                $new_values[ $name ] = is_array( $value_raw ) ? '' : sanitize_text_field( wp_unslash( $value_raw ) );
+                $new_values[ $name ] = is_array( $value_raw )
+                    ? ''
+                    : sanitize_text_field( wp_unslash( $value_raw ) );
                 break;
 
             case 'image': // attachment ID
@@ -1386,6 +1393,14 @@ switch ( $type ) {
         break;
 
     case 'password':
+    echo '<div class="ff-password-wrap">';
+    echo '<input type="password" name="ff_global[' . esc_attr( $name ) . ']" id="' . esc_attr( $id ) . '" value="' . esc_attr( (string) $value ) . '" class="regular-text ff-password-input" />';
+    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $id ) . '" aria-label="Show password">';
+    echo '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>';
+    echo '</button>';
+    echo '</div>';
+    break;
+
     case 'email':
     case 'url':
     case 'text':
@@ -1394,7 +1409,7 @@ switch ( $type ) {
             '<input type="%4$s" name="ff_global[%1$s]" id="%2$s" value="%3$s" class="regular-text" />',
             esc_attr( $name ),
             esc_attr( $id ),
-            esc_attr( $value ),
+            esc_attr( (string) $value ),
             esc_attr( $input_type )
         );
         break;

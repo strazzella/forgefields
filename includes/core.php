@@ -653,12 +653,20 @@ function ff_render_field_group_metabox( $post, $box ) {
                 <?php
                 break;
 
+            case 'password':
+                echo '<div class="ff-password-wrap">';
+                echo '<input type="password" class="regular-text ff-password-input" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
+                echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $meta_key ) . '" aria-label="Show password">';
+                echo '<span class="dashicons dashicons-hidden" aria-hidden="true"></span>';
+                echo '</button>';
+                echo '</div>';
+                break;
+
             case 'email':
             case 'url':
-            case 'password':
             case 'text':
             default:
-                $input = in_array( $type, ['email','url','password'], true ) ? $type : 'text';
+                $input = in_array( $type, ['email','url'], true ) ? $type : 'text';
                 echo '<input type="'. esc_attr( $input ) .'" class="regular-text" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
                 break;
         }

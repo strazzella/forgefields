@@ -2048,3 +2048,49 @@ input#_ff_range_slider {
     display: none !important;
   }
 }
+
+/* Password */
+.ff-password-wrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.ff-password-wrap .ff-password-input.regular-text {
+  width: 25em;
+  max-width: 100%;
+  margin: 0;
+  padding-right: 38px;
+  box-sizing: border-box;
+}
+
+.ff-password-wrap .ff-password-toggle.button {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ff-password-wrap .ff-password-toggle.button:hover,
+.ff-password-wrap .ff-password-toggle.button:focus {
+  background: transparent;
+  box-shadow: none;
+}
+
+.ff-password-wrap .ff-password-toggle .dashicons {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 1;
+}

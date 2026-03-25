@@ -629,3 +629,53 @@ jQuery(function ($) {
       $(this).hide();
     });
 })(jQuery);
+
+document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
+  const btn = wrap.querySelector(".ff-password-toggle");
+  const input = wrap.querySelector(".ff-password-input");
+  const icon = btn ? btn.querySelector(".dashicons") : null;
+
+  if (!btn || !input || !icon) return;
+
+  function sync() {
+    const isVisible = input.type === "text";
+
+    btn.setAttribute(
+      "aria-label",
+      isVisible ? "Hide password" : "Show password",
+    );
+
+    icon.classList.toggle("dashicons-visibility", isVisible);
+    icon.classList.toggle("dashicons-hidden", !isVisible);
+  }
+
+  sync();
+
+  btn.addEventListener("click", function () {
+    input.type = input.type === "text" ? "password" : "text";
+    sync();
+  });
+});
+
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest(".ff-password-toggle");
+  if (!btn) return;
+
+  const target = btn.getAttribute("data-target");
+  if (!target) return;
+
+  const input = document.querySelector(target);
+  if (!input) return;
+
+  const icon = btn.querySelector(".dashicons");
+  const isHidden = input.type === "password";
+
+  input.type = isHidden ? "text" : "password";
+
+  btn.setAttribute("aria-label", isHidden ? "Hide password" : "Show password");
+
+  if (icon) {
+    icon.classList.toggle("dashicons-visibility", isHidden);
+    icon.classList.toggle("dashicons-hidden", !isHidden);
+  }
+});
