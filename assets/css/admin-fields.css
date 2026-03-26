@@ -2094,3 +2094,123 @@ input#_ff_range_slider {
   font-size: 18px;
   line-height: 1;
 }
+
+/* =========================================================
+   PAGE/POST METABOX — LIGHT TOUCH MATCH TO GLOBAL
+   ========================================================= */
+
+/* Media fields: just tighten spacing */
+.postbox .inside .ff-mb .ff-media-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.postbox .inside .ff-mb .ff-media-fileline,
+.postbox .inside .ff-mb .ff-media-preview-wrap {
+  margin-bottom: 0 !important;
+}
+
+.postbox .inside .ff-mb .ff-media-select,
+.postbox .inside .ff-mb .ff-media-clear {
+  margin: 0;
+}
+
+/* WYSIWYG: style the outer shell only, do not force internal widths */
+.postbox .inside .ff-mb .wp-editor-wrap {
+  border: 1px solid var(--ff-border, #dcdcde);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Top bar */
+.postbox .inside .ff-mb .wp-editor-tools {
+  padding: 10px 12px 0;
+  background: #fff;
+  border-bottom: 1px solid var(--ff-border, #dcdcde);
+}
+
+/* Add Media spacing */
+.postbox .inside .ff-mb .wp-media-buttons {
+  margin: 0 0 10px;
+}
+
+/* Tabs */
+.postbox .inside .ff-mb .wp-editor-tabs {
+  padding-top: 0;
+}
+
+.postbox .inside .ff-mb .wp-switch-editor {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Toolbar row */
+.postbox .inside .ff-mb .quicktags-toolbar {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--ff-border, #dcdcde);
+  background: #f8f9fb;
+}
+
+/* Content area */
+.postbox .inside .ff-mb .wp-editor-container {
+  border: 0;
+  background: #fff;
+}
+
+/* Keep code editor full width */
+.postbox .inside .ff-mb textarea.wp-editor-area {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 260px;
+  padding: 12px;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* TinyMCE iframe container */
+.postbox .inside .ff-mb .tmce-active .wp-editor-area,
+.postbox .inside .ff-mb .html-active .wp-editor-area {
+  background: #fff;
+}
+
+/* =========================================================
+   FORGE BUTTON STYLE (MATCH GLOBAL EXACTLY)
+   ========================================================= */
+
+.postbox .inside .ff-mb .button,
+.postbox .inside .ff-mb .wp-media-buttons .button,
+.postbox .inside .ff-mb .quicktags-toolbar input.button {
+  background: #ffffff;
+  border: 1px solid #dcdcde;
+  color: #2c3338; /* darker gray */
+  box-shadow: none;
+  border-radius: 6px;
+  font-weight: 600; /* semibold */
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* Hover */
+.postbox .inside .ff-mb .button:hover,
+.postbox .inside .ff-mb .wp-media-buttons .button:hover,
+.postbox .inside .ff-mb .quicktags-toolbar input.button:hover {
+  background: #f6f7f7; /* lightest gray */
+  border-color: #d0d1d2;
+  color: #1d2327;
+}
+
+/* Active / focus */
+.postbox .inside .ff-mb .button:focus,
+.postbox .inside .ff-mb .button:active {
+  background: #f6f7f7;
+  border-color: #d0d1d2;
+  color: #1d2327;
+  box-shadow: none;
+  outline: none;
+}
