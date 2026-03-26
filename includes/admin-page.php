@@ -1087,18 +1087,42 @@ if ( $action && $group_id && isset( $groups[ $group_id ] ) ) {
                     </td>
 
                         <td>
-                            <?php
-                            if ( $location === 'page' ) {
-                                echo 'Page';
-                            } elseif ( $location === 'post' ) {
-                                echo 'Post';
-                            } elseif ( $location === 'global' ) {
-                                echo 'Global';
-                            } else {
-                                echo esc_html( ucfirst( (string) $location ) );
-                            }
-                            ?>
-                        </td>
+    <?php
+    $location_target = isset( $group['location_target'] ) ? (string) $group['location_target'] : '';
+
+    if ( $location === 'page' ) {
+        $label = 'Page';
+
+        if ( $location_target !== '' ) {
+            $target_post = get_post( (int) $location_target );
+            $target_text = $target_post ? get_the_title( $target_post ) : 'Missing Page';
+        } else {
+            $target_text = 'All Pages';
+        }
+
+        echo '<strong>' . esc_html( $label ) . '</strong> ';
+        echo '<span class="ff-location-target">(' . esc_html( $target_text ) . ')</span>';
+
+    } elseif ( $location === 'post' ) {
+        $label = 'Post';
+
+        if ( $location_target !== '' ) {
+            $target_post = get_post( (int) $location_target );
+            $target_text = $target_post ? get_the_title( $target_post ) : 'Missing Post';
+        } else {
+            $target_text = 'All Posts';
+        }
+
+        echo '<strong>' . esc_html( $label ) . '</strong> ';
+        echo '<span class="ff-location-target">(' . esc_html( $target_text ) . ')</span>';
+
+    } elseif ( $location === 'global' ) {
+        echo '<strong>Global</strong>';
+    } else {
+        echo esc_html( ucfirst( (string) $location ) );
+    }
+    ?>
+</td>
 
                         <td>
     <?php
@@ -1711,6 +1735,7 @@ function ff_render_field_group_edit() {
         'id'       => '',
         'title'    => '',
         'location' => 'page',
+        'location_target' => '',
         'fields'   => [],
         'status'   => 'active',
     ];
@@ -1737,6 +1762,18 @@ function ff_render_field_group_edit() {
         $location = isset( $_POST['ff_location'] )
             ? sanitize_text_field( wp_unslash( $_POST['ff_location'] ) )
             : 'page';
+
+        $location_target = '';
+
+        if ( $location === 'page' ) {
+            $location_target = isset( $_POST['ff_location_target_page'] )
+                ? absint( $_POST['ff_location_target_page'] )
+                : 0;
+        } elseif ( $location === 'post' ) {
+            $location_target = isset( $_POST['ff_location_target_post'] )
+                ? absint( $_POST['ff_location_target_post'] )
+                : 0;
+        }
 
         $fields_raw = isset( $_POST['ff_fields'] ) && is_array( $_POST['ff_fields'] )
             ? $_POST['ff_fields']
@@ -1851,6 +1888,7 @@ function ff_render_field_group_edit() {
                 'id'       => $posted_group_id,
                 'title'    => $title,
                 'location' => $location,
+                'location_target' => $location_target ? (string) $location_target : '',
                 'fields'   => $fields,
                 'status'   => $current_status,
             ];
@@ -1870,6 +1908,7 @@ function ff_render_field_group_edit() {
                 'id'       => $posted_group_id,
                 'title'    => $title,
                 'location' => $location,
+                'location_target' => $location_target ? (string) $location_target : '',
                 'fields'   => $fields,
                 'status'   => isset( $group['status'] ) ? $group['status'] : 'active',
             ];
@@ -1878,9 +1917,26 @@ function ff_render_field_group_edit() {
     }
 
     // Final values for the form
-    $title    = isset( $group['title'] )    ? $group['title']    : '';
-    $location = isset( $group['location'] ) ? $group['location'] : 'page';
-    $fields   = isset( $group['fields'] )   && is_array( $group['fields'] ) ? $group['fields'] : [];
+        $title           = isset( $group['title'] ) ? $group['title'] : '';
+        $location        = isset( $group['location'] ) ? $group['location'] : 'page';
+        $location_target = isset( $group['location_target'] ) ? (string) $group['location_target'] : '';
+        $fields          = isset( $group['fields'] ) && is_array( $group['fields'] ) ? $group['fields'] : [];
+
+        $page_options = get_posts( [
+            'post_type'      => 'page',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'title',
+            'order'          => 'ASC',
+        ] );
+
+        $post_options = get_posts( [
+            'post_type'      => 'post',
+            'post_status'    => 'publish',
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ] );
 
     // --- NEW: grouped type list (future-proof if you add more groups) ---
     $type_groups = [
@@ -1927,20 +1983,51 @@ function ff_render_field_group_edit() {
                 </tr>
 
                 <tr>
-                    <th scope="row"><label for="ff_location">Location</label></th>
-                    <td>
-                        <div class="ff-select-wrap">
-                            <select id="ff_location" name="ff_location">
-                                <option value="page"   <?php selected( $location, 'page' ); ?>>Page</option>
-                                <option value="post"   <?php selected( $location, 'post' ); ?>>Post</option>
-                                <option value="global" <?php selected( $location, 'global' ); ?>>Global</option>
-                            </select>
-                        </div>
-                        <p class="description">
-                            Where this field group should appear. “Global” will later be an options screen.
-                        </p>
-                    </td>
-                </tr>
+    <th scope="row"><label for="ff_location">Location</label></th>
+    <td>
+        <div class="ff-location-row" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div class="ff-select-wrap">
+                <select id="ff_location" name="ff_location">
+                    <option value="page" <?php selected( $location, 'page' ); ?>>Page</option>
+                    <option value="post" <?php selected( $location, 'post' ); ?>>Post</option>
+                    <option value="global" <?php selected( $location, 'global' ); ?>>Global</option>
+                </select>
+            </div>
+
+            <div class="ff-select-wrap" id="ff_location_target_page_wrap" <?php echo $location === 'page' ? '' : 'style="display:none;"'; ?>>
+                <select id="ff_location_target_page" name="ff_location_target_page">
+                    <option value="">All Pages</option>
+                    <?php foreach ( $page_options as $page_post ) : ?>
+                        <option
+                            value="<?php echo esc_attr( $page_post->ID ); ?>"
+                            <?php selected( $location === 'page' ? $location_target : '', (string) $page_post->ID ); ?>
+                        >
+                            <?php echo esc_html( get_the_title( $page_post ) ?: '(no title)' ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="ff-select-wrap" id="ff_location_target_post_wrap" <?php echo $location === 'post' ? '' : 'style="display:none;"'; ?>>
+                <select id="ff_location_target_post" name="ff_location_target_post">
+                    <option value="">All Posts</option>
+                    <?php foreach ( $post_options as $single_post ) : ?>
+                        <option
+                            value="<?php echo esc_attr( $single_post->ID ); ?>"
+                            <?php selected( $location === 'post' ? $location_target : '', (string) $single_post->ID ); ?>
+                        >
+                            <?php echo esc_html( get_the_title( $single_post ) ?: '(no title)' ); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+
+        <p class="description">
+            Choose whether this field group appears on all pages/posts, or only one specific item. Global ignores the second dropdown.
+        </p>
+    </td>
+</tr>
             </table>
 
             <h2>Fields</h2>

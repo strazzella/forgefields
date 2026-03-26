@@ -366,28 +366,45 @@ function ff_boot_field_groups() {
  * Attach meta boxes for all registered groups on posts/pages.
  */
 add_action('add_meta_boxes', function () {
-    // Prefer the helper over a global
     $groups = ff_get_all_groups();
-    if (empty($groups) || !is_array($groups)) {
+    if ( empty( $groups ) || ! is_array( $groups ) ) {
         return;
     }
 
-    foreach ($groups as $group_id => $group) {
-        $location = isset($group['location']) ? $group['location'] : 'page';
+    $current_post_id = 0;
+    if ( isset( $_GET['post'] ) ) {
+        $current_post_id = absint( $_GET['post'] );
+    } elseif ( isset( $_POST['post_ID'] ) ) {
+        $current_post_id = absint( $_POST['post_ID'] );
+    }
 
-        // Only attach to real post editors for now.
-        if (!in_array($location, ['page','post'], true)) {
-            continue; // 'global' is handled on your options screen
+    foreach ( $groups as $group_id => $group ) {
+        $location = isset( $group['location'] ) ? $group['location'] : 'page';
+        $target   = isset( $group['location_target'] ) ? (string) $group['location_target'] : '';
+        $status   = isset( $group['status'] ) ? $group['status'] : 'active';
+
+        if ( $status !== 'active' ) {
+            continue;
+        }
+
+        // Only attach to page/post editors. Global is handled elsewhere.
+        if ( ! in_array( $location, [ 'page', 'post' ], true ) ) {
+            continue;
+        }
+
+        // If a specific page/post is selected, only attach on that exact item.
+        if ( $target !== '' && (string) $current_post_id !== $target ) {
+            continue;
         }
 
         add_meta_box(
             'ff_field_group_' . $group_id,
-            esc_html($group['title']),
-            'ff_render_field_group_metabox', // <- this function must exist (renderer I sent)
-            $location,                       // 'post' or 'page'
+            esc_html( $group['title'] ),
+            'ff_render_field_group_metabox',
+            $location,
             'normal',
             'default',
-            ['group_id' => $group_id]
+            [ 'group_id' => $group_id ]
         );
     }
 });

@@ -679,3 +679,29 @@ document.addEventListener("click", function (e) {
     icon.classList.toggle("dashicons-hidden", !isHidden);
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const locationSelect = document.getElementById("ff_location");
+  const pageWrap = document.getElementById("ff_location_target_page_wrap");
+  const postWrap = document.getElementById("ff_location_target_post_wrap");
+
+  if (!locationSelect || !pageWrap || !postWrap) return;
+
+  function syncLocationTargets() {
+    const val = locationSelect.value;
+
+    if (val === "page") {
+      pageWrap.style.display = "";
+      postWrap.style.display = "none";
+    } else if (val === "post") {
+      pageWrap.style.display = "none";
+      postWrap.style.display = "";
+    } else {
+      pageWrap.style.display = "none";
+      postWrap.style.display = "none";
+    }
+  }
+
+  locationSelect.addEventListener("change", syncLocationTargets);
+  syncLocationTargets();
+});

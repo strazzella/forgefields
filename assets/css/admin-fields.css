@@ -2214,3 +2214,9 @@ input#_ff_range_slider {
   box-shadow: none;
   outline: none;
 }
+
+/* Location column subtle styling */
+.ff-location-target {
+  color: #8c8f94; /* WordPress gray */
+  font-weight: 400;
+}
