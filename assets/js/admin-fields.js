@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
       '<option value="textarea">Textarea</option>' +
       '<option value="number">Number</option>' +
       '<option value="email">Email</option>' +
-      '<option value="url">Url</option>' +
+      '<option value="url">URL</option>' +
       '<option value="range">Range</option>' +
       '<option value="password">Password</option>' +
       "</optgroup>" +
@@ -34,6 +34,16 @@ document.addEventListener("DOMContentLoaded", function () {
       '<option value="image">Image</option>' +
       '<option value="file">File</option>' +
       '<option value="wysiwyg">WYSIWYG Editor</option>' +
+      "</optgroup>" +
+      '<optgroup label="Choice">' +
+      '<option value="select">Select</option>' +
+      '<option value="checkbox">Checkbox</option>' +
+      '<option value="radio">Radio</option>' +
+      '<option value="button_group">Button Group</option>' +
+      '<option value="true_false">True/False</option>' +
+      "</optgroup>" +
+      '<optgroup label="Layout">' +
+      '<option value="tab">Tab</option>' +
       "</optgroup>" +
       "</select>" +
       "</div>"
@@ -91,11 +101,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const labelInput = row.querySelector(".ff-field-label");
       const nameInput = row.querySelector(".ff-field-name");
       const removeLink = row.querySelector(".ff-field-remove");
+      const typeSelect = row.querySelector(".ff-field-type");
 
+      if (typeSelect) {
+        typeSelect.addEventListener("change", function () {
+          syncTabRowState(row);
+        });
+      }
       // Auto label → slug
       if (labelInput) {
         labelInput.addEventListener("blur", function () {
           if (!nameInput) return;
+
+          const typeSelect = row.querySelector(".ff-field-type");
+          const isTab = typeSelect && typeSelect.value === "tab";
+
+          if (isTab) {
+            nameInput.value = "";
+            return;
+          }
 
           if (nameInput.value.trim() !== "") return;
           if (this.value.trim() === "") return;
@@ -108,6 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Attach to any existing rows
     tbody.querySelectorAll(".ff-field-row").forEach(function (row) {
       attachRowEvents(row);
+      syncTabRowState(row);
     });
     renumberRows();
 
@@ -156,6 +181,26 @@ document.addEventListener("DOMContentLoaded", function () {
         e.preventDefault();
         addFieldRow();
       });
+    }
+
+    function syncTabRowState(row) {
+      const typeSelect = row.querySelector(".ff-field-type");
+      const nameInput = row.querySelector(".ff-field-name");
+
+      if (!typeSelect || !nameInput) return;
+
+      const isTab = typeSelect.value === "tab";
+
+      if (isTab) {
+        nameInput.value = "";
+        nameInput.placeholder = "";
+        nameInput.readOnly = true;
+        nameInput.classList.add("ff-name-disabled");
+      } else {
+        nameInput.readOnly = false;
+        nameInput.placeholder = "";
+        nameInput.classList.remove("ff-name-disabled");
+      }
     }
 
     // -------------------------------
@@ -704,4 +749,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
   locationSelect.addEventListener("change", syncLocationTargets);
   syncLocationTargets();
+});
+
+// Tabs
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("[data-ff-tabs]").forEach(function (tabsWrap) {
+    const buttons = tabsWrap.querySelectorAll(".ff-tab-button");
+    const panels = tabsWrap.querySelectorAll(".ff-tab-panel");
+
+    if (!buttons.length || !panels.length) return;
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const target = btn.getAttribute("data-ff-tab");
+        if (target === null) return;
+
+        buttons.forEach(function (b) {
+          b.classList.remove("is-active");
+        });
+
+        panels.forEach(function (panel) {
+          panel.classList.remove("is-active");
+        });
+
+        btn.classList.add("is-active");
+
+        const panel = tabsWrap.querySelector(
+          '[data-ff-tab-panel="' + target + '"]',
+        );
+
+        if (panel) {
+          panel.classList.add("is-active");
+        }
+      });
+    });
+  });
 });

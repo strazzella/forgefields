@@ -2220,3 +2220,88 @@ input#_ff_range_slider {
   color: #8c8f94; /* WordPress gray */
   font-weight: 400;
 }
+
+/* ---------------------------------
+   Forge tabs — modern segmented style
+--------------------------------- */
+
+.ff-tabs {
+  margin-top: 0;
+}
+
+.ff-tab-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  margin: 0 0 18px;
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  border-radius: 10px;
+}
+
+.ff-tab-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #50575e;
+  padding: 9px 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: none;
+  border-radius: 8px;
+  margin: 0;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ff-tab-button:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: #2c3338;
+}
+
+.ff-tab-button.is-active {
+  background: #fff;
+  color: #2271b1;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+.ff-tab-panel {
+  display: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ff-tab-panel.is-active {
+  display: block;
+}
+
+.ff-tab-panel .form-table {
+  margin-top: 0;
+}
+
+/* Make tabs sit nicely inside your card */
+.ff-options-card .ff-tabs {
+  padding: 16px 16px 0;
+}
+
+.ff-options-card .ff-tab-panel {
+  padding: 0 16px 16px;
+}
+
+.ff-name-disabled {
+  background: #f6f7f7 !important;
+  color: #8c8f94;
+  cursor: not-allowed;
+  border-color: #dcdcde;
+}
+
+.ff-name-disabled::placeholder {
+  color: #a7aaad;
+}
