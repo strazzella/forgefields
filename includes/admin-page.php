@@ -2087,6 +2087,7 @@ function ff_render_field_group_edit() {
                                id="ff_group_title"
                                name="ff_group_title"
                                class="regular-text"
+                               maxlength="75"
                                value="<?php echo esc_attr( $title ); ?>">
                         <p class="description">e.g. “Landing Page – Hero Section”.</p>
                     </td>
@@ -2185,6 +2186,7 @@ function ff_render_field_group_edit() {
                                 name="ff_fields[<?php echo $index; ?>][label]"
                                 value="<?php echo esc_attr( $label ); ?>"
                                 class="regular-text ff-field-label"
+                                maxlength="50"
                                 data-index="<?php echo esc_attr( $index ); ?>"
                                 data-field-part="label">
                         </td>
@@ -2194,6 +2196,7 @@ function ff_render_field_group_edit() {
                                 name="ff_fields[<?php echo $index; ?>][name]"
                                 value="<?php echo esc_attr( $name ); ?>"
                                 class="regular-text ff-field-name"
+                                maxlength="50"
                                 data-index="<?php echo esc_attr( $index ); ?>"
                                 data-field-part="name">
                         </td>
