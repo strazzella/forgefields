@@ -1791,7 +1791,7 @@ function ff_render_field_group_edit() {
             : '';
 
         $title = isset( $_POST['ff_group_title'] )
-            ? sanitize_text_field( wp_unslash( $_POST['ff_group_title'] ) )
+            ? substr( sanitize_text_field( wp_unslash( $_POST['ff_group_title'] ) ), 0, 100 )
             : '';
 
         $location = isset( $_POST['ff_location'] )
@@ -1820,8 +1820,8 @@ function ff_render_field_group_edit() {
                 $used_names = [];
 
         foreach ( $fields_raw as $field_raw ) {
-                $name  = isset( $field_raw['name'] )  ? sanitize_key( $field_raw['name'] )  : '';
-                $label = isset( $field_raw['label'] ) ? sanitize_text_field( $field_raw['label'] ) : '';
+                $name  = isset( $field_raw['name'] )  ? substr( sanitize_key( $field_raw['name'] ), 0, 50 ) : '';
+                $label = isset( $field_raw['label'] ) ? substr( sanitize_text_field( $field_raw['label'] ), 0, 50 ) : '';
                 $type  = isset( $field_raw['type'] )  ? sanitize_text_field( $field_raw['type'] )  : 'text';
 
                 // Skip completely empty rows
