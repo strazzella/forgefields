@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Forge Fields
  * Description: Lightweight custom fields framework.
- * Version:     0.1.0
+ * Version:     0.1.1
  * Author:      Forge Plugins
  * License:     GPL2+
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'FF_VERSION', '0.1.0' );
+define( 'FF_VERSION', '0.1.1' );
 define( 'FF_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FF_URL',  plugin_dir_url( __FILE__ ) );
 

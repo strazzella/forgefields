@@ -186,23 +186,33 @@ function ff_render_type_range( array $field, $value, WP_Post $post ) {
     <?php
 }
 
-
-
 function ff_render_type_password( array $field, $value, WP_Post $post ) {
     $name = $field['name'];
     $id   = 'ff_' . esc_attr( $name );
 
     echo '<div class="ff-password-wrap">';
-    echo '<input type="password" class="regular-text ff-password-input" id="' . esc_attr( $id )
-    . '" name="' . esc_attr( $name )
-    . '" value="' . esc_attr( $value ) . '">';
 
-    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $id ) . '" aria-label="Show password">
-            <span class="dashicons dashicons-hidden"></span>
-        </button>';
+    echo '<input 
+        type="password"
+        class="regular-text ff-password-input"
+        id="' . esc_attr( $id ) . '"
+        name="' . esc_attr( $name ) . '"
+        value="' . esc_attr( $value ) . '"
+        maxlength="45"
+        autocomplete="off"
+    >';
+
+    echo '<button 
+        type="button" 
+        class="ff-password-toggle" 
+        data-target="#' . esc_attr( $id ) . '" 
+        aria-label="Show password"
+        aria-controls="' . esc_attr( $id ) . '"
+    >
+        <span class="dashicons dashicons-hidden"></span>
+    </button>';
 
     echo '</div>';
-
 }
 
 function ff_render_type_tab( array $field, $value, WP_Post $post ) {
@@ -489,8 +499,8 @@ function ff_render_metabox_field_row( array $field, WP_Post $post ) {
 
         case 'password':
             echo '<div class="ff-password-wrap">';
-            echo '<input type="password" class="regular-text ff-password-input" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
-            echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $meta_key ) . '" aria-label="Show password">';
+            echo '<input type="password" class="regular-text ff-password-input" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'" maxlength="45" autocomplete="off">';
+            echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $meta_key ) . '" aria-label="Show password" aria-controls="' . esc_attr( $meta_key ) . '">';
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
             echo '</div>';

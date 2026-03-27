@@ -1237,8 +1237,8 @@ function ff_render_global_field_row( array $field, array $stored ) {
 
                 case 'password':
                     echo '<div class="ff-password-wrap">';
-                    echo '<input type="password" name="ff_global[' . esc_attr( $name ) . ']" id="' . esc_attr( $id ) . '" value="' . esc_attr( (string) $value ) . '" class="regular-text ff-password-input" />';
-                    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $id ) . '" aria-label="Show password">';
+                    echo '<input type="password" name="ff_global[' . esc_attr( $name ) . ']" id="' . esc_attr( $id ) . '" value="' . esc_attr( (string) $value ) . '" class="regular-text ff-password-input" maxlength="45" autocomplete="off" />';
+                    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $id ) . '" aria-label="Show password" aria-controls="' . esc_attr( $id ) . '">';
                     echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
                     echo '</button>';
                     echo '</div>';
@@ -1816,68 +1816,93 @@ function ff_render_field_group_edit() {
 
                 $fields = [];
 
-            $used_names = [];
+                $has_save_errors = false;
+                $used_names = [];
 
         foreach ( $fields_raw as $field_raw ) {
-    $name  = isset( $field_raw['name'] )  ? sanitize_key( $field_raw['name'] )  : '';
-    $label = isset( $field_raw['label'] ) ? sanitize_text_field( $field_raw['label'] ) : '';
-    $type  = isset( $field_raw['type'] )  ? sanitize_text_field( $field_raw['type'] )  : 'text';
+                $name  = isset( $field_raw['name'] )  ? sanitize_key( $field_raw['name'] )  : '';
+                $label = isset( $field_raw['label'] ) ? sanitize_text_field( $field_raw['label'] ) : '';
+                $type  = isset( $field_raw['type'] )  ? sanitize_text_field( $field_raw['type'] )  : 'text';
 
-    // Skip completely empty rows
-    if ( $name === '' && $label === '' ) {
-        continue;
-    }
+                // Skip completely empty rows
+                if ( $name === '' && $label === '' ) {
+                    continue;
+                }
 
-    // Tabs are layout-only markers. They require a label, but never a name.
-    if ( $type === 'tab' ) {
-        if ( $label === '' ) {
-            $notices[] = [
-                'type'    => 'error',
-                'message' => 'Each Tab field must have a label.',
-            ];
-            continue;
-        }
+                // Tabs are layout-only markers. They require a label, but never a name.
+                if ( $type === 'tab' ) {
+                    if ( $label === '' ) {
+                        $notices[] = [
+                            'type'    => 'error',
+                            'message' => 'Each Tab field must have a label.',
+                        ];
+                        continue;
+                    }
 
-        $fields[] = [
-            'label' => $label,
-            'name'  => '',
-            'type'  => 'tab',
-        ];
-        continue;
-    }
+                    $fields[] = [
+                        'label' => $label,
+                        'name'  => '',
+                        'type'  => 'tab',
+                    ];
+                    continue;
+                }
 
-    // Normal fields must have a label
-    if ( $label === '' ) {
-        $notices[] = [
-            'type'    => 'error',
-            'message' => 'Each field must have a label.',
-        ];
-        continue;
-    }
+                // Normal fields must have a label
+                if ( $label === '' ) {
+                    $notices[] = [
+                        'type'    => 'error',
+                        'message' => 'Each field must have a label.',
+                    ];
+                    $has_save_errors = true;
 
-    // If name blank but label set, derive slug from label
-    if ( $name === '' ) {
-        $name = sanitize_key( strtolower( str_replace( ' ', '_', $label ) ) );
-    }
+                    $fields[] = [
+                        'label' => '',
+                        'name'  => $name,
+                        'type'  => $type,
+                    ];
 
-    // If name is still blank after sanitizing, block save
-    if ( $name === '' ) {
-        $notices[] = [
-            'type'    => 'error',
-            'message' => sprintf( 'Field "%s" needs a valid name.', $label ),
-        ];
-        continue;
-    }
+                    continue;
+                }
 
-    if ( isset( $used_names[ $name ] ) ) {
-    $notices[] = [
-        'type'    => 'error',
-        'message' => sprintf( 'Duplicate field name "%s" is not allowed.', $name ),
-    ];
-    continue;
-}
+                // If name blank but label set, derive slug from label
+                if ( $name === '' ) {
+                    $name = sanitize_key( strtolower( str_replace( ' ', '_', $label ) ) );
+                }
 
-$used_names[ $name ] = true;
+                // If name is still blank after sanitizing, block save
+                if ( $name === '' ) {
+                    $notices[] = [
+                        'type'    => 'error',
+                        'message' => sprintf( 'Field "%s" needs a valid name.', $label ),
+                    ];
+                    $has_save_errors = true;
+
+                    $fields[] = [
+                        'label' => $label,
+                        'name'  => '',
+                        'type'  => $type,
+                    ];
+
+                    continue;
+                }
+
+                if ( isset( $used_names[ $name ] ) ) {
+                    $notices[] = [
+                        'type'    => 'error',
+                        'message' => sprintf( 'Duplicate field name "%s" is not allowed.', $name ),
+                    ];
+                    $has_save_errors = true;
+
+                    $fields[] = [
+                        'label' => $label,
+                        'name'  => $name,
+                        'type'  => $type,
+                    ];
+
+                    continue;
+                }
+
+            $used_names[ $name ] = true;
 
             // Capture the raw choices textarea (only relevant types will use it)
             $choice_types = [ 'select', 'checkbox', 'radio', 'button_group', 'true_false' ];
@@ -1951,9 +1976,10 @@ $used_names[ $name ] = true;
                 'type'    => 'error',
                 'message' => 'Please enter a Field Group title.',
             ];
+            $has_save_errors = true;
         }
 
-        if ( empty( $notices ) ) {
+        if ( ! $has_save_errors ) {
 
             // Determine status: preserve existing if editing, else "active".
             $current_status = 'active';
