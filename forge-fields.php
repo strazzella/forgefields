@@ -50,6 +50,13 @@ function ff_enqueue_admin_assets( $hook ) {
     wp_enqueue_style( 'editor-buttons' );
 
     wp_enqueue_style(
+        'ff-font-inter',
+        'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+        [],
+        null
+    );
+
+    wp_enqueue_style(
         'ff-admin-fields',
         FF_URL . 'assets/css/admin-fields.css',
         [],

@@ -234,8 +234,10 @@ function ff_render_admin_brandbar( $subtitle = '', $add_url = '', $add_label = '
     <div class="ff-brandbar" role="banner" aria-label="Forge Fields">
         <div class="ff-brandbar__inner">
             <div class="ff-brandbar__left">
-                <span class="ff-brandbar__logo" aria-hidden="true">FF</span>
-
+                <span class="ff-brandbar__logo">
+                <a href="<?php echo esc_url( $home_url ); ?>">
+                    <img src="<?php echo FF_URL . 'assets/img/forge-logo2.png'; ?>" alt="Forge Fields Logo"></span>
+                </a>
                 <?php if ( $is_current ) : ?>
                     <a class="ff-brandbar__title" href="<?php echo esc_url( $home_url ); ?>">Forge Fields</a>
                 <?php else : ?>
@@ -1224,7 +1226,7 @@ function ff_render_global_field_row( array $field, array $stored ) {
                         <input
                             type="number"
                             class="small-text ff-range-number"
-                            id="<?php echo esc_attr( $num_id ); ?>"
+                            id="<?php echo esc_attr( $num_id ); ?>"                         
                             min="<?php echo esc_attr( $min ); ?>"
                             max="<?php echo esc_attr( $max ); ?>"
                             step="<?php echo esc_attr( $step ); ?>"
