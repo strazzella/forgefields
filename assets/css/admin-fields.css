@@ -12,23 +12,38 @@
   --ff-border-strong: #c7ccd6;
   --ff-text: #1f2937;
   --ff-text-muted: #6b7280;
-  --ff-primary: #2271b1;
+
+  --ff-primary: #363637;
+  --ff-primary-hover: #242425;
+  --ff-primary-active: #18181a;
+
   --ff-success: #1e824c;
   --ff-warn: #b45309;
   --ff-danger: #b91c1c;
+
   --ff-r-2: 3px;
   --ff-r-3: 4px;
   --ff-r-4: 6px;
+
   --ff-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+
   --ff-f-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui,
     sans-serif;
+
   --ff-f-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
+
   --ff-12: 12px;
   --ff-13: 13px;
   --ff-14: 14px;
+}
+
+body.ff-has-brandbar {
+  --wp-admin-theme-color: #363637;
+  --wp-admin-theme-color-darker-10: #242425;
+  --wp-admin-theme-color-darker-20: #18181a;
 }
 
 .wrap.ff-admin * {
@@ -88,7 +103,7 @@
 .ff-search-input:focus {
   outline: none;
   border-color: var(--ff-primary);
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
 .ff-search-clear {
@@ -209,7 +224,7 @@
 .ff-admin textarea:focus {
   outline: none;
   border-color: var(--ff-primary);
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
 .ff-admin.ff-edit input,
@@ -620,14 +635,19 @@ button#ff-add-field {
 }
 
 .wrap.ff-admin .button-primary {
-  background: #2271b1;
-  border: 1px solid #1f63a0;
+  background: var(--ff-primary);
+  border: 1px solid var(--ff-primary);
   color: #ffffff;
 }
 
 .wrap.ff-admin .button-primary:hover {
-  background: #1b5e94;
-  border-color: #184f7c;
+  background: var(--ff-primary-hover);
+  border-color: var(--ff-primary-hover);
+}
+
+.wrap.ff-admin .button-primary:active {
+  background: var(--ff-primary-active);
+  border-color: var(--ff-primary-active);
 }
 
 .wrap.ff-admin .button-primary:active {
@@ -639,7 +659,7 @@ button#ff-add-field {
   outline: none;
   box-shadow:
     var(--ff-elev-1),
-    0 0 0 2px rgba(34, 113, 177, 0.25);
+    0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
 .wrap.ff-admin .button[disabled],
@@ -795,7 +815,7 @@ button#ff-add-field {
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.08),
     0 1px 2px rgba(16, 24, 40, 0.06),
-    0 0 0 2px rgba(34, 113, 177, 0.25);
+    0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
 .wrap.ff-admin.ff-list table.ff-list-table td,
@@ -1097,7 +1117,7 @@ button#ff-add-field {
 
 .wrap.ff-admin .ff-copy-key:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
 .wrap.ff-admin .ff-copy-key svg {
@@ -1356,11 +1376,19 @@ span.dashicons {
 }
 
 a.button.button-primary.ff-subbar__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
   margin: 0;
+  padding: 0 20px;
+
   border-radius: 8px;
-  padding: 5px 20px;
-  font-weight: 500;
+
   font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
 }
 
 @media (max-width: 782px) {
@@ -1642,13 +1670,12 @@ a.ff-brandbar__title:focus {
 .ff-options-card select:focus,
 .ff-options-card textarea:focus {
   outline: 0;
-  border-color: #2271b1;
-  box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 3px rgba(54, 54, 55, 0.15);
 }
 
 .ff-mb .button,
-.ff-options-card .button,
-.ff-subbar__btn {
+.ff-options-card .button {
   border-radius: 8px;
   font-weight: 500;
   padding: 6px 12px;
@@ -1901,8 +1928,8 @@ input#_ff_range_slider {
 }
 
 .ff-button-group__btn:has(.ff-button-group__input:checked) {
-  border-color: #2271b1;
-  box-shadow: 0 0 0 1px #2271b1 inset;
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 1px var(--ff-primary) inset;
 }
 
 .ff-admin input[type="radio"] + *,
@@ -2271,7 +2298,7 @@ input#_ff_range_slider {
 
 .ff-tab-button.is-active {
   background: #fff;
-  color: #2271b1;
+  color: var(--ff-primary);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
 }
 

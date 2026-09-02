@@ -286,16 +286,75 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 1500);
       };
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard
-          .writeText(key)
-          .then(done)
-          .catch(function () {
-            window.prompt("Copy field group key:", key);
-          });
-      } else {
-        window.prompt("Copy field group key:", key);
-      }
+      // -------------------------------
+      // Copy group key button
+      // -------------------------------
+      document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
+        btn.addEventListener("click", async function (e) {
+          e.preventDefault();
+
+          const key = this.dataset.key;
+          if (!key) return;
+
+          const self = this;
+
+          function showCopiedState() {
+            self.classList.add("is-copied");
+
+            const oldTitle = self.getAttribute("title") || "";
+            self.setAttribute("title", "Copied!");
+
+            setTimeout(function () {
+              self.classList.remove("is-copied");
+              self.setAttribute("title", oldTitle || "Copy to clipboard");
+            }, 1000);
+          }
+
+          function fallbackCopy(text) {
+            const textarea = document.createElement("textarea");
+
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            textarea.style.pointerEvents = "none";
+
+            document.body.appendChild(textarea);
+
+            textarea.select();
+            textarea.setSelectionRange(0, textarea.value.length);
+
+            let copied = false;
+
+            try {
+              copied = document.execCommand("copy");
+            } catch (error) {
+              copied = false;
+            }
+
+            document.body.removeChild(textarea);
+
+            return copied;
+          }
+
+          try {
+            if (
+              navigator.clipboard &&
+              typeof navigator.clipboard.writeText === "function"
+            ) {
+              await navigator.clipboard.writeText(key);
+              showCopiedState();
+              return;
+            }
+          } catch (error) {
+            // Fall through to legacy copy method.
+          }
+
+          if (fallbackCopy(key)) {
+            showCopiedState();
+          }
+        });
+      });
     });
   });
 
