@@ -1,11 +1,17 @@
 <?php
 
 /**
- * Plugin Name: Forge Fields
- * Description: Lightweight custom fields framework.
- * Version:     0.1.3
- * Author:      Forge Plugins
- * License:     GPL2+
+ * Plugin Name:       Forge Fields
+ * Plugin URI:        https://your-future-plugin-site.com/
+ * Description:       Lightweight custom fields framework for WordPress with support for field groups, global fields, media fields, choice fields, and developer-friendly template functions.
+ * Version:           0.1.3
+ * Author:            Forge Tools
+ * Author URI:        https://your-future-site.com/
+ * License:           GPLv2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Requires at least: 6.5
+ * Requires PHP:      8.0
+ * Text Domain:       forge-fields
  */
 
 

@@ -4648,3 +4648,122 @@ input#_ff_range_slider {
     0 0 0 2px rgba(29, 109, 246, 0.2),
     0 1px 2px rgba(16, 24, 40, 0.05) !important;
 }
+
+/* ---------------------------------------------------------
+   TABS
+   --------------------------------------------------------- */
+
+/**
+ * Forge Fields metabox tab system.
+ *
+ * Uses a soft segmented navigation bar with a raised active tab
+ * for clearer hierarchy and stronger visual separation.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tabs {
+  margin: 0;
+}
+
+/**
+ * Tab navigation container.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 5px;
+  width: fit-content;
+  max-width: 100%;
+  background: #f1f3f5;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+}
+
+/**
+ * Individual tab button.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-button {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: none;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/**
+ * Inactive tab hover state.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-button:hover {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+/**
+ * Active tab.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-button.is-active {
+  color: #111827;
+  font-weight: 600;
+  background: #fff;
+  border-color: #d8dde5;
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.08),
+    0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+/**
+ * Small active indicator beneath the active tab label.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 14px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #363637;
+}
+
+/**
+ * Keyboard focus state.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#poststuff .postbox .inside .ff-mb .ff-tab-button:focus-visible {
+  box-shadow:
+    0 0 0 2px rgba(29, 109, 246, 0.2),
+    0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+/**
+ * Hide inactive tab panels.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-panel {
+  display: none;
+}
+
+/**
+ * Display the active tab panel.
+ */
+#poststuff .postbox .inside .ff-mb .ff-tab-panel.is-active {
+  display: block;
+}
