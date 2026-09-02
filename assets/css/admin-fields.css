@@ -355,16 +355,6 @@ body.ff-has-brandbar {
 }
 
 /**
- * Shared focus state for Forge Fields inputs and textareas.
- */
-.ff-admin input:focus,
-.ff-admin textarea:focus {
-  outline: none;
-  border-color: var(--ff-primary);
-  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
-}
-
-/**
  * Limit form-control width on Forge Fields edit screens so fields do not
  * stretch unnecessarily across the full admin content area.
  */
@@ -1219,26 +1209,6 @@ button#ff-add-field {
 }
 
 /**
- * Focus state for Forge Fields custom select controls.
- *
- * Applies the primary border color, elevated shadow, and an outer focus ring.
- */
-.wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
-.wrap.ff-admin.ff-global .ff-select-wrap select:focus,
-.wrap.ff-admin.ff-settings .ff-select-wrap select:focus,
-.wrap.ff-admin.ff-edit select#ff_location:focus {
-  outline: none;
-  border-color: var(--ff-primary);
-  box-shadow:
-    var(
-      --ff-elev-1,
-      0 2px 6px rgba(16, 24, 40, 0.08),
-      0 1px 2px rgba(16, 24, 40, 0.06)
-    ),
-    0 0 0 2px rgba(54, 54, 55, 0.2);
-}
-
-/**
  * Enhanced search input used on Forge Fields list screens.
  *
  * Adds fixed sizing, internal left padding for the search icon,
@@ -1269,19 +1239,6 @@ button#ff-add-field {
  */
 .wrap.ff-admin.ff-list .ff-search-input::placeholder {
   color: #9aa1ab;
-}
-
-/**
- * Focus state for the list search field.
- *
- * Replaces the browser outline with a blue focus ring and preserves
- * the field's subtle resting shadow.
- */
-.wrap.ff-admin.ff-list .ff-search-input:focus {
-  outline: none;
-  box-shadow:
-    0 0 0 2px rgba(29, 109, 246, 0.2),
-    0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
 /**
@@ -2852,23 +2809,6 @@ a.ff-brandbar__title:focus {
 }
 
 /**
- * Shared focus treatment for meta-box and options-card controls.
- *
- * Replaces the browser outline with the Forge Fields primary border
- * color and a subtle outer focus ring.
- */
-.ff-mb input:focus,
-.ff-mb select:focus,
-.ff-mb textarea:focus,
-.ff-options-card input:focus,
-.ff-options-card select:focus,
-.ff-options-card textarea:focus {
-  outline: 0;
-  border-color: var(--ff-primary);
-  box-shadow: 0 0 0 3px rgba(54, 54, 55, 0.15);
-}
-
-/**
  * Shared button styling inside meta boxes and options cards.
  */
 .ff-mb .button,
@@ -4409,43 +4349,6 @@ input#_ff_range_slider {
     0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
-/**
- * Text inputs and textarea focus state.
- *
- * Replaces browser/WordPress focus styling with the Forge Fields
- * primary border and a subtle layered focus treatment.
- */
-#poststuff .postbox .inside .ff-mb input[type="text"]:focus,
-#poststuff .postbox .inside .ff-mb input[type="email"]:focus,
-#poststuff .postbox .inside .ff-mb input[type="url"]:focus,
-#poststuff .postbox .inside .ff-mb input[type="password"]:focus,
-#poststuff .postbox .inside .ff-mb input[type="number"]:focus,
-#poststuff .postbox .inside .ff-mb textarea:focus {
-  outline: none !important;
-  border-color: var(--ff-primary) !important;
-  border-radius: 8px;
-  box-shadow:
-    0 2px 6px rgba(16, 24, 40, 0.07),
-    0 1px 2px rgba(16, 24, 40, 0.05),
-    0 0 0 1px rgba(54, 54, 55, 0.14) !important;
-}
-
-/**
- * Select focus state.
- *
- * Uses the Forge Fields primary border plus a slightly stronger
- * outer focus ring than standard text controls.
- */
-#poststuff .postbox .inside .ff-mb .ff-select-wrap select:focus {
-  outline: none !important;
-  border-color: var(--ff-primary) !important;
-  border-radius: 8px;
-  box-shadow:
-    0 2px 6px rgba(16, 24, 40, 0.08),
-    0 1px 2px rgba(16, 24, 40, 0.06),
-    0 0 0 2px rgba(54, 54, 55, 0.2) !important;
-}
-
 /* ---------------------------------------------------------
    CHECKBOX / RADIO
    --------------------------------------------------------- */
@@ -4617,11 +4520,11 @@ input#_ff_range_slider {
 
 /**
  * Prevent field-column content from forcing the grid wider than
- * its available space.
+ * its available space while allowing focus rings to remain visible.
  */
 #poststuff .postbox .inside .ff-mb .form-table td {
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /**
@@ -4708,4 +4611,40 @@ input#_ff_range_slider {
   font-size: 12px;
   color: var(--ff-text-muted);
   white-space: nowrap;
+}
+
+/**
+ * Shared Forge Fields form-control focus state.
+ *
+ * Applies the same blue focus treatment used by the Field Groups
+ * search input across standard inputs, textareas, selects, Global
+ * Fields, Settings fields, and post/page metabox controls.
+ */
+.wrap.ff-admin input[type="text"]:focus,
+.wrap.ff-admin input[type="password"]:focus,
+.wrap.ff-admin input[type="url"]:focus,
+.wrap.ff-admin input[type="number"]:focus,
+.wrap.ff-admin input[type="email"]:focus,
+.wrap.ff-admin input[type="search"]:focus,
+.wrap.ff-admin textarea:focus,
+.wrap.ff-admin select:focus,
+.ff-options-card input[type="text"]:focus,
+.ff-options-card input[type="password"]:focus,
+.ff-options-card input[type="url"]:focus,
+.ff-options-card input[type="number"]:focus,
+.ff-options-card input[type="email"]:focus,
+.ff-options-card textarea:focus,
+.ff-options-card select:focus,
+#poststuff .postbox .inside .ff-mb input[type="text"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="password"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="url"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="number"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="email"]:focus,
+#poststuff .postbox .inside .ff-mb textarea:focus,
+#poststuff .postbox .inside .ff-mb select:focus {
+  outline: none !important;
+  border-color: #1d6df676 !important;
+  box-shadow:
+    0 0 0 2px rgba(29, 109, 246, 0.2),
+    0 1px 2px rgba(16, 24, 40, 0.05) !important;
 }
