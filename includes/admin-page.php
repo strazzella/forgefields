@@ -2661,7 +2661,7 @@ function ff_render_field_group_edit()
                         </div>
 
                         <p class="description">
-                            Choose whether this field group appears on all pages/posts, or only one specific item. Global ignores the second dropdown.
+                            Choose whether this field group appears on all pages/posts, or only one specific item. Global affects site-wide.
                         </p>
                     </td>
                 </tr>
