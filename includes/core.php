@@ -10,6 +10,21 @@ global $ff_field_groups;
 $ff_field_groups = [];
 
 /**
+ * Generate a unique Forge Fields group ID.
+ */
+function ff_generate_group_id() {
+    return uniqid( 'ff_group_' );
+}
+
+/**
+ * Get all saved field groups from the database.
+ */
+function ff_get_all_groups() {
+    $groups = get_option( 'ff_field_groups', [] );
+
+    return is_array( $groups ) ? $groups : [];
+}
+/**
  * -------------------------------------------------------------------------
  * FIELD TYPE REGISTRY (first step of abstraction)
  * -------------------------------------------------------------------------
@@ -52,6 +67,10 @@ function ff_get_field_types() {
             'password' => [
                 'render'   => 'ff_render_type_password',
                 'sanitize' => 'ff_sanitize_type_password',
+            ],
+            'tab' => [
+                'render'   => 'ff_render_type_tab',
+                'sanitize' => 'ff_sanitize_type_tab',
             ],
         ];
 
@@ -167,27 +186,43 @@ function ff_render_type_range( array $field, $value, WP_Post $post ) {
     <?php
 }
 
-
-
 function ff_render_type_password( array $field, $value, WP_Post $post ) {
     $name = $field['name'];
     $id   = 'ff_' . esc_attr( $name );
 
     echo '<div class="ff-password-wrap">';
-    echo '<input type="password" class="regular-text ff-password-input" id="' . esc_attr( $id )
-    . '" name="' . esc_attr( $name )
-    . '" value="' . esc_attr( $value ) . '">';
 
-    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $id ) . '" aria-label="Show password">
-            <span class="dashicons dashicons-hidden"></span>
-        </button>';
+    echo '<input 
+        type="password"
+        class="regular-text ff-password-input"
+        id="' . esc_attr( $id ) . '"
+        name="' . esc_attr( $name ) . '"
+        value="' . esc_attr( $value ) . '"
+        maxlength="45"
+        autocomplete="off"
+    >';
+
+    echo '<button 
+        type="button" 
+        class="ff-password-toggle" 
+        data-target="#' . esc_attr( $id ) . '" 
+        aria-label="Show password"
+        aria-controls="' . esc_attr( $id ) . '"
+    >
+        <span class="dashicons dashicons-hidden"></span>
+    </button>';
 
     echo '</div>';
-
 }
 
+function ff_render_type_tab( array $field, $value, WP_Post $post ) {
+    // Tabs are layout-only markers and do not render a normal input.
+    $label = isset( $field['label'] ) ? $field['label'] : 'Tab';
 
-
+    echo '<div class="ff-tab-placeholder">';
+    echo '<strong>' . esc_html( $label ) . '</strong>';
+    echo '</div>';
+}
 
 /**
  * -------------------------------------------------------------------------
@@ -272,6 +307,10 @@ function ff_sanitize_type_password( $raw, array $field, $post_id ) {
     return $raw;
 }
 
+function ff_sanitize_type_tab( $raw, array $field, $post_id ) {
+    // Tabs are layout-only and should not store a value.
+    return '';
+}
 
 /**
  * Register a field group at runtime.
@@ -301,41 +340,325 @@ function ff_register_field_group( array $group ) {
 }
 
 /**
- * Attach meta boxes for all registered groups on posts/pages.
+ * Load saved field groups, migrate legacy data if needed,
+ * and register active groups at runtime.
  */
-add_action('add_meta_boxes', function () {
-    // Prefer the helper over a global
-    $groups = ff_get_all_groups();
-    if (empty($groups) || !is_array($groups)) {
+function ff_boot_field_groups() {
+    $groups = get_option( 'ff_field_groups', null );
+
+    if ( $groups === null ) {
+        $legacy = get_option( 'ff_field_group', [] );
+
+        if ( is_array( $legacy ) && ! empty( $legacy ) ) {
+            if ( empty( $legacy['id'] ) ) {
+                $legacy['id'] = 'ff_legacy_group';
+            }
+
+            $groups = [ $legacy['id'] => $legacy ];
+            update_option( 'ff_field_groups', $groups );
+            delete_option( 'ff_field_group' );
+        } else {
+            $groups = [];
+            update_option( 'ff_field_groups', $groups );
+        }
+    }
+
+    if ( ! is_array( $groups ) || empty( $groups ) ) {
         return;
     }
 
-    foreach ($groups as $group_id => $group) {
-        $location = isset($group['location']) ? $group['location'] : 'page';
+    foreach ( $groups as $group ) {
+        if ( ! is_array( $group ) ) {
+            continue;
+        }
 
-        // Only attach to real post editors for now.
-        if (!in_array($location, ['page','post'], true)) {
-            continue; // 'global' is handled on your options screen
+        $status = isset( $group['status'] ) ? $group['status'] : 'active';
+
+        if ( $status !== 'active' ) {
+            continue;
+        }
+
+        if ( empty( $group['id'] ) ) {
+            $group['id'] = ff_generate_group_id();
+        }
+
+        ff_register_field_group( $group );
+    }
+}
+
+/**
+ * Attach meta boxes for all registered groups on posts/pages.
+ */
+add_action('add_meta_boxes', function () {
+    $groups = ff_get_all_groups();
+    if ( empty( $groups ) || ! is_array( $groups ) ) {
+        return;
+    }
+
+    $current_post_id = 0;
+    if ( isset( $_GET['post'] ) ) {
+        $current_post_id = absint( $_GET['post'] );
+    } elseif ( isset( $_POST['post_ID'] ) ) {
+        $current_post_id = absint( $_POST['post_ID'] );
+    }
+
+    foreach ( $groups as $group_id => $group ) {
+        $location = isset( $group['location'] ) ? $group['location'] : 'page';
+        $target   = isset( $group['location_target'] ) ? (string) $group['location_target'] : '';
+        $status   = isset( $group['status'] ) ? $group['status'] : 'active';
+
+        if ( $status !== 'active' ) {
+            continue;
+        }
+
+        // Only attach to page/post editors. Global is handled elsewhere.
+        if ( ! in_array( $location, [ 'page', 'post' ], true ) ) {
+            continue;
+        }
+
+        // If a specific page/post is selected, only attach on that exact item.
+        if ( $target !== '' && (string) $current_post_id !== $target ) {
+            continue;
         }
 
         add_meta_box(
             'ff_field_group_' . $group_id,
-            esc_html($group['title']),
-            'ff_render_field_group_metabox', // <- this function must exist (renderer I sent)
-            $location,                       // 'post' or 'page'
+            esc_html( $group['title'] ),
+            'ff_render_field_group_metabox',
+            $location,
             'normal',
             'default',
-            ['group_id' => $group_id]
+            [ 'group_id' => $group_id ]
         );
     }
 });
 
+function ff_render_metabox_field_row( array $field, WP_Post $post ) {
+    $name = $field['name'] ?? '';
+    if ( $name === '' ) {
+        return;
+    }
+
+    $label    = $field['label'] ?? $name;
+    $type     = $field['type']  ?? 'text';
+    $meta_key = '_ff_' . $name;
+    $value    = get_post_meta( $post->ID, $meta_key, true );
+
+    echo '<tr>';
+    echo '<th scope="row"><label for="'. esc_attr( $meta_key ) .'">'. esc_html( $label ) .'</label></th>';
+    echo '<td>';
+
+    switch ( $type ) {
+        case 'wysiwyg':
+            $editor_id = 'ff_' . sanitize_key( $name );
+            wp_editor(
+                is_string( $value ) ? $value : '',
+                $editor_id,
+                [
+                    'textarea_name' => $meta_key,
+                    'textarea_rows' => 12,
+                    'media_buttons' => true,
+                    'tinymce'       => [
+                        'branding'  => false,
+                        'menubar'   => false,
+                        'statusbar' => false,
+                        'toolbar1'  => 'formatselect,bold,italic,underline,|,bullist,numlist,blockquote,|,link,unlink,|,alignleft,aligncenter,alignright,|,removeformat',
+                        'toolbar2'  => '',
+                    ],
+                    'quicktags'     => true,
+                    'editor_height' => 260,
+                    'editor_class'  => 'ff-editor',
+                ]
+            );
+            break;
+
+        case 'textarea':
+            printf(
+                '<textarea name="%1$s" id="%2$s" rows="6" class="large-text">%3$s</textarea>',
+                esc_attr( $meta_key ),
+                esc_attr( $meta_key ),
+                esc_textarea( (string) $value )
+            );
+            break;
+
+        case 'number':
+            printf(
+                '<input type="number" class="small-text" name="%1$s" id="%2$s" value="%3$s">',
+                esc_attr( $meta_key ),
+                esc_attr( $meta_key ),
+                esc_attr( (string) $value )
+            );
+            break;
+
+        case 'email':
+        case 'url':
+        case 'text':
+            $input = in_array( $type, [ 'email', 'url' ], true ) ? $type : 'text';
+            echo '<input type="'. esc_attr( $input ) .'" class="regular-text" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
+            break;
+
+        case 'password':
+            echo '<div class="ff-password-wrap">';
+            echo '<input type="password" class="regular-text ff-password-input" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'" maxlength="45" autocomplete="off">';
+            echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr( $meta_key ) . '" aria-label="Show password" aria-controls="' . esc_attr( $meta_key ) . '">';
+            echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
+            echo '</button>';
+            echo '</div>';
+            break;
+
+        case 'range':
+            $min  = isset( $field['min'] )  ? (int) $field['min']  : 0;
+            $max  = isset( $field['max'] )  ? (int) $field['max']  : 100;
+            $step = isset( $field['step'] ) ? (int) $field['step'] : 1;
+            $val  = ($value === '' ? $min : (int) $value);
+
+            $slider_id = $meta_key . '_slider';
+            $num_id    = $meta_key . '_num';
+
+            echo '<div class="ff-range-wrap">';
+            echo '<input type="range" class="ff-range-slider" id="'. esc_attr( $slider_id ) .'" name="'. esc_attr( $meta_key ) .'" min="'. esc_attr( $min ) .'" max="'. esc_attr( $max ) .'" step="'. esc_attr( $step ) .'" value="'. esc_attr( $val ) .'" data-target="#'. esc_attr( $num_id ) .'">';
+            echo '<input type="number" class="small-text ff-range-number" id="'. esc_attr( $num_id ) .'" min="'. esc_attr( $min ) .'" max="'. esc_attr( $max ) .'" step="'. esc_attr( $step ) .'" value="'. esc_attr( $val ) .'" data-target="#'. esc_attr( $slider_id ) .'">';
+            echo '</div>';
+            break;
+
+        case 'image':
+            $img_src = '';
+            if ( $value ) {
+                $src = wp_get_attachment_image_src( (int) $value, 'thumbnail' );
+                if ( $src ) {
+                    $img_src = $src[0];
+                }
+            }
+
+            echo '<div class="ff-media-wrap" data-type="image">';
+            echo '<input type="hidden" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
+            echo '<div class="ff-media-preview-wrap" style="margin-bottom:8px;">';
+            echo '<img class="ff-media-preview" src="'. esc_url( $img_src ) .'" style="'. ( $img_src ? '' : 'display:none;' ) .'max-height:80px;border-radius:4px;">';
+            echo '</div>';
+            echo '<button type="button" class="button ff-media-select" data-target="'. esc_attr( $meta_key ) .'">Select Image</button>';
+            echo '<button type="button" class="button ff-media-clear" data-target="'. esc_attr( $meta_key ) .'" style="'. ( $value ? '' : 'display:none;' ) .'">Clear</button>';
+            echo '</div>';
+            break;
+
+        case 'file':
+            $file_url  = $value ? wp_get_attachment_url( (int) $value ) : '';
+            $file_name = $file_url ? wp_basename( $file_url ) : '';
+
+            echo '<div class="ff-media-wrap" data-type="file">';
+            echo '<input type="hidden" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
+            echo '<div class="ff-media-fileline" style="margin-bottom:8px;">';
+            echo '<span class="dashicons dashicons-media-document" aria-hidden="true"></span> ';
+            echo '<a class="ff-media-fileurl" href="'. esc_url( $file_url ) .'" target="_blank" style="'. ( $file_url ? '' : 'display:none;' ) .'">'. esc_html( $file_name ) .'</a>';
+            echo '<span class="ff-media-nofile" style="'. ( $file_url ? 'display:none;' : '' ) .'">No file selected.</span>';
+            echo '</div>';
+            echo '<button type="button" class="button ff-media-select" data-target="'. esc_attr( $meta_key ) .'">Select File</button>';
+            echo '<button type="button" class="button ff-media-clear" data-target="'. esc_attr( $meta_key ) .'" style="'. ( $value ? '' : 'display:none;' ) .'">Clear</button>';
+            echo '</div>';
+            break;
+
+        case 'select':
+            $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+            $current     = is_scalar( $value ) ? (string) $value : '';
+
+            echo '<div class="ff-select-wrap">';
+            echo '<select name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'">';
+            foreach ( $choices_map as $v => $lbl ) {
+                printf(
+                    '<option value="%1$s"%3$s>%2$s</option>',
+                    esc_attr( $v ),
+                    esc_html( $lbl ),
+                    selected( $current, (string) $v, false )
+                );
+            }
+            echo '</select>';
+            echo '</div>';
+            break;
+
+        case 'radio':
+            $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+            $current     = is_scalar( $value ) ? (string) $value : '';
+
+            foreach ( $choices_map as $v => $lbl ) {
+                $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+                printf(
+                    '<label for="%1$s" style="display:inline-block;margin-right:12px;">
+                        <input type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
+                        %5$s
+                    </label>',
+                    esc_attr( $field_id ),
+                    esc_attr( $meta_key ),
+                    esc_attr( $v ),
+                    checked( $current, (string) $v, false ),
+                    esc_html( $lbl )
+                );
+            }
+            break;
+
+        case 'button_group':
+            $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+            $current     = is_scalar( $value ) ? (string) $value : '';
+
+            echo '<div class="ff-button-group" role="radiogroup">';
+            foreach ( $choices_map as $v => $lbl ) {
+                $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+                printf(
+                    '<label class="ff-button-group__btn" for="%1$s">
+                        <input class="ff-button-group__input" type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
+                        <span class="ff-button-group__label">%5$s</span>
+                    </label>',
+                    esc_attr( $field_id ),
+                    esc_attr( $meta_key ),
+                    esc_attr( $v ),
+                    checked( $current, (string) $v, false ),
+                    esc_html( $lbl )
+                );
+            }
+            echo '</div>';
+            break;
+
+        case 'checkbox':
+            $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
+            $current     = is_array( $value ) ? array_map( 'strval', $value ) : [];
+
+            foreach ( $choices_map as $v => $lbl ) {
+                $field_id = $meta_key . '_' . sanitize_key( (string) $v );
+                printf(
+                    '<label for="%1$s" style="display:inline-block;margin-right:12px;">
+                        <input type="checkbox" name="%2$s[]" id="%1$s" value="%3$s" %4$s>
+                        %5$s
+                    </label>',
+                    esc_attr( $field_id ),
+                    esc_attr( $meta_key ),
+                    esc_attr( $v ),
+                    in_array( (string) $v, $current, true ) ? 'checked' : '',
+                    esc_html( $lbl )
+                );
+            }
+            break;
+
+        case 'true_false':
+            $checked = ! empty( $value );
+            printf(
+                '<label>
+                    <input type="checkbox" name="%1$s" id="%2$s" value="1" %3$s>
+                    %4$s
+                </label>',
+                esc_attr( $meta_key ),
+                esc_attr( $meta_key ),
+                checked( $checked, true, false ),
+                esc_html__( 'Enabled', 'forge-fields' )
+            );
+            break;
+    }
+
+    echo '</td>';
+    echo '</tr>';
+}
 
 /**
  * Render fields for a given Forge Fields meta box.
  */
 function ff_render_field_group_metabox( $post, $box ) {
-    // Make sure the group exists
     $group_id = isset( $box['args']['group_id'] ) ? $box['args']['group_id'] : '';
     $groups   = ff_get_all_groups();
 
@@ -352,263 +675,50 @@ function ff_render_field_group_metabox( $post, $box ) {
         return;
     }
 
-    // One nonce for all fields in this box
     wp_nonce_field( 'ff_save_post_fields', 'ff_meta_nonce' );
 
+    $sections = ff_group_fields_into_tab_sections( $fields );
+    $has_tabs = count( $sections ) > 1 || ( count( $sections ) === 1 && $sections[0]['label'] !== '' );
+
     echo '<div class="ff-mb">';
-    echo '<table class="form-table"><tbody>';
 
-    foreach ( $fields as $field ) {
-        $name = $field['name'] ?? '';
-        if ( $name === '' ) {
-            continue;
+    if ( $has_tabs ) {
+        echo '<div class="ff-tabs" data-ff-tabs>';
+        echo '<div class="ff-tab-nav">';
+
+        foreach ( $sections as $index => $section ) {
+            echo '<button type="button" class="ff-tab-button'. ( $index === 0 ? ' is-active' : '' ) .'" data-ff-tab="'. esc_attr( $index ) .'">';
+            echo esc_html( $section['label'] ?: 'General' );
+            echo '</button>';
         }
 
-        $label   = $field['label'] ?? $name;
-        $type    = $field['type']  ?? 'text';
-        $meta_key = '_ff_' . $name; // meta key used for storage
-        $value    = get_post_meta( $post->ID, $meta_key, true );
-
-        echo '<tr>';
-        echo '<th scope="row"><label for="'. esc_attr( $meta_key ) .'">'. esc_html( $label ) .'</label></th>';
-        echo '<td>';
-
-        switch ( $type ) {
-
-            case 'wysiwyg':
-                $editor_id = 'ff_' . sanitize_key( $name );
-                wp_editor(
-                    is_string( $value ) ? $value : '',
-                    $editor_id,
-                    [
-                        'textarea_name' => $meta_key,   // IMPORTANT: matches save_post
-                        'textarea_rows' => 12,
-                        'media_buttons' => true,
-                        'tinymce'       => [
-                            'branding'  => false,
-                            'menubar'   => false,
-                            'statusbar' => false,
-                            'toolbar1'  => 'formatselect,bold,italic,underline,|,bullist,numlist,blockquote,|,link,unlink,|,alignleft,aligncenter,alignright,|,removeformat',
-                            'toolbar2'  => '',
-                        ],
-                        'quicktags'     => true,
-                        'editor_height' => 260,
-                        'editor_class'  => 'ff-editor',
-                    ]
-                );
-                break;
-
-            case 'image':
-                $img_src = '';
-                if ( $value ) {
-                    $src = wp_get_attachment_image_src( (int) $value, 'thumbnail' );
-                    if ( $src ) {
-                        $img_src = $src[0];
-                    }
-                }
-                ?>
-                <div class="ff-media-wrap" data-type="image">
-                    <input type="hidden"
-                           name="<?php echo esc_attr( $meta_key ); ?>"
-                           id="<?php echo esc_attr( $meta_key ); ?>"
-                           value="<?php echo esc_attr( $value ); ?>">
-                    <div class="ff-media-preview-wrap" style="margin-bottom:8px;">
-                        <img class="ff-media-preview"
-                             src="<?php echo esc_url( $img_src ); ?>"
-                             style="<?php echo $img_src ? '' : 'display:none;'; ?>max-height:80px;border-radius:4px;">
-                    </div>
-                    <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $meta_key ); ?>">Select Image</button>
-                    <button type="button" class="button ff-media-clear"  data-target="<?php echo esc_attr( $meta_key ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
-                </div>
-                <?php
-                break;
-
-            case 'file':
-                $file_url  = $value ? wp_get_attachment_url( (int) $value ) : '';
-                $file_name = $file_url ? wp_basename( $file_url ) : '';
-                ?>
-                <div class="ff-media-wrap" data-type="file">
-                    <input type="hidden"
-                           name="<?php echo esc_attr( $meta_key ); ?>"
-                           id="<?php echo esc_attr( $meta_key ); ?>"
-                           value="<?php echo esc_attr( $value ); ?>">
-                    <div class="ff-media-fileline" style="margin-bottom:8px;">
-                        <span class="dashicons dashicons-media-document" aria-hidden="true"></span>
-                        <a class="ff-media-fileurl"
-                           href="<?php echo esc_url( $file_url ); ?>"
-                           target="_blank"
-                           style="<?php echo $file_url ? '' : 'display:none;'; ?>">
-                            <?php echo esc_html( $file_name ); ?>
-                        </a>
-                        <span class="ff-media-nofile" style="<?php echo $file_url ? 'display:none;' : ''; ?>">
-                            No file selected.
-                        </span>
-                    </div>
-                    <button type="button" class="button ff-media-select" data-target="<?php echo esc_attr( $meta_key ); ?>">Select File</button>
-                    <button type="button" class="button ff-media-clear"  data-target="<?php echo esc_attr( $meta_key ); ?>" style="<?php echo $value ? '' : 'display:none;'; ?>">Clear</button>
-                </div>
-                <?php
-                break;
-
-            /**
-             * CHOICE TYPES – THIS IS THE BIT YOU WERE MISSING
-             */
-      case 'select':
-    $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
-    $current     = is_scalar( $value ) ? (string) $value : '';
-
-    echo '<select name="'. esc_attr($meta_key) .'" id="'. esc_attr($meta_key) .'">';
-    foreach ( $choices_map as $v => $lbl ) {
-        printf(
-            '<option value="%1$s"%3$s>%2$s</option>',
-            esc_attr( $v ),
-            esc_html( $lbl ),
-            selected( $current, (string) $v, false )
-        );
-    }
-    echo '</select>';
-    break;
-
-    case 'radio':
-        $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
-        $current     = is_scalar( $value ) ? (string) $value : '';
-
-        foreach ( $choices_map as $v => $lbl ) {
-            $field_id = $meta_key . '_' . sanitize_key( (string) $v );
-            printf(
-                '<label for="%1$s" style="display:inline-block;margin-right:12px;">
-                    <input type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
-                    %5$s
-                </label>',
-                esc_attr( $field_id ),
-                esc_attr( $meta_key ),
-                esc_attr( $v ),
-                checked( $current, (string) $v, false ),
-                esc_html( $lbl )
-            );
-        }
-        break;
-
-    case 'button_group':
-        $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
-        $current     = is_scalar( $value ) ? (string) $value : '';
-
-        echo '<div class="ff-button-group" role="radiogroup">';
-        foreach ( $choices_map as $v => $lbl ) {
-            $field_id = $meta_key . '_' . sanitize_key( (string) $v );
-            printf(
-                '<label class="ff-button-group__btn" for="%1$s">
-                    <input class="ff-button-group__input" type="radio" name="%2$s" id="%1$s" value="%3$s" %4$s>
-                    <span class="ff-button-group__label">%5$s</span>
-                </label>',
-                esc_attr( $field_id ),
-                esc_attr( $meta_key ),
-                esc_attr( $v ),
-                checked( $current, (string) $v, false ),
-                esc_html( $lbl )
-            );
-        }
         echo '</div>';
-        break;
 
-    case 'checkbox':
-        $choices_map = ff_parse_choices_string( $field['choices'] ?? '' );
-        $current     = is_array( $value ) ? array_map( 'strval', $value ) : [];
+        foreach ( $sections as $index => $section ) {
+            echo '<div class="ff-tab-panel'. ( $index === 0 ? ' is-active' : '' ) .'" data-ff-tab-panel="'. esc_attr( $index ) .'">';
+            echo '<table class="form-table"><tbody>';
 
-        foreach ( $choices_map as $v => $lbl ) {
-            $field_id = $meta_key . '_' . sanitize_key( (string) $v );
-            printf(
-                '<label for="%1$s" style="display:inline-block;margin-right:12px;">
-                    <input type="checkbox" name="%2$s[]" id="%1$s" value="%3$s" %4$s>
-                    %5$s
-                </label>',
-                esc_attr( $field_id ),
-                esc_attr( $meta_key ),
-                esc_attr( $v ),
-                in_array( (string) $v, $current, true ) ? 'checked' : '',
-                esc_html( $lbl )
-            );
-        }
-        break;
+            foreach ( $section['fields'] as $field ) {
+                ff_render_metabox_field_row( $field, $post );
+            }
 
-    case 'true_false':
-        $checked = ! empty( $value );
-        printf(
-            '<label>
-                <input type="checkbox" name="%1$s" id="%2$s" value="1" %3$s>
-                %4$s
-            </label>',
-            esc_attr( $meta_key ),
-            esc_attr( $meta_key ),
-            checked( $checked, true, false ),
-            esc_html__( 'Enabled', 'forge-fields' )
-        );
-        break;
-    
-            /**
-             * BASIC TYPES
-             */
-            case 'textarea':
-                echo '<textarea class="large-text" rows="4" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'">'. esc_textarea( (string) $value ) .'</textarea>';
-                break;
-
-            case 'number':
-                echo '<input type="number" class="small-text" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
-                break;
-
-            case 'range':
-                $min  = isset( $field['min'] )  ? (int) $field['min']  : 0;
-                $max  = isset( $field['max'] )  ? (int) $field['max']  : 100;
-                $step = isset( $field['step'] ) ? (int) $field['step'] : 1;
-                $val  = ( $value === '' ? $min : (int) $value );
-
-                $slider_id = esc_attr( $meta_key ) . '_slider';
-                $num_id    = esc_attr( $meta_key ) . '_num';
-                ?>
-                <div class="ff-range-wrap">
-                    <input
-                        type="range"
-                        class="ff-range-slider"
-                        id="<?php echo $slider_id; ?>"
-                        name="<?php echo esc_attr( $meta_key ); ?>"
-                        min="<?php echo esc_attr( $min ); ?>"
-                        max="<?php echo esc_attr( $max ); ?>"
-                        step="<?php echo esc_attr( $step ); ?>"
-                        value="<?php echo esc_attr( $val ); ?>"
-                        data-target="#<?php echo $num_id; ?>"
-                    />
-                    <input
-                        type="number"
-                        class="small-text ff-range-number"
-                        id="<?php echo $num_id; ?>"
-                        min="<?php echo esc_attr( $min ); ?>"
-                        max="<?php echo esc_attr( $max ); ?>"
-                        step="<?php echo esc_attr( $step ); ?>"
-                        value="<?php echo esc_attr( $val ); ?>"
-                        data-target="#<?php echo $slider_id; ?>"
-                    />
-                </div>
-                <?php
-                break;
-
-            case 'email':
-            case 'url':
-            case 'password':
-            case 'text':
-            default:
-                $input = in_array( $type, ['email','url','password'], true ) ? $type : 'text';
-                echo '<input type="'. esc_attr( $input ) .'" class="regular-text" name="'. esc_attr( $meta_key ) .'" id="'. esc_attr( $meta_key ) .'" value="'. esc_attr( (string) $value ) .'">';
-                break;
+            echo '</tbody></table>';
+            echo '</div>';
         }
 
-        echo '</td></tr>';
+        echo '</div>';
+    } else {
+        echo '<table class="form-table"><tbody>';
+
+        foreach ( $fields as $field ) {
+            ff_render_metabox_field_row( $field, $post );
+        }
+
+        echo '</tbody></table>';
     }
 
-    echo '</tbody></table>';
     echo '</div>';
 }
-
-
 
 /**
  * Save meta values for all registered field groups.
@@ -727,10 +837,10 @@ add_action( 'save_post', function( $post_id ) {
             }
 
             // Save or delete
-            if ( $val === '' || $val === 0 || $val === [] ) {
-                delete_post_meta( $post_id, $key );
+            if ( $val === '' || $val === [] || $val === null ) {
+                delete_post_meta( $post_id, '_ff_' . $name );
             } else {
-                update_post_meta( $post_id, $key, $val );
+                update_post_meta( $post_id, '_ff_' . $name, $val );
             }
         }
     }
@@ -746,33 +856,19 @@ add_action( 'save_post', function( $post_id ) {
  *   echo ff_get_field( 'hero_heading', 'global' ); // global/options
  *   echo ff_get_field( 'hero_heading', 'option' ); // alias for global
  */
-function ff_get_field( $name, $context = 0 ) {
-    $name = sanitize_key( $name );
-
-    if ( ! $name ) {
+function ff_get_field( $field_name, $post_id = null ) {
+    if ( ! $field_name ) {
         return '';
     }
 
-    // Global / options context, ACF-style.
-    if (
-        $context === 'global' ||
-        $context === 'option' ||
-        $context === 'options'
-    ) {
-        $all = get_option( 'ff_global_fields', [] );
-
-        if ( ! is_array( $all ) ) {
-            $all = [];
-        }
-
-        $value = isset( $all[ $name ] ) ? $all[ $name ] : '';
-
-        return is_string( $value ) ? $value : '';
+    // Global/options lookup
+    if ( $post_id === 'global' || $post_id === 'option' ) {
+        $global = get_option( 'ff_global_fields', [] );
+        return isset( $global[ $field_name ] ) ? $global[ $field_name ] : '';
     }
 
-    // Default: treat $context as a post ID (post/page fields).
-    $post_id = intval( $context );
-    if ( ! $post_id ) {
+    // Current post fallback
+    if ( $post_id === null ) {
         $post_id = get_the_ID();
     }
 
@@ -780,13 +876,9 @@ function ff_get_field( $name, $context = 0 ) {
         return '';
     }
 
-    // Your meta boxes save with a "_ff_" prefix (e.g. "_ff_plan")
-    $meta_key = '_ff_' . $name;
+    $value = get_post_meta( $post_id, '_ff_' . $field_name, true );
 
-    $value = get_post_meta( $post_id, $meta_key, true );
-
-    // Normalise return to string for consistency
-    return is_string( $value ) ? $value : '';
+    return $value;
 }
 
 /**
@@ -827,3 +919,63 @@ if ( ! function_exists( 'ff_parse_choices_string' ) ) {
     }
 }
 
+function ff_group_fields_into_tab_sections( array $fields ) {
+    $has_tabs = false;
+
+    foreach ( $fields as $field ) {
+        $type = isset( $field['type'] ) ? $field['type'] : 'text';
+        if ( $type === 'tab' ) {
+            $has_tabs = true;
+            break;
+        }
+    }
+
+    // No tabs at all: return a single plain section
+    if ( ! $has_tabs ) {
+        return [
+            [
+                'label'  => '',
+                'fields' => $fields,
+            ],
+        ];
+    }
+
+    $sections       = [];
+    $current_label  = 'General';
+    $current_fields = [];
+
+    foreach ( $fields as $field ) {
+        $type = isset( $field['type'] ) ? $field['type'] : 'text';
+
+        if ( $type === 'tab' ) {
+            if ( ! empty( $current_fields ) ) {
+                $sections[] = [
+                    'label'  => $current_label,
+                    'fields' => $current_fields,
+                ];
+            }
+
+            $current_label  = ! empty( $field['label'] ) ? $field['label'] : 'Tab';
+            $current_fields = [];
+            continue;
+        }
+
+        $current_fields[] = $field;
+    }
+
+    if ( ! empty( $current_fields ) ) {
+        $sections[] = [
+            'label'  => $current_label,
+            'fields' => $current_fields,
+        ];
+    }
+
+    return $sections;
+}
+
+/**
+ * Save all field groups back to the database.
+ */
+function ff_save_all_groups( array $groups ) {
+    update_option( 'ff_field_groups', $groups );
+}

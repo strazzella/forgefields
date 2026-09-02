@@ -1,6 +1,9 @@
-/* File: assets/css/forge-fields-admin.css */
+/* Forge Fields admin CSS — consolidated clean pass.
+ * Based on your current stylesheet, with duplicate selector blocks merged,
+ * undefined token references normalized, and rule order preserved as much as possible.
+ * Keep your original file as backup before swapping this in.
+ */
 
-/* ---------- tokens ---------- */
 .ff-admin {
   --ff-bg: #fff;
   --ff-bg-muted: #f6f7f7;
@@ -9,7 +12,11 @@
   --ff-border-strong: #c7ccd6;
   --ff-text: #1f2937;
   --ff-text-muted: #6b7280;
-  --ff-primary: #2271b1; /* WP/ACF-ish */
+
+  --ff-primary: #363637;
+  --ff-primary-hover: #242425;
+  --ff-primary-active: #18181a;
+
   --ff-success: #1e824c;
   --ff-warn: #b45309;
   --ff-danger: #b91c1c;
@@ -17,11 +24,13 @@
   --ff-r-2: 3px;
   --ff-r-3: 4px;
   --ff-r-4: 6px;
+
   --ff-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 
   --ff-f-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui,
     sans-serif;
+
   --ff-f-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
@@ -31,29 +40,34 @@
   --ff-14: 14px;
 }
 
-/* unify font/box-sizing just under our wrap */
+body.ff-has-brandbar {
+  --wp-admin-theme-color: #363637;
+  --wp-admin-theme-color-darker-10: #242425;
+  --wp-admin-theme-color-darker-20: #18181a;
+}
+
 .wrap.ff-admin * {
   box-sizing: border-box;
   font-family: var(--ff-f-ui);
 }
 
-/* ---------- global layout ---------- */
 .ff-edit,
 .ff-list,
 .ff-global {
   padding: 24px 20px;
 }
+
 .page-title-action {
   border-radius: var(--ff-r-3);
 }
 
-/* ---------- subsubsub -> ACF-like pills ---------- */
 .wrap.ff-admin .subsubsub {
   margin: 6px 0 14px;
   gap: 8px;
   display: flex;
   flex-wrap: wrap;
 }
+
 .wrap.ff-admin .subsubsub a {
   padding: 3px 8px;
   text-decoration: none;
@@ -62,14 +76,15 @@
   align-items: center;
   gap: 6px;
 }
+
 .wrap.ff-admin .subsubsub a .count {
   color: var(--ff-text-muted);
 }
+
 .wrap.ff-admin .subsubsub a.current {
   font-weight: 600;
 }
 
-/* ---------- search bar ---------- */
 .ff-search-form {
   margin: 10px 0 12px;
   display: flex;
@@ -77,17 +92,20 @@
   align-items: center;
   flex-wrap: wrap;
 }
+
 .ff-search-input {
   max-width: 280px;
   padding: 7px 10px;
   border: 1px solid var(--ff-border);
   border-radius: var(--ff-r-3);
 }
+
 .ff-search-input:focus {
   outline: none;
   border-color: var(--ff-primary);
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
+
 .ff-search-clear {
   padding: 0 8px;
   font-size: 18px;
@@ -95,20 +113,30 @@
   height: 30px;
 }
 
-/* ---------- selects (edit/global only keep yours) ---------- */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
   appearance: none;
-  padding: 8px 32px 8px 10px;
+  padding: 8px 34px 8px 10px;
   border: 1px solid var(--ff-border);
-  border-radius: var(--ff-r-3);
+  border-radius: 8px;
   background: #fff;
   transition:
     border-color 0.15s,
-    box-shadow 0.15s;
+    box-shadow 0.15s,
+    background-color 0.15s;
   cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 36px;
+  line-height: 22px;
+  background-image: none !important;
+  box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
+  font-size: 13px;
+  background-clip: padding-box;
 }
+
 .wrap.ff-admin.ff-edit .ff-select-wrap::after,
 .wrap.ff-admin.ff-global .ff-select-wrap::after {
   content: "▾";
@@ -117,9 +145,10 @@
   top: 50%;
   transform: translateY(-50%);
   color: var(--ff-text-muted);
+  font-size: 12px;
+  pointer-events: none;
 }
 
-/* LIST SCREEN — Bulk actions: keep caret INSIDE the dropdown */
 .wrap.ff-admin.ff-list .tablenav .bulkactions {
   display: flex;
   align-items: center;
@@ -129,23 +158,22 @@
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap {
   position: relative;
   display: inline-block;
-  width: 200px; /* controls overall control width */
+  width: 200px;
   min-width: 160px;
 }
 
-/* select fills wrapper so pseudo-caret overlays inside */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select {
-  width: 100%; /* <<< key fix */
+  width: 100%;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   height: 32px;
   line-height: 20px;
-  padding: 6px 30px 6px 10px; /* room for caret on the right */
-  border: 1px solid var(--ff-color-border);
+  padding: 6px 30px 6px 10px;
+  border: 1px solid var(--ff-border);
   border-radius: 6px;
   background: #fff;
-  background-image: none !important; /* remove WP svg caret */
+  background-image: none !important;
   box-shadow: none;
   font-size: 13px;
   cursor: pointer;
@@ -153,13 +181,13 @@
     border-color 0.15s,
     box-shadow 0.15s;
 }
+
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select:focus {
   outline: none;
-  border-color: var(--ff-color-focus);
+  border-color: var(--ff-primary);
   box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
 }
 
-/* caret drawn by the wrapper, now inside because select is width:100% */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap::after {
   content: "▾";
   position: absolute;
@@ -167,11 +195,10 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 12px;
-  color: var(--ff-color-text-muted);
+  color: var(--ff-text-muted);
   pointer-events: none;
 }
 
-/* align Apply button */
 .wrap.ff-admin.ff-list .tablenav .bulkactions .button.action {
   height: 32px;
   line-height: 30px;
@@ -179,7 +206,6 @@
   margin: 0;
 }
 
-/* ---------- inputs/textarea ---------- */
 .ff-admin input[type="text"],
 .ff-admin input[type="password"],
 .ff-admin input[type="url"],
@@ -193,12 +219,14 @@
   transition: all 0.15s;
   width: 100%;
 }
+
 .ff-admin input:focus,
 .ff-admin textarea:focus {
   outline: none;
   border-color: var(--ff-primary);
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.2);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
+
 .ff-admin.ff-edit input,
 .ff-admin.ff-edit textarea,
 .ff-admin.ff-edit select#ff_location,
@@ -206,62 +234,67 @@
   max-width: 520px;
 }
 
-/* ---------- table (list) ---------- */
 .wrap.ff-admin.ff-list .ff-list-table {
   margin-top: 12px;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table thead.ff-list-bar,
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar {
   background: var(--ff-bg-muted);
   border-top: 1px solid #e3e5ea;
   border-bottom: 1px solid #e3e5ea;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table th {
   font-weight: 600;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:hover {
   background: #fbfcfd;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a {
   color: #0a4b78;
   text-decoration: none;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a:hover {
   color: #0b5a91;
 }
 
-/* Sort indicator (clean) */
 th.sortable a,
 th.sorted a {
   display: inline-flex;
   align-items: center;
 }
+
 th.column-title .sorting-indicator::before {
-  content: "\25B2";
+  content: "▲";
   font-size: 10px;
   margin-left: 4px;
   opacity: 0.35;
   color: #0b5a91;
 }
+
 th.column-title.sorted.asc .sorting-indicator::before {
   opacity: 1;
 }
+
 th.column-title.sorted.desc .sorting-indicator::before {
-  content: "\25BC";
+  content: "▼";
   opacity: 1;
 }
 
-/* Row actions only on hover/focus (like ACF) */
 .wrap.ff-admin.ff-list .row-actions {
   opacity: 0;
-  transition: opacity 0.12s;
+  transition: opacity 0.12s ease-in-out;
 }
+
 .wrap.ff-admin.ff-list tr:hover .row-actions,
 .wrap.ff-admin.ff-list tr.ff-row-focus .row-actions {
   opacity: 1;
 }
 
-/* ---------- chips/pills ---------- */
 .ff-chip {
   display: inline-flex;
   align-items: center;
@@ -275,19 +308,21 @@ th.column-title.sorted.desc .sorting-indicator::before {
   font-size: 12px;
   box-shadow: var(--ff-shadow);
 }
+
 .ff-chip--mono {
   font-family: var(--ff-f-mono);
   background: #f3f4f6;
   border-color: #e5e7eb;
 }
+
 .ff-count-link {
   text-decoration: none;
 }
+
 .ff-count-link:hover .ff-chip {
   background: #eef2f7;
 }
 
-/* status pills */
 .ff-status {
   display: inline-flex;
   align-items: center;
@@ -298,53 +333,63 @@ th.column-title.sorted.desc .sorting-indicator::before {
   font-weight: 600;
   color: #111827;
 }
+
 .ff-status--active {
   background: #ecfdf5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
+
 .ff-status--inactive {
   background: #f3f4f6;
   color: #374151;
   border: 1px solid #e5e7eb;
 }
+
 .ff-status--trash {
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
-/* Key copy */
 .ff-copy-key {
   margin-left: 6px;
 }
+
 .ff-copy-key.is-copied {
   color: #198754;
 }
 
-/* ---------- edit screen fields table ---------- */
 .wrap.ff-admin.ff-edit table.widefat {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
 }
+
 .wrap.ff-admin.ff-edit table.widefat thead th {
   background: var(--ff-bg-muted);
 }
+
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
   background: #fbfcfd;
+  background: #f7f9fc !important;
 }
+
 .ff-field-handle {
   cursor: grab;
   width: 28px;
   text-align: center;
   color: #9aa0a6;
 }
+
 .ff-field-handle::after {
   content: "⋮⋮";
   font-size: 14px;
   opacity: 0.7;
-} /* why: clearer grab affordance */
+}
+
 .ff-field-actions .ff-remove-field,
 .ff-field-remove {
   color: #b91c1c;
@@ -385,7 +430,6 @@ a.remove-field:hover {
   text-decoration: underline !important;
 }
 
-/* Forge Fields: "Remove" links */
 a.ff-field-remove {
   color: #b32d2e !important;
   text-decoration: none !important;
@@ -399,30 +443,30 @@ span.sorting-indicator {
   margin-top: 7px;
 }
 
-/* Descriptions under inputs */
 .wrap.ff-admin .description {
   color: var(--ff-text-muted);
 }
 
-/* ---------- focus reset only inside our wrap (WP native remains elsewhere) ---------- */
 #wpbody-content .wrap.ff-admin a:focus,
 #wpbody-content .wrap.ff-admin button:focus {
   outline: none;
   box-shadow: none;
 }
+
 #wpbody-content .wrap.ff-admin th a:focus {
   outline: none;
   box-shadow: none;
 }
 
-/* ---------- range/password helpers (optional) ---------- */
 .ff-password-wrap {
   position: relative;
   max-width: 520px;
 }
+
 .ff-password-wrap .ff-password-input {
   padding-right: 34px;
 }
+
 .ff-password-toggle {
   position: absolute;
   right: 8px;
@@ -432,12 +476,14 @@ span.sorting-indicator {
   border: 0;
   cursor: pointer;
 }
+
 .ff-range-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
   max-width: 340px;
 }
+
 .ff-range-number {
   width: 72px;
   text-align: center;
@@ -446,7 +492,6 @@ span.sorting-indicator {
   background: #fff;
 }
 
-/* ---------- misc ---------- */
 .bulkactions input.button.action {
   margin-top: 2px;
 }
@@ -463,16 +508,16 @@ button#ff-add-field {
   border: 1px solid var(--ff-border);
 }
 
-/* Card chrome */
 .wrap.ff-admin.ff-list table.ff-list-table {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  overflow: hidden; /* rounds the header too */
+  overflow: hidden;
   background: #fff;
   box-shadow: var(--ff-shadow);
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-/* Header & footer */
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
   background: var(--ff-bg-muted);
@@ -481,62 +526,37 @@ button#ff-add-field {
   font-weight: 600;
 }
 
-/* Cell sizing */
 .wrap.ff-admin.ff-list table.ff-list-table td,
 .wrap.ff-admin.ff-list table.ff-list-table th {
   padding: 10px 12px;
   vertical-align: middle;
 }
 
-/* Primary/title column link */
-.wrap.ff-admin.ff-list .ff-list-table .column-primary strong a {
-  color: #0a4b78;
-  text-decoration: none;
-}
-.wrap.ff-admin.ff-list .ff-list-table .column-primary strong a:hover {
-  color: #0b5a91;
-}
-
-/* Subtle row separators + striping to mirror edit table */
 .wrap.ff-admin.ff-list .ff-list-table tbody tr {
   border-top: 1px solid #f1f5f9;
 }
+
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:nth-child(odd) {
   background: #fafbfc;
 }
-.wrap.ff-admin.ff-list .ff-list-table tbody tr:hover {
-  background: #fbfcfd;
-}
 
-/* Checkbox col a bit tighter */
 .wrap.ff-admin.ff-list .ff-list-table .check-column {
   width: 34px;
   padding-left: 10px;
 }
 
-/* Row actions only on hover/focus (we already keep focus via JS) */
-.wrap.ff-admin.ff-list .row-actions {
-  opacity: 0;
-  transition: opacity 0.12s ease-in-out;
-}
-.wrap.ff-admin.ff-list tr:hover .row-actions,
-.wrap.ff-admin.ff-list tr.ff-row-focus .row-actions {
-  opacity: 1;
-}
-
-/* Chips already exist; just tighten in table context */
 .wrap.ff-admin.ff-list .ff-chip {
   height: 20px;
   line-height: 20px;
   padding: 0 7px;
   font-size: 11px;
 }
+
 .wrap.ff-admin.ff-list .ff-chip--mono {
   background: #f3f4f6;
   border-color: #e5e7eb;
 }
 
-/* Status pill tone matches edit table */
 .wrap.ff-admin.ff-list .ff-status {
   height: 20px;
   line-height: 20px;
@@ -544,18 +564,15 @@ button#ff-add-field {
   padding: 0 8px;
 }
 
-/* Sort indicator spacing */
 .wrap.ff-admin.ff-list th.column-title .sorting-indicator::before {
   margin-left: 6px;
 }
 
-/* Footer */
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar th {
   border-top: 1px solid #e5e7eb;
   border-bottom: 0;
 }
 
-/* Optional: slimmer tablenav below the table */
 .wrap.ff-admin.ff-list .tablenav.bottom {
   border: 0;
   padding: 10px 0 4px;
@@ -566,6 +583,7 @@ button#ff-add-field {
   position: relative;
   cursor: grab;
 }
+
 .wrap.ff-admin.ff-edit .ff-field-handle::after {
   content: "⋮⋮";
   position: absolute;
@@ -576,27 +594,23 @@ button#ff-add-field {
   opacity: 0.7;
   line-height: 1;
 }
+
 .wrap.ff-admin.ff-edit .ff-field-handle:active {
   cursor: grabbing;
 }
-
-/* ===========================
-   Modern buttons (scoped to Forge Fields screens)
-   =========================== */
 
 .wrap.ff-admin .button,
 .wrap.ff-admin .button-primary {
   --ff-btn-radius: 8px;
   --ff-btn-h: 36px;
   --ff-btn-pad-x: 14px;
-
   height: var(--ff-btn-h);
   line-height: calc(var(--ff-btn-h) - 2px);
   padding: 0 var(--ff-btn-pad-x);
   border-radius: var(--ff-btn-radius);
   font-weight: 600;
   letter-spacing: 0.01em;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  box-shadow: var(--ff-elev-0);
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
@@ -605,44 +619,49 @@ button#ff-add-field {
     transform 0.02s ease;
 }
 
-/* Secondary / ghost */
 .wrap.ff-admin .button {
   background: #ffffff;
   color: #0f172a;
-  border: 1px solid var(--ff-color-border);
+  border: 1px solid var(--ff-border);
 }
+
 .wrap.ff-admin .button:hover {
   background: #f8fafc;
-  border-color: var(--ff-color-border-strong);
+  border-color: var(--ff-border-strong);
 }
+
 .wrap.ff-admin .button:active {
   transform: translateY(1px);
 }
 
-/* Primary / filled */
 .wrap.ff-admin .button-primary {
-  background: #2271b1; /* WP primary hue */
-  border: 1px solid #1f63a0;
+  background: var(--ff-primary);
+  border: 1px solid var(--ff-primary);
   color: #ffffff;
 }
+
 .wrap.ff-admin .button-primary:hover {
-  background: #1b5e94;
-  border-color: #184f7c;
+  background: var(--ff-primary-hover);
+  border-color: var(--ff-primary-hover);
 }
+
+.wrap.ff-admin .button-primary:active {
+  background: var(--ff-primary-active);
+  border-color: var(--ff-primary-active);
+}
+
 .wrap.ff-admin .button-primary:active {
   transform: translateY(1px);
 }
 
-/* Focus ring (both) */
 .wrap.ff-admin .button:focus,
 .wrap.ff-admin .button-primary:focus {
   outline: none;
   box-shadow:
-    0 1px 2px rgba(16, 24, 40, 0.05),
-    0 0 0 2px rgba(34, 113, 177, 0.25);
+    var(--ff-elev-1),
+    0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
-/* Disabled */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-disabled,
 .wrap.ff-admin .button-primary[disabled] {
@@ -650,7 +669,6 @@ button#ff-add-field {
   pointer-events: none;
 }
 
-/* Link-style buttons (e.g., "Remove", "Copy") */
 .wrap.ff-admin .button-link {
   padding: 0;
   height: auto;
@@ -659,23 +677,20 @@ button#ff-add-field {
   color: #2563eb;
   box-shadow: none;
 }
+
 .wrap.ff-admin .button-link:hover {
   color: #1e40af;
   text-decoration: underline;
 }
 
-/* Spacing helpers around your footer actions */
 .wrap.ff-admin .submit .button-primary {
-  min-width: 160px; /* makes the Save button feel substantial */
+  min-width: 160px;
 }
+
 .wrap.ff-admin #ff-add-field {
   margin-top: 12px;
 }
 
-/* ===========================
-   Button shadows / elevation
-   Append after your existing button styles
-   =========================== */
 .wrap.ff-admin {
   --ff-elev-0: 0 1px 2px rgba(16, 24, 40, 0.05);
   --ff-elev-1:
@@ -685,42 +700,22 @@ button#ff-add-field {
   --ff-press: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-/* Base elevation (secondary + primary) */
-.wrap.ff-admin .button,
-.wrap.ff-admin .button-primary {
-  box-shadow: var(--ff-elev-0);
-}
-
-/* Hover lift */
 .wrap.ff-admin .button:hover,
 .wrap.ff-admin .button-primary:hover {
   box-shadow: var(--ff-elev-1);
 }
 
-/* Active press (slightly reduce elevation and nudge) */
 .wrap.ff-admin .button:active,
 .wrap.ff-admin .button-primary:active {
   transform: translateY(1px);
   box-shadow: var(--ff-elev-0), var(--ff-press);
 }
 
-/* Focus: elevation + ring (keeps your existing focus ring) */
-.wrap.ff-admin .button:focus,
-.wrap.ff-admin .button-primary:focus {
-  box-shadow:
-    var(--ff-elev-1),
-    0 0 0 2px rgba(34, 113, 177, 0.25); /* focus ring */
-}
-
-/* Disabled: flatten and reduce glow */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-primary[disabled] {
   box-shadow: var(--ff-elev-0);
 }
 
-/* assets/css/admin-fields.css — append at the end */
-
-/* EDIT/GLOBAL selects — show caret like Bulk actions */
 .wrap.ff-admin.ff-edit .ff-select-wrap,
 .wrap.ff-admin.ff-global .ff-select-wrap {
   position: relative;
@@ -728,61 +723,26 @@ button#ff-add-field {
   min-width: 180px;
 }
 
-.wrap.ff-admin.ff-edit .ff-select-wrap select,
-.wrap.ff-admin.ff-global .ff-select-wrap select,
-.wrap.ff-admin.ff-edit select#ff_location {
-  width: 100%; /* important so caret overlays inside */
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  height: 36px;
-  line-height: 22px;
-  padding: 8px 34px 8px 10px; /* room for caret */
-  border: 1px solid var(--ff-color-border);
-  border-radius: 6px;
-  background: #fff;
-  background-image: none !important; /* kill native arrow */
-  box-shadow: none;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s;
-}
-
 .wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-global .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-edit select#ff_location:focus {
   outline: none;
-  border-color: var(--ff-color-focus);
-  box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
+  border-color: var(--ff-primary);
+  box-shadow:
+    var(
+      --ff-elev-1,
+      0 2px 6px rgba(16, 24, 40, 0.08),
+      0 1px 2px rgba(16, 24, 40, 0.06)
+    ),
+    0 0 0 2px rgba(29, 109, 246, 0.2);
 }
 
-/* caret inside the wrapper */
-.wrap.ff-admin.ff-edit .ff-select-wrap::after,
-.wrap.ff-admin.ff-global .ff-select-wrap::after {
-  content: "▾";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  color: var(--ff-color-text-muted);
-  pointer-events: none;
-}
-
-/* ===========================
-   LIST SCREEN — modern search + Add New button
-   =========================== */
-
-/* Search input: rounded, icon, ring on focus */
 .wrap.ff-admin.ff-list .ff-search-input {
   height: 36px;
   line-height: 22px;
   width: 260px;
   max-width: 100%;
-  padding: 8px 12px 8px 36px; /* left room for icon */
-  border: 1px solid var(--ff-color-border);
+  padding: 8px 12px 8px 36px;
   border: 1px solid var(--ff-border);
   border-radius: 8px;
   background: #fff;
@@ -795,9 +755,11 @@ button#ff-add-field {
   background-repeat: no-repeat;
   background-position: 10px center;
 }
+
 .wrap.ff-admin.ff-list .ff-search-input::placeholder {
   color: #9aa1ab;
 }
+
 .wrap.ff-admin.ff-list .ff-search-input:focus {
   outline: none;
   box-shadow:
@@ -805,12 +767,10 @@ button#ff-add-field {
     0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
-/* Keep spacing with the search button */
 .wrap.ff-admin.ff-list .ff-search-form {
   gap: 10px;
 }
 
-/* Make the search submit use your modern primary button rules automatically */
 .wrap.ff-admin.ff-list .ff-search-form .button.button-primary {
   height: 36px;
   line-height: 34px;
@@ -818,7 +778,6 @@ button#ff-add-field {
   border-radius: 8px;
 }
 
-/* "Add New" – unify with your secondary button look */
 .wrap.ff-admin .page-title-action {
   display: inline-flex;
   align-items: center;
@@ -839,24 +798,26 @@ button#ff-add-field {
     box-shadow 0.15s,
     transform 0.02s;
 }
+
 .wrap.ff-admin .page-title-action:hover {
   background: #f8fafc;
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.08),
     0 1px 2px rgba(16, 24, 40, 0.06);
 }
+
 .wrap.ff-admin .page-title-action:active {
   transform: translateY(1px);
 }
+
 .wrap.ff-admin .page-title-action:focus {
   outline: none;
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.08),
     0 1px 2px rgba(16, 24, 40, 0.06),
-    0 0 0 2px rgba(34, 113, 177, 0.25);
+    0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
-/* LIST — kill stray borders on the checkbox column and cells */
 .wrap.ff-admin.ff-list table.ff-list-table td,
 .wrap.ff-admin.ff-list table.ff-list-table th,
 .wrap.ff-admin.ff-list table.ff-list-table td.check-column,
@@ -865,52 +826,23 @@ button#ff-add-field {
   border-bottom-color: transparent !important;
 }
 
-/* Use a single consistent separator per row */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-  box-shadow: inset 0 -1px #e9edf3; /* bottom hairline */
+  box-shadow: inset 0 -1px #e9edf3;
+  background: #fff !important;
+  background: #fff;
+  transition: background-color 0.12s ease-in-out;
 }
 
-/* Also draw a hairline just under the header for the first body row */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child {
   box-shadow:
     inset 0 -1px #e9edf3,
     inset 0 1px #e9edf3;
 }
 
-/* Ensure the table itself isn't collapsing borders into darker lines */
-.wrap.ff-admin.ff-list table.ff-list-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-/* EDIT/GLOBAL selects — match text input “soft” look */
-.wrap.ff-admin.ff-edit .ff-select-wrap select,
-.wrap.ff-admin.ff-global .ff-select-wrap select,
-.wrap.ff-admin.ff-edit select#ff_location {
-  /* size matches your inputs */
-  height: 36px;
-  line-height: 22px;
-  padding: 8px 34px 8px 10px;
-
-  /* soft border + subtle elevation */
-  border: 1px solid var(--ff-color-border);
-  border: 1px solid var(--ff-border);
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
-
-  /* tidy rendering */
-  background-clip: padding-box;
-  transition:
-    border-color 0.15s,
-    box-shadow 0.15s,
-    background-color 0.15s;
-}
-
 .wrap.ff-admin.ff-edit .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-global .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-edit select#ff_location:hover {
-  border-color: var(--ff-color-border-strong);
+  border-color: var(--ff-border-strong);
   box-shadow: var(
     --ff-elev-1,
     0 2px 6px rgba(16, 24, 40, 0.08),
@@ -918,21 +850,6 @@ button#ff-add-field {
   );
 }
 
-.wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
-.wrap.ff-admin.ff-global .ff-select-wrap select:focus,
-.wrap.ff-admin.ff-edit select#ff_location:focus {
-  outline: none;
-  border-color: var(--ff-color-focus);
-  box-shadow:
-    var(
-      --ff-elev-1,
-      0 2px 6px rgba(16, 24, 40, 0.08),
-      0 1px 2px rgba(16, 24, 40, 0.06)
-    ),
-    0 0 0 2px rgba(29, 109, 246, 0.2); /* ring, same as inputs */
-}
-
-/* Disabled look parity */
 .wrap.ff-admin.ff-edit .ff-select-wrap select:disabled,
 .wrap.ff-admin.ff-global .ff-select-wrap select:disabled {
   background: #f8fafc;
@@ -949,141 +866,78 @@ button#ff-add-field {
   font-weight: 600;
 }
 
-/* ===========================
-   Remove striping; keep hover — BOTH TABLES
-   =========================== */
-
-/* LIST table (Field Groups) */
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-  background: #fff !important; /* base row */
-}
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(even) {
-  background: #fff !important; /* kill zebra */
-}
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
-  background: #f7f9fc !important; /* subtle hover */
-}
-
-/* EDIT table (Fields builder) */
-.wrap.ff-admin.ff-edit table.widefat tbody tr {
   background: #fff !important;
 }
-.wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
-.wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
-  background: #fff !important; /* kill zebra */
-}
-.wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
-  background: #f7f9fc !important; /* keep hover */
+
+.wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
+  background: #f7f9fc !important;
+  background: #f7f9fc;
 }
 
-/* Optional: smooth transition for hover */
+.wrap.ff-admin.ff-edit table.widefat tbody tr {
+  background: #fff !important;
+  transition: background-color 0.12s ease-in-out;
+}
+
+.wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
+.wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
+  background: #fff !important;
+}
+
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr,
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
   transition: background-color 0.12s ease-in-out;
 }
 
-/* EDIT PAGE — remove zebra stripes; keep hover */
-.wrap.ff-admin.ff-edit table.widefat {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr,
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
-  background: #fff !important; /* no stripes */
+  background: #fff !important;
 }
 
-.wrap.ff-admin.ff-edit table.widefat tbody tr {
-  transition: background-color 0.12s ease-in-out;
-}
-
-.wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
-  background: #f7f9fc !important; /* keep hover */
-}
-
-/* Keep header/footer neutral */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
   background: #f5f6f8;
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* EDIT PAGE — force row hover to show (WP paints cells) */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td {
-  background: #fff !important; /* base, no stripes */
-  transition: background-color 0.12s ease-in-out;
-}
-
-/* actual hover (stronger selector to beat WP) */
-.wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr:hover > td {
-  background: #f7f9fc !important; /* same as list table */
-}
-
-/* header/footer stay neutral */
-.wrap.ff-admin.ff-edit table.widefat thead th,
-.wrap.ff-admin.ff-edit table.widefat tfoot th {
-  background: #f5f6f8;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* optional: subtle hairline separators without stripes */
-.wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td + td {
-  box-shadow: none; /* no cell borders */
-}
-
-/* ===========================================
-   SOFT ROW SEPARATORS — both tables
-   =========================================== */
-
-/* ---------- Field Groups LIST table ---------- */
-.wrap.ff-admin.ff-list table.ff-list-table {
-  border-collapse: separate; /* avoid doubled lines */
-  border-spacing: 0;
-}
-
-/* base (no stripes) */
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr {
-  background: #fff;
-  transition: background-color 0.12s ease-in-out;
-}
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
-  background: #f7f9fc;
-}
-
-/* hairlines */
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr > td {
-  border-bottom: 1px solid #e9edf3 !important; /* soft divider */
-}
-.wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child > td {
-  border-top: 1px solid #e9edf3 !important; /* top edge under header */
-}
-
-/* ---------- EDIT Fields Builder table ---------- */
-.wrap.ff-admin.ff-edit table.widefat {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-/* base + hover (no stripes) */
-.wrap.ff-admin.ff-edit table.widefat tbody tr > td {
   background: #fff !important;
   transition: background-color 0.12s ease-in-out;
 }
+
+.wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr:hover > td {
+  background: #f7f9fc !important;
+}
+
+.wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td + td {
+  box-shadow: none;
+}
+
+.wrap.ff-admin.ff-list table.ff-list-table tbody tr > td {
+  border-bottom: 1px solid #e9edf3 !important;
+}
+
+.wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child > td {
+  border-top: 1px solid #e9edf3 !important;
+}
+
+.wrap.ff-admin.ff-edit table.widefat tbody tr > td {
+  background: #fff !important;
+  transition: background-color 0.12s ease-in-out;
+  border-bottom: 1px solid #e9edf3 !important;
+}
+
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover > td {
   background: #f7f9fc !important;
 }
 
-/* hairlines */
-.wrap.ff-admin.ff-edit table.widefat tbody tr > td {
-  border-bottom: 1px solid #e9edf3 !important;
-}
 .wrap.ff-admin.ff-edit table.widefat tbody tr:first-child > td {
   border-top: 1px solid #e9edf3 !important;
 }
 
-/* header/footer stay neutral */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th,
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
@@ -1092,32 +946,29 @@ button#ff-add-field {
   border-bottom: 1px solid #e5e7eb;
   padding: 10px 12px;
 }
+
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
   border-top: 1px solid #e5e7eb;
   border-bottom: 0;
 }
 
-/* EDIT PAGE — vertically center controls in rows */
 .wrap.ff-admin.ff-edit table.widefat td {
-  vertical-align: middle; /* center content vertically */
+  vertical-align: middle;
 }
 
-/* Ensure the Type select sits perfectly centered */
 .wrap.ff-admin.ff-edit .ff-select-wrap {
-  display: inline-flex; /* center the select within the cell */
+  display: inline-flex;
   align-items: center;
 }
 
-/* Normalize the select box metrics to match inputs */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
-  height: 36px; /* same as text inputs */
-  line-height: 36px; /* centers text baseline */
-  padding: 0 34px 0 10px; /* keep caret space; remove vertical padding */
-  margin: 0; /* kill browser defaults */
+  height: 36px;
+  line-height: 36px;
+  padding: 0 34px 0 10px;
+  margin: 0;
 }
 
-/* Firefox tweak: remove inner extra padding */
 @-moz-document url-prefix() {
   .wrap.ff-admin.ff-edit .ff-select-wrap select,
   .wrap.ff-admin.ff-edit select#ff_location {
@@ -1126,63 +977,59 @@ button#ff-add-field {
   }
 }
 
-/* ===========================================
-   Softer rounding for both tables
-   =========================================== */
-
-/* LIST: Field Groups table */
 .wrap.ff-admin.ff-list table.ff-list-table {
-  border-collapse: separate; /* required for border-radius on tables */
+  border-collapse: separate;
   border-spacing: 0;
-  border-radius: 12px; /* <- increase here (10–14 looks great) */
-  overflow: hidden; /* clip hover/bg at corners */
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-/* round header/footer corners */
 .wrap.ff-admin.ff-list table.ff-list-table thead th:first-child {
   border-top-left-radius: 12px;
 }
+
 .wrap.ff-admin.ff-list table.ff-list-table thead th:last-child {
   border-top-right-radius: 12px;
 }
+
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:first-child {
   border-bottom-left-radius: 12px;
 }
+
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:last-child {
   border-bottom-right-radius: 12px;
 }
 
-/* EDIT: Fields builder table */
 .wrap.ff-admin.ff-edit table.widefat {
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 12px; /* <- same radius */
+  border-radius: 12px;
   overflow: hidden;
 }
 
-/* round header/footer on edit table too */
 .wrap.ff-admin.ff-edit table.widefat thead th:first-child {
   border-top-left-radius: 12px;
 }
+
 .wrap.ff-admin.ff-edit table.widefat thead th:last-child {
   border-top-right-radius: 12px;
 }
+
 .wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
   border-bottom-left-radius: 12px;
 }
+
 .wrap.ff-admin.ff-edit table.widefat tfoot th:last-child {
   border-bottom-right-radius: 12px;
 }
 
-/* assets/css/forge-fields-admin.css */
-/* ---- Optgroup headers in native selects (works across major browsers) ---- */
 .wrap.ff-admin select optgroup {
-  color: #8a94a6; /* faded */
-  font-weight: 600; /* readable but lighter than options */
+  color: #8a94a6;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  font-size: 12px; /* some UAs ignore size; harmless if ignored */
+  font-size: 12px;
 }
-/* keep options normal */
+
 .wrap.ff-admin select optgroup option {
   color: #0f172a;
   text-transform: none;
@@ -1190,24 +1037,23 @@ button#ff-add-field {
   font-size: 13px;
 }
 
-/* Icon-only copy button (keeps pill intact) */
 .wrap.ff-admin .ff-copy-key {
-  /* inline, compact, neutral */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  margin-left: 6px;
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
   padding: 0;
-  border: 1px solid var(--ff-border);
-  border-radius: 6px;
+  border: 1px solid var(--ff-color-border, #d0d5dd);
+  border-radius: 8px;
   background: #fff;
-  box-shadow: var(--ff-elev-0, 0 1px 2px rgba(16, 24, 40, 0.05));
-  line-height: 1;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  line-height: 0;
+  color: #64748b;
+  text-decoration: none;
 }
 
-/* hide text but keep for a11y if any */
 .wrap.ff-admin .ff-copy-key .screen-reader-text {
   position: absolute !important;
   width: 1px;
@@ -1220,7 +1066,6 @@ button#ff-add-field {
   border: 0;
 }
 
-/* glyph: copy (two rectangles) */
 .wrap.ff-admin .ff-copy-key::before {
   content: "";
   display: block;
@@ -1229,25 +1074,25 @@ button#ff-add-field {
   background-repeat: no-repeat;
   background-position: center;
   background-size: 14px 14px;
-  /* neutral copy icon */
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>');
 }
 
 .wrap.ff-admin .ff-copy-key:hover {
   background: #f8fafc;
-  border-color: var(--ff-border-strong, #c7ccd6);
+  border-color: var(--ff-color-border-strong, #c7ccd6);
+  color: #475569;
 }
 
-/* success state: soft green + checkmark */
 .wrap.ff-admin .ff-copy-key.is-copied {
   background: #ecfdf5;
-  border-color: #a7f3d0;
+  border-color: #86efac;
+  color: #166534;
 }
+
 .wrap.ff-admin .ff-copy-key.is-copied::before {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23065f46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>');
 }
 
-/* Pill for the key itself */
 .wrap.ff-admin .ff-group-key {
   display: inline-block;
   padding: 4px 10px;
@@ -1270,32 +1115,9 @@ button#ff-add-field {
   margin-bottom: 4px;
 }
 
-/* Icon-only copy button */
-.wrap.ff-admin .ff-copy-key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-left: 8px;
-  border: 1px solid var(--ff-color-border, #d0d5dd);
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-  color: #64748b; /* base icon tint */
-  line-height: 0;
-  text-decoration: none;
-}
-
-.wrap.ff-admin .ff-copy-key:hover {
-  background: #f8fafc;
-  border-color: var(--ff-color-border-strong, #c7ccd6);
-  color: #475569;
-}
-
 .wrap.ff-admin .ff-copy-key:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.25);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
 .wrap.ff-admin .ff-copy-key svg {
@@ -1304,21 +1126,11 @@ button#ff-add-field {
   display: block;
 }
 
-/* Copied state */
-.wrap.ff-admin .ff-copy-key.is-copied {
-  color: #166534;
-  border-color: #86efac;
-  background: #ecfdf5;
-}
-
-/* ---------- Global screen: card + table reset ---------- */
 .wrap.ff-admin.ff-global {
-  /* Tweak how wide the content feels on this screen */
-  --ff-card-max-w: 1100px; /* container width */
-  --ff-field-max-w: 720px; /* input/select width */
+  --ff-card-max-w: 1100px;
+  --ff-field-max-w: 720px;
 }
 
-/* Center the group “card” and give it proper chrome */
 .wrap.ff-admin.ff-global .ff-options-card {
   max-width: var(--ff-card-max-w);
   background: #fff;
@@ -1329,15 +1141,13 @@ button#ff-add-field {
   margin: 10px 0 20px;
 }
 
-/* Make the WP form-table behave like a clean list inside a card */
 .wrap.ff-admin.ff-global .ff-options-card .form-table {
   width: 100%;
   margin: 0;
-  border-collapse: separate; /* allow rounded corners to clip properly */
+  border-collapse: separate;
   border-spacing: 0;
 }
 
-/* Kill WP’s default white cell backgrounds and add soft dividers */
 .wrap.ff-admin.ff-global .ff-options-card .form-table th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table td {
   background: transparent !important;
@@ -1346,19 +1156,16 @@ button#ff-add-field {
   vertical-align: middle;
 }
 
-/* No divider under the last row */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child td {
   border-bottom: 0;
 }
 
-/* Subtle hover (optional, matches your other tables) */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover td,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover th {
   background: #f7f9fc;
 }
 
-/* Keep fields a comfortable width and centered in the card */
 .wrap.ff-admin.ff-global input[type="text"],
 .wrap.ff-admin.ff-global input[type="email"],
 .wrap.ff-admin.ff-global input[type="url"],
@@ -1371,7 +1178,6 @@ button#ff-add-field {
   width: 100%;
 }
 
-/* Optional: make the Save button align nicely with the card */
 .wrap.ff-admin.ff-global .submit .button-primary {
   min-width: 180px;
   margin-top: 8px;
@@ -1385,16 +1191,10 @@ textarea#ff_textarea {
   min-height: 40px;
 }
 
-/* ===========================================
-   Post/Page editor – compact metabox fields
-   (classic editor metabox under #poststuff)
-   =========================================== */
-
 #poststuff .postbox .ff-admin {
-  --ff-field-max: 560px; /* tweak this to your taste (480–640px works well) */
+  --ff-field-max: 560px;
 }
 
-/* Text-like inputs, selects, textareas */
 #poststuff .postbox .ff-admin .form-table td input[type="text"],
 #poststuff .postbox .ff-admin .form-table td input[type="email"],
 #poststuff .postbox .ff-admin .form-table td input[type="url"],
@@ -1407,65 +1207,54 @@ textarea#ff_textarea {
   max-width: var(--ff-field-max);
 }
 
-/* Password wrapper (keeps the toggle aligned) */
 #poststuff .postbox .ff-admin .ff-password-wrap {
   max-width: var(--ff-field-max);
   width: 100%;
 }
 
-/* Range group: slider grows, number stays compact */
 #poststuff .postbox .ff-admin .ff-range-wrap {
   max-width: var(--ff-field-max);
   width: 100%;
 }
+
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-slider {
   flex: 1 1 auto;
   min-width: 0;
 }
+
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-number {
-  width: 74px; /* keep it small */
+  width: 74px;
 }
 
-/* Keep things tidy on narrow admin screens */
 @media (max-width: 782px) {
-  /* WP admin breakpoint */
   #poststuff .postbox .ff-admin {
     --ff-field-max: 100%;
   }
 }
 
-/* ===========================
-   Post/Page editor – stable widths
-   =========================== */
-
-/* Default text-like inputs stay pleasantly wide */
 #poststuff .ff-admin input.regular-text:not(.ff-number-input),
 #poststuff .ff-admin textarea {
   width: min(100%, 640px);
   max-width: 640px;
 }
 
-/* Number (standalone integers) – compact */
 #poststuff .ff-admin input.ff-number-input {
   width: 140px !important;
   min-width: 140px;
-  padding-right: 28px; /* spinner space */
+  padding-right: 28px;
 }
 
-/* Range slider layout */
 #poststuff .ff-admin .ff-range-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-/* Slider itself – sensible width */
 #poststuff .ff-admin .ff-range-wrap .ff-range-slider {
   width: 220px;
   max-width: 40vw;
 }
 
-/* Numeric box beside slider – compact */
 #poststuff .ff-admin .ff-range-wrap .ff-range-number {
   width: 90px !important;
   min-width: 90px;
@@ -1476,26 +1265,22 @@ span.dashicons {
   opacity: 0.7;
 }
 
-/* BRAND TOP BAR */
-/* ===== Brand bar positioning (fixed under WP admin bar) ===== */
 .ff-has-brandbar .ff-brandbar {
   position: fixed;
   z-index: 1000;
-  top: 32px; /* under the black WP admin bar */
-  left: 160px; /* width of the WP admin menu */
+  top: 32px;
+  left: 160px;
   width: calc(100% - 160px);
-  background: #2f3a4b;
+  background: #363637;
   color: #fff;
   box-sizing: border-box;
 }
 
-/* When the left menu is collapsed (body has .folded) */
 .ff-has-brandbar.folded .ff-brandbar {
-  left: 36px; /* collapsed menu gutter */
+  left: 36px;
   width: calc(100% - 36px);
 }
 
-/* On small screens the menu overlays; let the bar span full width */
 @media (max-width: 960px) {
   .ff-has-brandbar .ff-brandbar {
     left: 0;
@@ -1503,17 +1288,15 @@ span.dashicons {
   }
 }
 
-/* Push page content below the fixed bar */
 .ff-has-brandbar #wpcontent {
-  padding-top: 64px; /* ≈ bar height */
+  padding-top: 64px;
 }
 
-/* ===== Brand bar inner layout ===== */
 .ff-brandbar__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 14px 20px;
   height: 40px;
 }
 
@@ -1521,7 +1304,7 @@ span.dashicons {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0; /* allow text truncation */
+  min-width: 0;
 }
 
 .ff-brandbar__logo {
@@ -1535,22 +1318,24 @@ span.dashicons {
   font-weight: 600;
   font-size: 12px;
   line-height: 1;
+  margin-right: 8px;
 }
 
 .ff-brandbar__title {
   font-weight: 600;
   font-size: 14px;
   line-height: 1;
+  margin-right: 6px;
 }
 
 .ff-brandbar__subtitle {
-  opacity: 0.85;
+  opacity: 0.9;
   font-size: 13px;
 }
 
-/* Right-side button spacing */
 .ff-brandbar__right {
   flex: 0 0 auto;
+  padding-right: 16px;
 }
 
 .ff-brandbar__btn.button {
@@ -1560,59 +1345,30 @@ span.dashicons {
   text-decoration: none;
 }
 
-/* slight elevation so the bar doesn't feel glued to the page */
 .ff-brandbar {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
 }
 
-/* keep the left title from ever tucking under the admin menu gutter */
 .folded .ff-brandbar__inner,
 .auto-fold .ff-brandbar__inner {
   padding-left: 40px;
 }
 
-/* keep the Add New from kissing the edge at narrow widths */
-.ff-brandbar__right {
-  padding-right: 16px;
-}
-
-/* nicer spacing between logo, title, subtitle */
-.ff-brandbar__logo {
-  margin-right: 8px;
-}
-.ff-brandbar__title {
-  font-weight: 600;
-  margin-right: 6px;
-}
-.ff-brandbar__subtitle {
-  opacity: 0.9;
-}
-
-/* make sure the CTA stays vertically centered */
-.ff-brandbar__inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* edge-to-edge white subbar (compensate for WP admin 20px content gutters) */
 .ff-subbar {
   background: #fff;
-  margin: 0 -20px 16px; /* pull to the very edges */
-  padding: 22px 42px; /* room for title + button */
+  margin: 0 -20px 16px;
+  padding: 22px 42px;
   border-bottom: 1px solid #e2e4e7;
 }
 
-/* simple flex row: title + button on the left with consistent spacing */
 .ff-subbar__inner {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* button sits beside the title */
-  gap: 35px; /* spacing between title and button */
+  justify-content: flex-start;
+  gap: 35px;
 }
 
-/* title + button polish */
 .ff-subbar__title {
   margin: 0;
   font-size: 26px;
@@ -1620,25 +1376,32 @@ span.dashicons {
 }
 
 a.button.button-primary.ff-subbar__btn {
-  margin: 0; /* ensure no stray margins */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
+  margin: 0;
+  padding: 0 20px;
+
   border-radius: 8px;
-  padding: 5px 20px;
-  font-weight: 500;
+
   font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
 }
 
-/* admin mobile has tighter gutters – pull less so we don't clip */
 @media (max-width: 782px) {
   .ff-subbar {
-    margin: 0 -10px 16px; /* WP admin uses ~10px on small screens */
+    margin: 0 -10px 16px;
     padding: 16px 20px;
   }
+
   .ff-subbar__title {
     font-size: 22px;
   }
 }
 
-/* Toolbar row above the table */
 .ff-list .ff-list-toolbar {
   display: flex;
   align-items: center;
@@ -1647,12 +1410,10 @@ a.button.button-primary.ff-subbar__btn {
   margin: 12px 0 6px;
 }
 
-/* Remove default WP margins on filter links row */
 .ff-list .ff-list-toolbar .subsubsub {
   margin: 0;
 }
 
-/* Keep the search snug to the right */
 .ff-list .ff-search-form {
   display: flex;
   align-items: center;
@@ -1660,44 +1421,42 @@ a.button.button-primary.ff-subbar__btn {
   margin-left: auto;
 }
 
-/* Reasonable width for the search input */
 .ff-list .ff-search-form .regular-text.ff-search-input {
   width: 260px;
 }
 
-/* Stack nicely on small screens */
 @media (max-width: 782px) {
   .ff-list .ff-list-toolbar {
     flex-wrap: wrap;
     gap: 10px;
   }
+
   .ff-list .ff-search-form {
     margin-left: 0;
     width: 100%;
   }
+
   .ff-list .ff-search-form .regular-text.ff-search-input {
     flex: 1 1 auto;
     width: auto;
   }
 }
 
-/* Subbar action buttons */
 .ff-subbar__actions {
   display: flex;
   align-items: center;
-  gap: 14px; /* a bit more space between buttons */
+  gap: 14px;
 }
 
 .ff-subbar__actions .button {
   border-radius: 8px;
-  padding: 6px 16px; /* comfy hit area */
+  padding: 6px 16px;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.4;
-  height: auto; /* avoid the WP fixed-height look */
+  height: auto;
 }
 
-/* keep primary looking crisp */
 .ff-subbar__actions .button.button-primary {
   box-shadow: none;
 }
@@ -1708,15 +1467,14 @@ button#ff-add-field {
 
 .ff-brandbar,
 .ff-subbar {
-  /* z-index already set in JS; here for safety */
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 h1.ff-subbar__title {
+  font-family: inter, arial, sans-serif;
   font-weight: 400;
 }
 
-/* ===== FF confirm modal ===== */
 .ff-confirm.is-hidden {
   display: none;
 }
@@ -1724,7 +1482,7 @@ h1.ff-subbar__title {
 .ff-confirm {
   position: fixed;
   inset: 0;
-  z-index: 100010; /* above menus & our bars */
+  z-index: 100010;
 }
 
 .ff-confirm__overlay {
@@ -1772,12 +1530,12 @@ h1.ff-subbar__title {
   cursor: pointer;
 }
 
-/* red “danger” button */
 .ff-button-danger {
   background: #dc3232;
   border-color: #b32d2e;
   color: #fff;
 }
+
 .ff-button-danger:hover,
 .ff-button-danger:focus {
   background: #b32d2e;
@@ -1785,10 +1543,35 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+.ff-confirm__actions .ff-button-danger,
+.ff-confirm__actions .ff-button-danger.button {
+  background: var(--ff-primary);
+  border-color: var(--ff-primary);
+  color: #fff;
+}
+
+.ff-confirm__actions .ff-button-danger:hover,
+.ff-confirm__actions .ff-button-danger:focus,
+.ff-confirm__actions .ff-button-danger.button:hover,
+.ff-confirm__actions .ff-button-danger.button:focus {
+  background: var(--ff-primary-hover);
+  border-color: var(--ff-primary-hover);
+  color: #fff;
+}
+
+.ff-confirm__actions .ff-button-danger:active,
+.ff-confirm__actions .ff-button-danger.button:active {
+  background: var(--ff-primary-active);
+  border-color: var(--ff-primary-active);
+  color: #fff;
+}
+
 .ff-brandbar__title {
+  font-family: inter, arial, sans-serif;
   color: inherit;
   text-decoration: none;
 }
+
 .ff-brandbar__title:hover,
 .ff-brandbar__title:focus {
   color: inherit;
@@ -1804,9 +1587,10 @@ a.ff-brandbar__title:focus {
   max-width: 160px;
   height: auto;
   display: block;
+  max-height: 80px;
+  border-radius: 8px;
 }
 
-/* Media field wrapper */
 .ff-media-wrap {
   display: block;
   margin: 8px 0 16px;
@@ -1816,12 +1600,6 @@ a.ff-brandbar__title:focus {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.ff-media-preview {
-  max-height: 80px;
-  border-radius: 8px;
-  display: block;
 }
 
 .ff-media-fileline {
@@ -1839,7 +1617,6 @@ a.ff-brandbar__title:focus {
   font-weight: 500;
 }
 
-/* Keep buttons tidy inside table cells */
 .ff-options-card .button,
 .ff-admin .button {
   border-radius: 8px;
@@ -1847,17 +1624,15 @@ a.ff-brandbar__title:focus {
   font-weight: 500;
 }
 
-/* WYSIWYG spacing */
 .wp-editor-wrap {
   margin-top: 6px;
 }
 
-/* ---------- Forge Fields modern admin styles ---------- */
 .ff-mb .form-table,
 .ff-options-card .form-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 12px; /* row gaps */
+  border-spacing: 0 12px;
 }
 
 .ff-mb th,
@@ -1874,7 +1649,6 @@ a.ff-brandbar__title:focus {
   padding: 0;
 }
 
-/* Inputs, selects, textareas */
 #poststuff .postbox .ff-admin .ff-mb input[type="text"],
 #poststuff .postbox .ff-admin .ff-mb input[type="password"],
 #poststuff .postbox .ff-admin .ff-mb input[type="email"],
@@ -1894,7 +1668,6 @@ a.ff-brandbar__title:focus {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
 }
 
-/* Global Options card – wide but bounded */
 .wrap.ff-admin.ff-global .ff-options-card input[type="text"],
 .wrap.ff-admin.ff-global .ff-options-card input[type="password"],
 .wrap.ff-admin.ff-global .ff-options-card input[type="email"],
@@ -1904,7 +1677,7 @@ a.ff-brandbar__title:focus {
 .wrap.ff-admin.ff-global .ff-options-card select,
 .wrap.ff-admin.ff-global .ff-options-card textarea {
   width: 100%;
-  max-width: var(--ff-field-max-w); /* you already set this to 720px */
+  max-width: var(--ff-field-max-w);
   border: 1px solid #ccd0d4;
   border-radius: 8px;
   padding: 10px 12px;
@@ -1920,20 +1693,17 @@ a.ff-brandbar__title:focus {
 .ff-options-card select:focus,
 .ff-options-card textarea:focus {
   outline: 0;
-  border-color: #2271b1;
-  box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.15);
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 3px rgba(54, 54, 55, 0.15);
 }
 
-/* Buttons */
 .ff-mb .button,
-.ff-options-card .button,
-.ff-subbar__btn {
+.ff-options-card .button {
   border-radius: 8px;
   font-weight: 500;
   padding: 6px 12px;
 }
 
-/* Media (image/file) controls */
 .ff-mb .ff-media-wrap,
 .ff-options-card .ff-media-wrap {
   display: flex;
@@ -1966,7 +1736,6 @@ a.ff-brandbar__title:focus {
   color: #8c8f94;
 }
 
-/* WYSIWYG container polish */
 .ff-mb .wp-editor-wrap,
 .ff-options-card .wp-editor-wrap {
   border: 1px solid #ccd0d4;
@@ -1974,16 +1743,17 @@ a.ff-brandbar__title:focus {
   overflow: hidden;
   background: #fff;
 }
+
 .ff-mb .wp-editor-container,
 .ff-options-card .wp-editor-container {
   border: 0;
 }
+
 .ff-mb .quicktags-toolbar,
 .ff-options-card .quicktags-toolbar {
   border-bottom: 1px solid #e7eaee;
 }
 
-/* Range + number little layout helper */
 .ff-mb .ff-range-wrap,
 .ff-options-card .ff-range-wrap {
   display: flex;
@@ -1991,7 +1761,6 @@ a.ff-brandbar__title:focus {
   gap: 10px;
 }
 
-/* Card wrapper shared by metabox + globals */
 .ff-editor-card {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -2001,7 +1770,6 @@ a.ff-brandbar__title:focus {
   max-width: 100%;
 }
 
-/* Tighten the default WP editor chrome */
 .ff-editor-card .wp-editor-wrap {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -2023,7 +1791,6 @@ a.ff-brandbar__title:focus {
   background: #f9fafb !important;
 }
 
-/* Tabs (Visual / Code) */
 .ff-editor-card .wp-switch-editor {
   border: 0;
   background: transparent;
@@ -2032,14 +1799,17 @@ a.ff-brandbar__title:focus {
   margin: 0 2px 0 0;
   border-radius: 6px;
 }
+
 .ff-editor-card .wp-switch-editor.switch-tmce,
 .ff-editor-card .wp-switch-editor.switch-html {
   box-shadow: none;
 }
+
 .ff-editor-card .wp-switch-editor:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
 }
+
 .ff-editor-card .wp-switch-editor.active {
   background: #e5edff;
   color: #1e40af;
@@ -2053,39 +1823,35 @@ a.ff-brandbar__title:focus {
   line-height: 1.55;
 }
 
-/* Ensure icon fonts render even if a theme overrides fonts */
 .ff-admin .dashicons,
 .ff-admin .mce-ico {
   font-family: "dashicons" !important;
 }
 
-/* FF Global – make Quicktags (Code) view fill the card width */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
   width: 100% !important;
   max-width: none !important;
-  box-sizing: border-box; /* include borders in width calc */
+  box-sizing: border-box;
 }
 
-/* keep the toolbar from nudging the textarea width */
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
   box-sizing: border-box;
   width: 100%;
 }
 
-/* (optional) if you see a tiny right gap, remove inner padding on the card */
 .wrap.ff-admin.ff-global .ff-editor-card {
-  padding: 0; /* comment out if you prefer the padding */
+  padding: 0;
 }
+
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons,
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
   padding-left: 10px;
-  padding-right: 10px; /* re-add comfortable gutters after zeroing card padding */
+  padding-right: 10px;
 }
 
-/* ===== Forge Fields — Global WYSIWYG: match edit screen look ===== */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap {
   border: 1px solid #e5e7eb !important;
   border-radius: 6px !important;
@@ -2093,14 +1859,12 @@ a.ff-brandbar__title:focus {
   background: #fafafa !important;
 }
 
-/* Top toolbars (TinyMCE + Quicktags) */
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
   border-bottom: 1px solid #e5e7eb !important;
   background: #f9fafb !important;
 }
 
-/* Visual / Code tabs */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor {
   border: 0 !important;
   background: transparent !important;
@@ -2110,33 +1874,30 @@ a.ff-brandbar__title:focus {
   border-radius: 6px !important;
   box-shadow: none !important;
 }
+
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor.active {
   background: #e5edff !important;
   color: #1e40af !important;
 }
 
-/* Editor area */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
   border: 0 !important;
   padding: 10px !important;
   font-size: 14px !important;
   line-height: 1.55 !important;
-  width: 100% !important; /* keep full width */
+  width: 100% !important;
 }
 
-/* Make all inner wrappers fill the card width */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card textarea.wp-editor-area {
   width: 100% !important;
 }
 
-/* Keep Code (Quicktags) height stable when toggling */
 .wrap.ff-admin.ff-global .wp-editor-wrap.html-active .wp-editor-area {
   min-height: 260px !important;
 }
 
-/* Cosmetic: Add Media button rounding to match */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button {
   border-radius: 6px !important;
 }
@@ -2190,11 +1951,10 @@ input#_ff_range_slider {
 }
 
 .ff-button-group__btn:has(.ff-button-group__input:checked) {
-  border-color: #2271b1;
-  box-shadow: 0 0 0 1px #2271b1 inset;
+  border-color: var(--ff-primary);
+  box-shadow: 0 0 0 1px var(--ff-primary) inset;
 }
 
-/* Make radio + checkbox labels clickable */
 .ff-admin input[type="radio"] + *,
 .ff-admin input[type="checkbox"] + *,
 .ff-admin label:has(input[type="radio"]),
@@ -2204,4 +1964,483 @@ input#_ff_range_slider {
 
 .ff-confirm__dialog .ff-confirm__actions button {
   box-shadow: 1px 3px 7px 1px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* =========================================================
+   FORGE FIELDS — POST/PAGE EDITOR METABOX STYLING
+   ========================================================= */
+
+.postbox .inside .ff-mb {
+  margin: 0;
+}
+
+.postbox .inside .ff-mb .form-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0;
+}
+
+.postbox .inside .ff-mb .form-table tbody tr:first-child th,
+.postbox .inside .ff-mb .form-table tbody tr:first-child td {
+  padding-top: 4px;
+}
+
+.postbox .inside .ff-mb .form-table th,
+.postbox .inside .ff-mb .form-table td {
+  padding: 14px 12px;
+  vertical-align: top;
+  border-top: 1px solid var(--ff-border, #dcdcde);
+}
+
+.postbox .inside .ff-mb .form-table tbody tr:first-child th,
+.postbox .inside .ff-mb .form-table tbody tr:first-child td {
+  border-top: 0;
+}
+
+.postbox .inside .ff-mb .form-table th {
+  width: 180px;
+  font-weight: 600;
+  color: var(--ff-text, #1d2327);
+}
+
+.postbox .inside .ff-mb .form-table th label {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--ff-text, #1d2327);
+}
+
+.postbox .inside .ff-mb .form-table td {
+  width: auto;
+}
+
+.postbox .inside .ff-mb input[type="text"],
+.postbox .inside .ff-mb input[type="email"],
+.postbox .inside .ff-mb input[type="url"],
+.postbox .inside .ff-mb input[type="password"],
+.postbox .inside .ff-mb input[type="number"],
+.postbox .inside .ff-mb textarea,
+.postbox .inside .ff-mb select {
+  max-width: 760px;
+}
+
+.postbox .inside .ff-mb textarea.large-text {
+  width: 100%;
+  max-width: none;
+  min-height: 120px;
+}
+
+.postbox .inside .ff-mb .regular-text {
+  width: min(100%, 350px);
+}
+
+.postbox .inside .ff-mb .small-text {
+  width: 90px;
+}
+
+.postbox .inside .ff-mb .ff-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.postbox .inside .ff-mb .ff-range-slider {
+  width: min(100%, 260px);
+}
+
+.postbox .inside .ff-mb .ff-range-number {
+  width: 80px;
+}
+
+.postbox .inside .ff-mb .ff-media-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.postbox .inside .ff-mb .ff-media-fileline,
+.postbox .inside .ff-mb .ff-media-preview-wrap {
+  margin-bottom: 0 !important;
+}
+
+.postbox .inside .ff-mb .ff-media-preview {
+  max-height: 80px;
+  border-radius: 6px;
+}
+
+.postbox .inside .ff-mb .ff-media-select,
+.postbox .inside .ff-mb .ff-media-clear {
+  margin-right: 8px;
+}
+
+.postbox .inside .ff-mb .wp-editor-wrap {
+  max-width: 880px;
+}
+
+.postbox .inside .ff-mb .wp-editor-container {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.postbox .inside .ff-mb label:has(input[type="checkbox"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.postbox .inside .ff-mb input[type="checkbox"] {
+  margin: 0;
+}
+
+/* MEDIA QUERIES */
+@media screen and (max-width: 1440px) {
+  .ff-group-key {
+    display: none !important;
+  }
+}
+
+/* Password */
+.ff-password-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 420px; /* adjust if you want wider */
+}
+
+.ff-password-wrap .ff-password-input.regular-text {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-right: 42px;
+  box-sizing: border-box;
+}
+
+.ff-password-wrap .ff-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.ff-password-wrap .ff-password-toggle:hover,
+.ff-password-wrap .ff-password-toggle:focus {
+  background: transparent;
+  box-shadow: none;
+  color: #374151;
+  outline: none;
+}
+
+.ff-password-wrap .ff-password-toggle .dashicons {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+}
+
+/* =========================================================
+   PAGE/POST METABOX — LIGHT TOUCH MATCH TO GLOBAL
+   ========================================================= */
+
+/* Media fields: just tighten spacing */
+.postbox .inside .ff-mb .ff-media-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.postbox .inside .ff-mb .ff-media-fileline,
+.postbox .inside .ff-mb .ff-media-preview-wrap {
+  margin-bottom: 0 !important;
+}
+
+.postbox .inside .ff-mb .ff-media-select,
+.postbox .inside .ff-mb .ff-media-clear {
+  margin: 0;
+}
+
+/* WYSIWYG: style the outer shell only, do not force internal widths */
+.postbox .inside .ff-mb .wp-editor-wrap {
+  border: 1px solid var(--ff-border, #dcdcde);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Top bar */
+.postbox .inside .ff-mb .wp-editor-tools {
+  padding: 10px 12px 0;
+  background: #fff;
+  border-bottom: 1px solid var(--ff-border, #dcdcde);
+}
+
+/* Add Media spacing */
+.postbox .inside .ff-mb .wp-media-buttons {
+  margin: 0 0 10px;
+}
+
+/* Tabs */
+.postbox .inside .ff-mb .wp-editor-tabs {
+  padding-top: 0;
+}
+
+.postbox .inside .ff-mb .wp-switch-editor {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Toolbar row */
+.postbox .inside .ff-mb .quicktags-toolbar {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--ff-border, #dcdcde);
+  background: #f8f9fb;
+}
+
+/* Content area */
+.postbox .inside .ff-mb .wp-editor-container {
+  border: 0;
+  background: #fff;
+}
+
+/* Keep code editor full width */
+.postbox .inside .ff-mb textarea.wp-editor-area {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 260px;
+  padding: 12px;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* TinyMCE iframe container */
+.postbox .inside .ff-mb .tmce-active .wp-editor-area,
+.postbox .inside .ff-mb .html-active .wp-editor-area {
+  background: #fff;
+}
+
+/* =========================================================
+   FORGE BUTTON STYLE (MATCH GLOBAL EXACTLY)
+   ========================================================= */
+
+.postbox .inside .ff-mb .button,
+.postbox .inside .ff-mb .wp-media-buttons .button,
+.postbox .inside .ff-mb .quicktags-toolbar input.button {
+  background: #ffffff;
+  border: 1px solid #dcdcde;
+  color: #2c3338; /* darker gray */
+  box-shadow: none;
+  border-radius: 6px;
+  font-weight: 600; /* semibold */
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* Hover */
+.postbox .inside .ff-mb .button:hover,
+.postbox .inside .ff-mb .wp-media-buttons .button:hover,
+.postbox .inside .ff-mb .quicktags-toolbar input.button:hover {
+  background: #f6f7f7; /* lightest gray */
+  border-color: #d0d1d2;
+  color: #1d2327;
+}
+
+/* Active / focus */
+.postbox .inside .ff-mb .button:focus,
+.postbox .inside .ff-mb .button:active {
+  background: #f6f7f7;
+  border-color: #d0d1d2;
+  color: #1d2327;
+  box-shadow: none;
+  outline: none;
+}
+
+/* Location column subtle styling */
+.ff-location-target {
+  color: #8c8f94; /* WordPress gray */
+  font-weight: 400;
+}
+
+/* ---------------------------------
+   Forge tabs — modern segmented style
+--------------------------------- */
+
+.ff-tabs {
+  margin-top: 0;
+}
+
+.ff-tab-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  margin: 0 0 18px;
+  background: #f6f7f7;
+  border: 1px solid #dcdcde;
+  border-radius: 10px;
+}
+
+.ff-tab-button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #50575e;
+  padding: 9px 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: none;
+  border-radius: 8px;
+  margin: 0;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ff-tab-button:hover {
+  background: rgba(255, 255, 255, 0.7);
+  color: #2c3338;
+}
+
+.ff-tab-button.is-active {
+  background: #fff;
+  color: var(--ff-primary);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+}
+
+.ff-tab-panel {
+  display: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ff-tab-panel.is-active {
+  display: block;
+}
+
+.ff-tab-panel .form-table {
+  margin-top: 0;
+}
+
+/* Make tabs sit nicely inside your card */
+.ff-options-card .ff-tabs {
+  padding: 16px 16px 0;
+}
+
+.ff-options-card .ff-tab-panel {
+  padding: 0 16px 16px;
+}
+
+.ff-name-disabled {
+  background: #f6f7f7 !important;
+  color: #8c8f94;
+  cursor: not-allowed;
+  border-color: #dcdcde;
+}
+
+.ff-name-disabled::placeholder {
+  color: #a7aaad;
+}
+
+/* LOGO */
+.ff-brandbar__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.ff-brandbar__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.ff-subbar__actions .ff-last-saved {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   FORGE FIELDS — SETTINGS
+   ========================================================= */
+
+.ff-settings {
+  max-width: 1100px;
+}
+
+.ff-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.ff-settings-card {
+  padding: 24px;
+  background: var(--ff-surface);
+  border: 1px solid var(--ff-border);
+  border-radius: 10px;
+  box-shadow: var(--ff-shadow);
+}
+
+.ff-settings-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.ff-settings-card > p {
+  margin: 0 0 22px;
+  color: var(--ff-text-muted);
+}
+
+.ff-settings-field {
+  margin-bottom: 20px;
+}
+
+.ff-settings-field > label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.ff-settings-field input[type="file"] {
+  display: block;
+}
+
+.ff-settings-field .ff-select-wrap {
+  width: 240px;
+}
+
+.ff-settings-field select {
+  width: 100%;
 }
