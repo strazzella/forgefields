@@ -518,22 +518,134 @@ function ff_handle_field_group_import()
             ? sanitize_key($group['location'])
             : 'page';
 
-        $group['location_target'] =
-            isset($group['location_target'])
-            ? sanitize_text_field(
-                (string) $group['location_target']
-            )
+        $location_target = isset($group['location_target'])
+            ? absint($group['location_target'])
+            : 0;
+
+        $group['location_target'] = $location_target
+            ? (string) $location_target
             : '';
 
         $group['status'] = isset($group['status'])
             ? sanitize_key($group['status'])
             : 'active';
 
-        $group['fields'] =
+        if (! in_array($group['location'], ['page', 'post'], true)) {
+            $group['location'] = 'page';
+        }
+
+        if (! in_array($group['status'], ['active', 'inactive', 'trash'], true)) {
+            $group['status'] = 'active';
+        }
+
+        $sanitized_fields = [];
+
+        if (
             isset($group['fields'])
             && is_array($group['fields'])
-            ? $group['fields']
-            : [];
+        ) {
+            foreach ($group['fields'] as $field) {
+
+                if (! is_array($field)) {
+                    continue;
+                }
+
+                $field_name = isset($field['name'])
+                    ? substr(
+                        sanitize_key($field['name']),
+                        0,
+                        50
+                    )
+                    : '';
+
+                $field_label = isset($field['label'])
+                    ? substr(
+                        sanitize_text_field($field['label']),
+                        0,
+                        50
+                    )
+                    : '';
+
+                $field_type = isset($field['type'])
+                    ? sanitize_key($field['type'])
+                    : 'text';
+
+                $allowed_types = [
+                    'text',
+                    'textarea',
+                    'number',
+                    'email',
+                    'url',
+                    'range',
+                    'password',
+                    'image',
+                    'file',
+                    'wysiwyg',
+                    'select',
+                    'checkbox',
+                    'radio',
+                    'button_group',
+                    'true_false',
+                    'tab',
+                ];
+
+                if (! in_array($field_type, $allowed_types, true)) {
+                    $field_type = 'text';
+                }
+
+                /*
+         * Tab fields don't require a field name.
+         */
+                if ($field_type !== 'tab' && $field_name === '') {
+                    continue;
+                }
+
+                if ($field_label === '') {
+                    continue;
+                }
+
+                $clean_field = [
+                    'name'  => $field_name,
+                    'label' => $field_label,
+                    'type'  => $field_type,
+                ];
+
+                if (
+                    in_array(
+                        $field_type,
+                        ['select', 'checkbox', 'radio', 'button_group'],
+                        true
+                    )
+                ) {
+                    $choices = isset($field['choices'])
+                        ? sanitize_textarea_field(
+                            (string) $field['choices']
+                        )
+                        : '';
+
+                    $clean_field['choices'] = $choices;
+                }
+
+                if ($field_type === 'range') {
+
+                    if (isset($field['min']) && is_numeric($field['min'])) {
+                        $clean_field['min'] = (float) $field['min'];
+                    }
+
+                    if (isset($field['max']) && is_numeric($field['max'])) {
+                        $clean_field['max'] = (float) $field['max'];
+                    }
+
+                    if (isset($field['step']) && is_numeric($field['step'])) {
+                        $clean_field['step'] = (float) $field['step'];
+                    }
+                }
+
+                $sanitized_fields[] = $clean_field;
+            }
+        }
+
+        $group['fields'] = $sanitized_fields;
 
         $group['last_saved'] = time();
 
@@ -675,7 +787,7 @@ function ff_handle_feedback_submission()
         $message
     );
 
-    $to = 'useforgedev@gmail.com.com';
+    $to = 'useforgedev@gmail.com';
 
     $sent = wp_mail(
         $to,

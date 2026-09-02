@@ -332,6 +332,7 @@ function ff_boot_field_groups()
     }
 
     foreach ($groups as $group) {
+
         if (! is_array($group)) {
             continue;
         }
@@ -680,14 +681,53 @@ function ff_render_field_group_metabox($post, $box)
 
 add_action('save_post', function ($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
-    if (! isset($_POST['ff_meta_nonce']) || ! wp_verify_nonce($_POST['ff_meta_nonce'], 'ff_save_post_fields')) return;
+
+    if (wp_is_post_revision($post_id)) {
+        return;
+    }
+
+    if (! isset($_POST['ff_meta_nonce'])) {
+        return;
+    }
+
+    $nonce = sanitize_text_field(
+        wp_unslash($_POST['ff_meta_nonce'])
+    );
+
+    if (! wp_verify_nonce($nonce, 'ff_save_post_fields')) {
+        return;
+    }
     if (! current_user_can('edit_post', $post_id)) return;
 
     $groups = ff_get_all_groups();
 
     foreach ($groups as $group) {
-        $location = $group['location'] ?? 'page';
-        if (! in_array($location, ['post', 'page'], true)) {
+
+        $status = isset($group['status'])
+            ? $group['status']
+            : 'active';
+
+        if ($status !== 'active') {
+            continue;
+        }
+
+        $location = isset($group['location'])
+            ? $group['location']
+            : 'page';
+
+        if (! in_array($location, ['page', 'post'], true)) {
+            continue;
+        }
+
+        if (get_post_type($post_id) !== $location) {
+            continue;
+        }
+
+        $target = isset($group['location_target'])
+            ? (string) $group['location_target']
+            : '';
+
+        if ($target !== '' && (string) $post_id !== $target) {
             continue;
         }
 
@@ -759,18 +799,23 @@ add_action('save_post', function ($post_id) {
 
                 case 'checkbox':
                     if ($has_key && is_array($raw)) {
+
+                        $raw_values = wp_unslash($raw);
+
                         $vals = array_map(
                             static function ($v) {
                                 return sanitize_key((string) $v);
                             },
-                            $raw
+                            $raw_values
                         );
+
                         $vals = array_values(
                             array_filter(
                                 $vals,
                                 static fn($v) => $v !== ''
                             )
                         );
+
                         $val = $vals;
                     } else {
                         $val = [];

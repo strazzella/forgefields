@@ -34,3 +34,25 @@ ff_get_field('field_name', 123);
     name="description"
     content="<?php echo esc_attr(ff_get_global('home_meta_description')); ?>"
 >
+
+<?php
+$image_id = ff_get_field('hero_image');
+$image_url = wp_get_attachment_image_url($image_id, 'full');
+?>
+
+<?php if ($image_url) : ?>
+    <img
+        src="<?php echo esc_url($image_url); ?>"
+        alt="">
+<?php endif; ?>
+
+<?php
+$image_id = ff_get_global_field('site_logo');
+
+if ($image_id) {
+    echo wp_get_attachment_image(
+        $image_id,
+        'full'
+    );
+}
+?>

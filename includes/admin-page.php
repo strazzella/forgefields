@@ -466,6 +466,10 @@ function ff_handle_field_group_save()
         ? sanitize_text_field(wp_unslash($_POST['ff_location']))
         : 'page';
 
+    if (! in_array($location, ['page', 'post', 'global'], true)) {
+        $location = 'page';
+    }
+
     $location_target = '';
 
     if ($location === 'page') {
@@ -490,7 +494,13 @@ function ff_handle_field_group_save()
     foreach ($fields_raw as $field_raw) {
 
         $name = isset($field_raw['name'])
-            ? substr(sanitize_key($field_raw['name']), 0, 50)
+            ? substr(
+                sanitize_key(
+                    wp_unslash($field_raw['name'])
+                ),
+                0,
+                50
+            )
             : '';
 
         $label = isset($field_raw['label'])
@@ -504,10 +514,33 @@ function ff_handle_field_group_save()
             : '';
 
         $type = isset($field_raw['type'])
-            ? sanitize_text_field(
+            ? sanitize_key(
                 wp_unslash($field_raw['type'])
             )
             : 'text';
+
+        $allowed_types = [
+            'text',
+            'textarea',
+            'number',
+            'email',
+            'url',
+            'range',
+            'password',
+            'image',
+            'file',
+            'wysiwyg',
+            'select',
+            'checkbox',
+            'radio',
+            'button_group',
+            'true_false',
+            'tab',
+        ];
+
+        if (! in_array($type, $allowed_types, true)) {
+            $type = 'text';
+        }
 
         if ($name === '' && $label === '') {
             continue;
@@ -791,6 +824,19 @@ function ff_handle_field_group_actions()
         $bulk_action = sanitize_key(
             wp_unslash($_POST['ff_bulk_action'])
         );
+
+        $allowed_bulk_actions = [
+            'trash',
+            'activate',
+            'deactivate',
+            'duplicate',
+            'restore',
+            'delete',
+        ];
+
+        if (! in_array($bulk_action, $allowed_bulk_actions, true)) {
+            return;
+        }
 
         $selected_ids = array_map(
             'sanitize_text_field',
@@ -1891,7 +1937,12 @@ function ff_render_global_options_page()
 
         foreach ($raw as $field_name => $value_raw) {
             $name = sanitize_key($field_name);
-            $type = isset($type_map[$name]) ? $type_map[$name] : 'text';
+
+            if ($name === '' || ! isset($type_map[$name])) {
+                continue;
+            }
+
+            $type = $type_map[$name];
 
             switch ($type) {
                 case 'number':
@@ -1916,12 +1967,28 @@ function ff_render_global_options_page()
                         : ff_sanitize_type_password(wp_unslash($value_raw), ['name' => $name, 'type' => 'password'], 0);
                     break;
 
-                case 'text':
-                case 'textarea':
                 case 'wysiwyg':
                     $new_values[$name] = is_array($value_raw)
                         ? ''
-                        : sanitize_text_field(wp_unslash($value_raw));
+                        : wp_kses_post(
+                            wp_unslash($value_raw)
+                        );
+                    break;
+
+                case 'textarea':
+                    $new_values[$name] = is_array($value_raw)
+                        ? ''
+                        : sanitize_textarea_field(
+                            wp_unslash($value_raw)
+                        );
+                    break;
+
+                case 'text':
+                    $new_values[$name] = is_array($value_raw)
+                        ? ''
+                        : sanitize_text_field(
+                            wp_unslash($value_raw)
+                        );
                     break;
 
                 case 'image':
@@ -1937,9 +2004,16 @@ function ff_render_global_options_page()
 
                 case 'checkbox':
                     if (is_array($value_raw)) {
-                        $vals = array_map(static function ($v) {
-                            return sanitize_key((string) $v);
-                        }, $value_raw);
+
+                        $raw_values = wp_unslash($value_raw);
+
+                        $vals = array_map(
+                            static function ($v) {
+                                return sanitize_key((string) $v);
+                            },
+                            $raw_values
+                        );
+
                         $vals = array_values(array_filter($vals, static fn($v) => $v !== ''));
                         $new_values[$name] = $vals;
                     } else {
