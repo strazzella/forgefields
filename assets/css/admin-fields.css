@@ -1046,9 +1046,9 @@ button#ff-add-field {
  * plugin content and within the secondary admin bar.
  */
 .wrap.ff-admin .button-primary,
-.ff-subbar .button-primary {
+body.wp-admin .ff-subbar .button.button-primary {
   background: var(--ff-primary);
-  border: 1px solid var(--ff-primary);
+  border-color: var(--ff-primary);
   color: #ffffff;
 }
 
@@ -1056,7 +1056,7 @@ button#ff-add-field {
  * Primary button hover state.
  */
 .wrap.ff-admin .button-primary:hover,
-.ff-subbar .button-primary:hover {
+body.wp-admin .ff-subbar .button.button-primary:hover {
   background: var(--ff-primary-hover);
   border-color: var(--ff-primary-hover);
   color: #ffffff;
@@ -1066,7 +1066,7 @@ button#ff-add-field {
  * Primary button active color state.
  */
 .wrap.ff-admin .button-primary:active,
-.ff-subbar .button-primary:active {
+body.wp-admin .ff-subbar .button.button-primary:active {
   background: var(--ff-primary-active);
   border-color: var(--ff-primary-active);
   color: #ffffff;
@@ -2331,11 +2331,12 @@ span.dashicons {
 }
 
 /**
- * Primary action button displayed directly inside the subbar.
+ * Primary Forge Fields action button displayed inside the subbar.
  *
- * Uses flex alignment to keep its text vertically and horizontally centered.
+ * Explicitly overrides the native WordPress primary-button colors so
+ * Forge Fields branding remains consistent across admin color schemes.
  */
-a.button.button-primary.ff-subbar__btn {
+.ff-subbar .button.button-primary.ff-subbar__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2346,6 +2347,23 @@ a.button.button-primary.ff-subbar__btn {
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
+
+  background: #363637 !important;
+  border-color: #363637 !important;
+  color: #ffffff !important;
+  box-shadow: none;
+}
+
+.ff-subbar .button.button-primary.ff-subbar__btn:hover {
+  background: #242425 !important;
+  border-color: #242425 !important;
+  color: #ffffff !important;
+}
+
+.ff-subbar .button.button-primary.ff-subbar__btn:active {
+  background: #18181a !important;
+  border-color: #18181a !important;
+  color: #ffffff !important;
 }
 
 /**
