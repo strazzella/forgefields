@@ -827,10 +827,27 @@ input.button.action {
 }
 
 /**
- * Apply the shared border color to the Add Field button.
+ * Secondary Add Field button displayed inside the subbar.
+ *
+ * Explicit colors prevent the active WordPress admin color scheme
+ * from changing the button text or border appearance.
  */
-button#ff-add-field {
-  border: 1px solid var(--ff-border);
+.ff-subbar #ff-add-field {
+  background: #ffffff !important;
+  border: 1px solid #d0d5dd !important;
+  color: #363637 !important;
+}
+
+.ff-subbar #ff-add-field:hover {
+  background: #f8fafc !important;
+  border-color: #c7ccd6 !important;
+  color: #242425 !important;
+}
+
+.ff-subbar #ff-add-field:active {
+  background: #f1f3f5 !important;
+  border-color: #c7ccd6 !important;
+  color: #18181a !important;
 }
 
 /**
@@ -1045,28 +1062,19 @@ button#ff-add-field {
  * Applies Forge Fields branding to primary actions both inside
  * plugin content and within the secondary admin bar.
  */
-.wrap.ff-admin .button-primary,
-body.wp-admin .ff-subbar .button.button-primary {
+.wrap.ff-admin .button-primary {
   background: var(--ff-primary);
   border-color: var(--ff-primary);
   color: #ffffff;
 }
 
-/**
- * Primary button hover state.
- */
-.wrap.ff-admin .button-primary:hover,
-body.wp-admin .ff-subbar .button.button-primary:hover {
+.wrap.ff-admin .button-primary:hover {
   background: var(--ff-primary-hover);
   border-color: var(--ff-primary-hover);
   color: #ffffff;
 }
 
-/**
- * Primary button active color state.
- */
-.wrap.ff-admin .button-primary:active,
-body.wp-admin .ff-subbar .button.button-primary:active {
+.wrap.ff-admin .button-primary:active {
   background: var(--ff-primary-active);
   border-color: var(--ff-primary-active);
   color: #ffffff;
@@ -2484,13 +2492,6 @@ span.dashicons {
  */
 .ff-subbar__actions .button.button-primary {
   box-shadow: none;
-}
-
-/**
- * Explicit border for the Add Field button.
- */
-button#ff-add-field {
-  border: 1px solid #d0d5dd;
 }
 
 /**
