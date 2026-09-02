@@ -2430,6 +2430,14 @@ input#_ff_range_slider {
   font-family: var(--ff-f-ui);
 }
 
+#poststuff .postbox .inside .ff-mb input,
+#poststuff .postbox .inside .ff-mb textarea,
+#poststuff .postbox .inside .ff-mb .ff-select-wrap select {
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
 /* ---------------------------------------------------------
    REMOVE OLD WORDPRESS TABLE APPEARANCE
    --------------------------------------------------------- */
@@ -2653,18 +2661,40 @@ input#_ff_range_slider {
 #poststuff .postbox .inside .ff-mb textarea:hover,
 #poststuff .postbox .inside .ff-mb .ff-select-wrap select:hover {
   border-color: #aeb4bf;
-}
-
-#poststuff .postbox .inside .ff-mb input:focus,
-#poststuff .postbox .inside .ff-mb textarea:focus,
-#poststuff .postbox .inside .ff-mb .ff-select-wrap select:focus {
-  outline: none;
-
-  border-color: var(--ff-primary);
 
   box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+/* Text inputs + textarea focus */
+#poststuff .postbox .inside .ff-mb input[type="text"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="email"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="url"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="password"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="number"]:focus,
+#poststuff .postbox .inside .ff-mb textarea:focus {
+  outline: none !important;
+
+  border-color: var(--ff-primary) !important;
+  border-radius: 8px;
+
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.07),
     0 1px 2px rgba(16, 24, 40, 0.05),
-    0 0 0 2px rgba(54, 54, 55, 0.18);
+    0 0 0 1px rgba(54, 54, 55, 0.14) !important;
+}
+
+#poststuff .postbox .inside .ff-mb .ff-select-wrap select:focus {
+  outline: none !important;
+
+  border-color: var(--ff-primary) !important;
+  border-radius: 8px;
+
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06),
+    0 0 0 2px rgba(54, 54, 55, 0.2) !important;
 }
 
 /* ---------------------------------------------------------
