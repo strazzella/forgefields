@@ -1,60 +1,134 @@
+/**
+ * Forge Fields admin design tokens.
+ *
+ * These custom properties define the shared visual system used throughout
+ * the Forge Fields WordPress admin interface, including:
+ * - Background and surface colors.
+ * - Border colors.
+ * - Text colors.
+ * - Primary/action colors.
+ * - Status colors.
+ * - Border radii.
+ * - Shadows.
+ * - Font families.
+ * - Shared font sizes.
+ */
 .ff-admin {
+  /**
+   * Core background and surface colors.
+   */
   --ff-bg: #fff;
   --ff-bg-muted: #f6f7f7;
   --ff-surface: #ffffff;
+
+  /**
+   * Border colors used for standard and stronger separators.
+   */
   --ff-border: #d0d5dd;
   --ff-border-strong: #c7ccd6;
+
+  /**
+   * Primary and muted text colors.
+   */
   --ff-text: #1f2937;
   --ff-text-muted: #6b7280;
 
+  /**
+   * Primary interaction colors used for default, hover, and active states.
+   */
   --ff-primary: #363637;
   --ff-primary-hover: #242425;
   --ff-primary-active: #18181a;
 
+  /**
+   * Semantic status colors.
+   */
   --ff-success: #1e824c;
   --ff-warn: #b45309;
   --ff-danger: #b91c1c;
 
+  /**
+   * Shared border-radius scale.
+   */
   --ff-r-2: 3px;
   --ff-r-3: 4px;
   --ff-r-4: 6px;
 
+  /**
+   * Default lightweight elevation shadow.
+   */
   --ff-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 
+  /**
+   * Primary UI font stack.
+   *
+   * Uses native system fonts first, with Inter and common
+   * sans-serif fallbacks.
+   */
   --ff-f-ui:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui,
     sans-serif;
 
+  /**
+   * Monospace font stack used for keys, code-like values,
+   * and other technical content.
+   */
   --ff-f-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 
+  /**
+   * Shared small font-size tokens.
+   */
   --ff-12: 12px;
   --ff-13: 13px;
   --ff-14: 14px;
 }
 
+/**
+ * Override WordPress admin theme colors when the Forge Fields brand bar
+ * is present.
+ *
+ * This keeps WordPress-native controls aligned with the Forge Fields
+ * primary color palette.
+ */
 body.ff-has-brandbar {
   --wp-admin-theme-color: #363637;
   --wp-admin-theme-color-darker-10: #242425;
   --wp-admin-theme-color-darker-20: #18181a;
 }
 
+/**
+ * Apply consistent box sizing and the Forge Fields UI font to all
+ * descendants inside the admin wrapper.
+ */
 .wrap.ff-admin * {
   box-sizing: border-box;
   font-family: var(--ff-f-ui);
 }
 
+/**
+ * Shared page padding for edit, list, and global Forge Fields admin screens.
+ */
 .ff-edit,
 .ff-list,
 .ff-global {
   padding: 24px 20px;
 }
 
+/**
+ * Apply the Forge Fields small-radius token to WordPress page-title actions.
+ */
 .page-title-action {
   border-radius: var(--ff-r-3);
 }
 
+/**
+ * Style WordPress sub-navigation links inside Forge Fields admin screens.
+ *
+ * The default inline list is converted into a flexible row layout that
+ * can wrap cleanly on narrower screens.
+ */
 .wrap.ff-admin .subsubsub {
   margin: 6px 0 14px;
   gap: 8px;
@@ -62,6 +136,9 @@ body.ff-has-brandbar {
   flex-wrap: wrap;
 }
 
+/**
+ * Style individual sub-navigation links.
+ */
 .wrap.ff-admin .subsubsub a {
   padding: 3px 8px;
   text-decoration: none;
@@ -71,14 +148,25 @@ body.ff-has-brandbar {
   gap: 6px;
 }
 
+/**
+ * Use muted text for item counts displayed inside sub-navigation links.
+ */
 .wrap.ff-admin .subsubsub a .count {
   color: var(--ff-text-muted);
 }
 
+/**
+ * Emphasize the currently active sub-navigation link.
+ */
 .wrap.ff-admin .subsubsub a.current {
   font-weight: 600;
 }
 
+/**
+ * Forge Fields search-form layout.
+ *
+ * Search controls are arranged in a flexible row with consistent spacing.
+ */
 .ff-search-form {
   margin: 10px 0 12px;
   display: flex;
@@ -87,6 +175,9 @@ body.ff-has-brandbar {
   flex-wrap: wrap;
 }
 
+/**
+ * Search text input styling.
+ */
 .ff-search-input {
   max-width: 280px;
   padding: 7px 10px;
@@ -94,12 +185,20 @@ body.ff-has-brandbar {
   border-radius: var(--ff-r-3);
 }
 
+/**
+ * Search input focus state.
+ *
+ * Uses the Forge Fields primary color for both the border and outer focus ring.
+ */
 .ff-search-input:focus {
   outline: none;
   border-color: var(--ff-primary);
   box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
+/**
+ * Search-clear control sizing.
+ */
 .ff-search-clear {
   padding: 0 8px;
   font-size: 18px;
@@ -107,6 +206,13 @@ body.ff-has-brandbar {
   height: 30px;
 }
 
+/**
+ * Shared custom-select styling for Forge Fields edit, global, and settings
+ * screens, along with the primary location selector.
+ *
+ * Native browser appearance is removed so all supported select controls
+ * use the same custom presentation.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
 .wrap.ff-admin.ff-settings .ff-select-wrap select,
@@ -132,6 +238,12 @@ body.ff-has-brandbar {
   background-clip: padding-box;
 }
 
+/**
+ * Custom dropdown indicator for Forge Fields select wrappers.
+ *
+ * The indicator is visual only and ignores pointer events so clicks
+ * continue to reach the underlying select.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap::after,
 .wrap.ff-admin.ff-global .ff-select-wrap::after,
 .wrap.ff-admin.ff-settings .ff-select-wrap::after {
@@ -145,12 +257,20 @@ body.ff-has-brandbar {
   pointer-events: none;
 }
 
+/**
+ * Align bulk-action controls horizontally within WordPress list-table navigation.
+ */
 .wrap.ff-admin.ff-list .tablenav .bulkactions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+/**
+ * Custom-select wrapper used by list-table bulk actions.
+ *
+ * Establishes a positioning context for the custom dropdown indicator.
+ */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap {
   position: relative;
   display: inline-block;
@@ -158,6 +278,9 @@ body.ff-has-brandbar {
   min-width: 160px;
 }
 
+/**
+ * Bulk-action select styling for Forge Fields list screens.
+ */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select {
   width: 100%;
   appearance: none;
@@ -178,12 +301,18 @@ body.ff-has-brandbar {
     box-shadow 0.15s;
 }
 
+/**
+ * Focus state for list-table bulk-action selects.
+ */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap select:focus {
   outline: none;
   border-color: var(--ff-primary);
   box-shadow: 0 0 0 2px rgba(29, 109, 246, 0.2);
 }
 
+/**
+ * Custom dropdown indicator for list-table bulk-action selects.
+ */
 .wrap.ff-admin.ff-list .tablenav .ff-select-wrap::after {
   content: "▾";
   position: absolute;
@@ -195,6 +324,9 @@ body.ff-has-brandbar {
   pointer-events: none;
 }
 
+/**
+ * Match the WordPress bulk-action Apply button height to the adjacent select.
+ */
 .wrap.ff-admin.ff-list .tablenav .bulkactions .button.action {
   height: 32px;
   line-height: 30px;
@@ -202,6 +334,12 @@ body.ff-has-brandbar {
   margin: 0;
 }
 
+/**
+ * Shared styling for common Forge Fields text-based form controls.
+ *
+ * Applies consistent spacing, borders, radius, background, transitions,
+ * and full available width.
+ */
 .ff-admin input[type="text"],
 .ff-admin input[type="password"],
 .ff-admin input[type="url"],
@@ -216,6 +354,9 @@ body.ff-has-brandbar {
   width: 100%;
 }
 
+/**
+ * Shared focus state for Forge Fields inputs and textareas.
+ */
 .ff-admin input:focus,
 .ff-admin textarea:focus {
   outline: none;
@@ -223,6 +364,10 @@ body.ff-has-brandbar {
   box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
+/**
+ * Limit form-control width on Forge Fields edit screens so fields do not
+ * stretch unnecessarily across the full admin content area.
+ */
 .ff-admin.ff-edit input,
 .ff-admin.ff-edit textarea,
 .ff-admin.ff-edit select#ff_location,
@@ -230,10 +375,16 @@ body.ff-has-brandbar {
   max-width: 520px;
 }
 
+/**
+ * Add spacing above the main Forge Fields list table.
+ */
 .wrap.ff-admin.ff-list .ff-list-table {
   margin-top: 12px;
 }
 
+/**
+ * Shared header and footer bar styling for Forge Fields list tables.
+ */
 .wrap.ff-admin.ff-list .ff-list-table thead.ff-list-bar,
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar {
   background: var(--ff-bg-muted);
@@ -241,29 +392,51 @@ body.ff-has-brandbar {
   border-bottom: 1px solid #e3e5ea;
 }
 
+/**
+ * Increase list-table header weight for clearer column labeling.
+ */
 .wrap.ff-admin.ff-list .ff-list-table th {
   font-weight: 600;
 }
 
+/**
+ * Apply a subtle background highlight when hovering list-table rows.
+ */
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:hover {
   background: #fbfcfd;
 }
 
+/**
+ * Primary row-title links use WordPress-style blue coloring without underlines.
+ */
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a {
   color: #0a4b78;
   text-decoration: none;
 }
 
+/**
+ * Darken primary row-title links on hover.
+ */
 .wrap.ff-admin.ff-list .ff-list-table .column-primary strong a:hover {
   color: #0b5a91;
 }
 
+/**
+ * Align sortable and currently sorted column-heading links inline
+ * with their sort indicators.
+ */
 th.sortable a,
 th.sorted a {
   display: inline-flex;
   align-items: center;
 }
 
+/**
+ * Default sort indicator for the title column.
+ *
+ * The upward triangle is shown at reduced opacity until the column
+ * becomes actively sorted.
+ */
 th.column-title .sorting-indicator::before {
   content: "▲";
   font-size: 10px;
@@ -272,25 +445,46 @@ th.column-title .sorting-indicator::before {
   color: #0b5a91;
 }
 
+/**
+ * Fully reveal the upward indicator when the title column is sorted ascending.
+ */
 th.column-title.sorted.asc .sorting-indicator::before {
   opacity: 1;
 }
 
+/**
+ * Switch the sort indicator to a downward triangle when sorted descending.
+ */
 th.column-title.sorted.desc .sorting-indicator::before {
   content: "▼";
   opacity: 1;
 }
 
+/**
+ * Hide WordPress row actions by default on Forge Fields list screens.
+ *
+ * The opacity transition allows them to appear smoothly when needed.
+ */
 .wrap.ff-admin.ff-list .row-actions {
   opacity: 0;
   transition: opacity 0.12s ease-in-out;
 }
 
+/**
+ * Reveal row actions when:
+ * - The user hovers over the row.
+ * - The row receives the ff-row-focus class from keyboard focus handling.
+ */
 .wrap.ff-admin.ff-list tr:hover .row-actions,
 .wrap.ff-admin.ff-list tr.ff-row-focus .row-actions {
   opacity: 1;
 }
 
+/**
+ * Base pill/chip component.
+ *
+ * Used for compact metadata and count-style labels.
+ */
 .ff-chip {
   display: inline-flex;
   align-items: center;
@@ -305,20 +499,36 @@ th.column-title.sorted.desc .sorting-indicator::before {
   box-shadow: var(--ff-shadow);
 }
 
+/**
+ * Monospace chip variant.
+ *
+ * Intended for technical values such as field keys or identifiers.
+ */
 .ff-chip--mono {
   font-family: var(--ff-f-mono);
   background: #f3f4f6;
   border-color: #e5e7eb;
 }
 
+/**
+ * Remove underline styling from links that wrap count chips.
+ */
 .ff-count-link {
   text-decoration: none;
 }
 
+/**
+ * Apply a subtle hover background to chips inside count links.
+ */
 .ff-count-link:hover .ff-chip {
   background: #eef2f7;
 }
 
+/**
+ * Base status-pill component.
+ *
+ * Provides shared sizing, alignment, radius, typography, and default text color.
+ */
 .ff-status {
   display: inline-flex;
   align-items: center;
@@ -330,32 +540,59 @@ th.column-title.sorted.desc .sorting-indicator::before {
   color: #111827;
 }
 
+/**
+ * Active status appearance.
+ *
+ * Uses green tones to communicate an enabled or healthy state.
+ */
 .ff-status--active {
   background: #ecfdf5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
 
+/**
+ * Inactive status appearance.
+ *
+ * Uses neutral gray tones.
+ */
 .ff-status--inactive {
   background: #f3f4f6;
   color: #374151;
   border: 1px solid #e5e7eb;
 }
 
+/**
+ * Trash status appearance.
+ *
+ * Uses red tones to indicate deleted or trashed content.
+ */
 .ff-status--trash {
   background: #fef2f2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
+/**
+ * Add spacing before field-key copy controls.
+ */
 .ff-copy-key {
   margin-left: 6px;
 }
 
+/**
+ * Temporary success state applied after a field key has been copied.
+ */
 .ff-copy-key.is-copied {
   color: #198754;
 }
 
+/**
+ * Forge Fields edit-table styling.
+ *
+ * Gives the WordPress widefat table used on edit screens a contained,
+ * card-like appearance with rounded corners and separated borders.
+ */
 .wrap.ff-admin.ff-edit table.widefat {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -364,15 +601,29 @@ th.column-title.sorted.desc .sorting-indicator::before {
   border-spacing: 0;
 }
 
+/**
+ * Apply the muted admin background to edit-table header cells.
+ */
 .wrap.ff-admin.ff-edit table.widefat thead th {
   background: var(--ff-bg-muted);
 }
 
+/**
+ * Highlight edit-table rows on hover.
+ *
+ * The second background declaration is marked important and therefore
+ * takes precedence over the first declaration in this same rule.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover {
   background: #fbfcfd;
   background: #f7f9fc !important;
 }
 
+/**
+ * Base drag handle used for reordering field rows.
+ *
+ * The grab cursor communicates that the row can be dragged.
+ */
 .ff-field-handle {
   cursor: grab;
   width: 28px;
@@ -380,32 +631,53 @@ th.column-title.sorted.desc .sorting-indicator::before {
   color: #9aa0a6;
 }
 
+/**
+ * Render a compact vertical grip marker inside each field drag handle.
+ */
 .ff-field-handle::after {
   content: "⋮⋮";
   font-size: 14px;
   opacity: 0.7;
 }
 
+/**
+ * Apply the destructive color to field-removal controls.
+ */
 .ff-field-actions .ff-remove-field,
 .ff-field-remove {
   color: #b91c1c;
 }
 
+/**
+ * Preserve the destructive color on hover and add an underline
+ * to make the removal action more visually explicit.
+ */
 .ff-field-actions .ff-remove-field:hover,
 .ff-field-remove:hover {
   color: #b91c1c;
   text-decoration: underline;
 }
 
+/**
+ * Keep remove controls red during active and keyboard-focus states.
+ */
 .ff-field-remove:active,
 .ff-field-remove:focus {
   color: #b91c1c;
 }
 
+/**
+ * Ensure button-link variants of the field-remove control
+ * use the same destructive color.
+ */
 button.button-link.ff-field-remove {
   color: #b91c1c;
 }
 
+/**
+ * Force several Forge Fields remove-link variants to use a consistent
+ * destructive color while suppressing their default underline.
+ */
 .ff-field-row .ff-remove,
 .ff-fields-table .ff-remove,
 a.ff-remove {
@@ -413,56 +685,101 @@ a.ff-remove {
   text-decoration: none !important;
 }
 
+/**
+ * Restore an underline when hovering generic .ff-remove links.
+ */
 a.ff-remove:hover {
   text-decoration: underline !important;
 }
 
+/**
+ * Apply the destructive color to legacy/remove-field link variants.
+ */
 a.remove-field {
   color: #b91c1c !important;
   text-decoration: none !important;
 }
 
+/**
+ * Underline legacy remove-field links on hover.
+ */
 a.remove-field:hover {
   text-decoration: underline !important;
 }
 
+/**
+ * Apply WordPress-style destructive red to explicit field-remove links.
+ */
 a.ff-field-remove {
   color: #b32d2e !important;
   text-decoration: none !important;
 }
 
+/**
+ * Underline field-remove links on hover.
+ */
 a.ff-field-remove:hover {
   text-decoration: underline !important;
 }
 
+/**
+ * Vertically offset WordPress sorting indicators.
+ */
 span.sorting-indicator {
   margin-top: 7px;
 }
 
+/**
+ * Use the shared muted text color for descriptive/help text.
+ */
 .wrap.ff-admin .description {
   color: var(--ff-text-muted);
 }
 
+/**
+ * Remove WordPress's default focus outline and shadow from links
+ * and buttons inside the Forge Fields admin wrapper.
+ */
 #wpbody-content .wrap.ff-admin a:focus,
 #wpbody-content .wrap.ff-admin button:focus {
   outline: none;
   box-shadow: none;
 }
 
+/**
+ * Remove WordPress's default focus styling specifically from
+ * links contained inside table headers.
+ */
 #wpbody-content .wrap.ff-admin th a:focus {
   outline: none;
   box-shadow: none;
 }
 
+/**
+ * Password-field wrapper.
+ *
+ * Establishes a positioning context for the visibility-toggle button
+ * and limits the control to the standard edit-form width.
+ */
 .ff-password-wrap {
   position: relative;
   max-width: 520px;
 }
 
+/**
+ * Add right-side input padding so password text does not overlap
+ * the visibility-toggle control.
+ */
 .ff-password-wrap .ff-password-input {
   padding-right: 34px;
 }
 
+/**
+ * Password visibility-toggle button.
+ *
+ * Positioned inside the password wrapper and vertically centered
+ * over the input.
+ */
 .ff-password-toggle {
   position: absolute;
   right: 8px;
@@ -473,6 +790,11 @@ span.sorting-indicator {
   cursor: pointer;
 }
 
+/**
+ * Range-field layout.
+ *
+ * Places the slider and numeric input on the same row with consistent spacing.
+ */
 .ff-range-wrap {
   display: flex;
   align-items: center;
@@ -480,6 +802,9 @@ span.sorting-indicator {
   max-width: 340px;
 }
 
+/**
+ * Numeric control paired with range sliders.
+ */
 .ff-range-number {
   width: 72px;
   text-align: center;
@@ -488,22 +813,44 @@ span.sorting-indicator {
   background: #fff;
 }
 
+/**
+ * Slightly adjust the vertical position of bulk-action buttons.
+ */
 .bulkactions input.button.action {
   margin-top: 2px;
 }
 
+/**
+ * Ensure the bottom bulk-action selector uses the shared Forge Fields border.
+ */
 select#ff-bulk-action-selector-bottom {
   border: 1px solid var(--ff-border);
 }
 
+/**
+ * Force generic action buttons to use the Forge Fields border color.
+ */
 input.button.action {
   border: 1px solid var(--ff-border) !important;
 }
 
+/**
+ * Apply the shared border color to the Add Field button.
+ */
 button#ff-add-field {
   border: 1px solid var(--ff-border);
 }
 
+/**
+ * Main Forge Fields list-table container.
+ *
+ * Gives the table a card-like appearance with:
+ * - A subtle border.
+ * - Rounded corners.
+ * - White background.
+ * - Shared elevation shadow.
+ * - Separate border layout for cleaner rounded edges.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -514,6 +861,9 @@ button#ff-add-field {
   border-spacing: 0;
 }
 
+/**
+ * Shared styling for list-table header and footer cells.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
   background: var(--ff-bg-muted);
@@ -522,25 +872,41 @@ button#ff-add-field {
   font-weight: 600;
 }
 
+/**
+ * Standard cell spacing and vertical alignment for all list-table
+ * headers and body cells.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table td,
 .wrap.ff-admin.ff-list table.ff-list-table th {
   padding: 10px 12px;
   vertical-align: middle;
 }
 
+/**
+ * Add subtle row separation throughout the list-table body.
+ */
 .wrap.ff-admin.ff-list .ff-list-table tbody tr {
   border-top: 1px solid #f1f5f9;
 }
 
+/**
+ * Apply alternating background shading to odd-numbered body rows.
+ */
 .wrap.ff-admin.ff-list .ff-list-table tbody tr:nth-child(odd) {
   background: #fafbfc;
 }
 
+/**
+ * Set a compact width and left padding for checkbox columns.
+ */
 .wrap.ff-admin.ff-list .ff-list-table .check-column {
   width: 34px;
   padding-left: 10px;
 }
 
+/**
+ * Reduce chip sizing when chips are displayed inside list tables.
+ */
 .wrap.ff-admin.ff-list .ff-chip {
   height: 20px;
   line-height: 20px;
@@ -548,11 +914,18 @@ button#ff-add-field {
   font-size: 11px;
 }
 
+/**
+ * Preserve the muted technical styling of monospace chips
+ * inside Forge Fields list tables.
+ */
 .wrap.ff-admin.ff-list .ff-chip--mono {
   background: #f3f4f6;
   border-color: #e5e7eb;
 }
 
+/**
+ * Reduce status-pill dimensions for compact list-table display.
+ */
 .wrap.ff-admin.ff-list .ff-status {
   height: 20px;
   line-height: 20px;
@@ -560,26 +933,46 @@ button#ff-add-field {
   padding: 0 8px;
 }
 
+/**
+ * Add extra spacing before the title-column sorting indicator
+ * on Forge Fields list screens.
+ */
 .wrap.ff-admin.ff-list th.column-title .sorting-indicator::before {
   margin-left: 6px;
 }
 
+/**
+ * Adjust footer cells so the footer receives a top separator
+ * without an additional bottom border.
+ */
 .wrap.ff-admin.ff-list .ff-list-table tfoot.ff-list-bar th {
   border-top: 1px solid #e5e7eb;
   border-bottom: 0;
 }
 
+/**
+ * Simplify the bottom WordPress table-navigation area.
+ */
 .wrap.ff-admin.ff-list .tablenav.bottom {
   border: 0;
   padding: 10px 0 4px;
 }
 
+/**
+ * Edit-screen drag-handle positioning.
+ *
+ * Establishes a positioning context so the grip icon can be centered
+ * precisely inside the handle.
+ */
 .wrap.ff-admin.ff-edit .ff-field-handle {
   width: 28px;
   position: relative;
   cursor: grab;
 }
 
+/**
+ * Center the drag-grip marker inside edit-screen field handles.
+ */
 .wrap.ff-admin.ff-edit .ff-field-handle::after {
   content: "⋮⋮";
   position: absolute;
@@ -591,15 +984,28 @@ button#ff-add-field {
   line-height: 1;
 }
 
+/**
+ * Change to the grabbing cursor while the drag handle is actively pressed.
+ */
 .wrap.ff-admin.ff-edit .ff-field-handle:active {
   cursor: grabbing;
 }
 
+/**
+ * Shared Forge Fields button system.
+ *
+ * Applies consistent dimensions, spacing, radius, typography,
+ * elevation, and transition behavior to standard and primary buttons.
+ */
 .wrap.ff-admin .button,
 .wrap.ff-admin .button-primary {
+  /**
+   * Local button sizing tokens.
+   */
   --ff-btn-radius: 8px;
   --ff-btn-h: 36px;
   --ff-btn-pad-x: 14px;
+
   height: var(--ff-btn-h);
   line-height: calc(var(--ff-btn-h) - 2px);
   padding: 0 var(--ff-btn-pad-x);
@@ -615,41 +1021,73 @@ button#ff-add-field {
     transform 0.02s ease;
 }
 
+/**
+ * Default secondary button appearance.
+ */
 .wrap.ff-admin .button {
   background: #ffffff;
   color: #0f172a;
   border: 1px solid var(--ff-border);
 }
 
+/**
+ * Secondary button hover state.
+ */
 .wrap.ff-admin .button:hover {
   background: #f8fafc;
   border-color: var(--ff-border-strong);
 }
 
+/**
+ * Secondary button pressed state.
+ *
+ * Moves the button down by one pixel to create a tactile press effect.
+ */
 .wrap.ff-admin .button:active {
   transform: translateY(1px);
 }
 
+/**
+ * Primary button appearance.
+ */
 .wrap.ff-admin .button-primary {
   background: var(--ff-primary);
   border: 1px solid var(--ff-primary);
   color: #ffffff;
 }
 
+/**
+ * Primary button hover state.
+ */
 .wrap.ff-admin .button-primary:hover {
   background: var(--ff-primary-hover);
   border-color: var(--ff-primary-hover);
 }
 
+/**
+ * Primary button active color state.
+ */
 .wrap.ff-admin .button-primary:active {
   background: var(--ff-primary-active);
   border-color: var(--ff-primary-active);
 }
 
+/**
+ * Primary button pressed-position state.
+ *
+ * This is a separate active-state declaration and adds the same
+ * one-pixel downward movement used by standard buttons.
+ */
 .wrap.ff-admin .button-primary:active {
   transform: translateY(1px);
 }
 
+/**
+ * Shared keyboard-focus treatment for standard and primary buttons.
+ *
+ * Replaces the browser/WordPress outline with Forge Fields elevation
+ * plus a subtle outer focus ring.
+ */
 .wrap.ff-admin .button:focus,
 .wrap.ff-admin .button-primary:focus {
   outline: none;
@@ -658,6 +1096,11 @@ button#ff-add-field {
     0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
+/**
+ * Disabled button state.
+ *
+ * Disabled controls are visually faded and ignore pointer interaction.
+ */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-disabled,
 .wrap.ff-admin .button-primary[disabled] {
@@ -665,6 +1108,12 @@ button#ff-add-field {
   pointer-events: none;
 }
 
+/**
+ * Button-link variant.
+ *
+ * Removes normal button chrome so the control visually behaves like
+ * an inline text link.
+ */
 .wrap.ff-admin .button-link {
   padding: 0;
   height: auto;
@@ -674,44 +1123,93 @@ button#ff-add-field {
   box-shadow: none;
 }
 
+/**
+ * Button-link hover state.
+ */
 .wrap.ff-admin .button-link:hover {
   color: #1e40af;
   text-decoration: underline;
 }
 
+/**
+ * Ensure submit-area primary buttons maintain a useful minimum width.
+ */
 .wrap.ff-admin .submit .button-primary {
   min-width: 160px;
 }
 
+/**
+ * Add spacing above the Forge Fields Add Field button.
+ */
 .wrap.ff-admin #ff-add-field {
   margin-top: 12px;
 }
 
+/**
+ * Forge Fields elevation and pressed-state tokens.
+ *
+ * These custom properties define reusable shadow levels for standard,
+ * elevated, and pressed controls throughout the Forge Fields admin UI.
+ */
 .wrap.ff-admin {
+  /**
+   * Lowest elevation level for resting controls.
+   */
   --ff-elev-0: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  /**
+   * Medium elevation level used for hover and focus states.
+   */
   --ff-elev-1:
     0 2px 6px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.06);
+
+  /**
+   * Stronger elevation level available for more prominent surfaces.
+   */
   --ff-elev-2:
     0 4px 12px rgba(16, 24, 40, 0.12), 0 2px 4px rgba(16, 24, 40, 0.06);
+
+  /**
+   * Inset highlight used to simulate a pressed control surface.
+   */
   --ff-press: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+/**
+ * Increase button elevation on hover for both standard and primary buttons.
+ */
 .wrap.ff-admin .button:hover,
 .wrap.ff-admin .button-primary:hover {
   box-shadow: var(--ff-elev-1);
 }
 
+/**
+ * Pressed state for standard and primary buttons.
+ *
+ * Buttons move down slightly and combine their resting elevation with
+ * the inset pressed-state highlight.
+ */
 .wrap.ff-admin .button:active,
 .wrap.ff-admin .button-primary:active {
   transform: translateY(1px);
   box-shadow: var(--ff-elev-0), var(--ff-press);
 }
 
+/**
+ * Keep disabled buttons at the base elevation level.
+ */
 .wrap.ff-admin .button[disabled],
 .wrap.ff-admin .button-primary[disabled] {
   box-shadow: var(--ff-elev-0);
 }
 
+/**
+ * Shared wrapper layout for custom select controls on edit, global,
+ * and settings screens.
+ *
+ * Relative positioning provides the positioning context for the custom
+ * dropdown indicator added elsewhere in the stylesheet.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap,
 .wrap.ff-admin.ff-global .ff-select-wrap,
 .wrap.ff-admin.ff-settings .ff-select-wrap {
@@ -720,6 +1218,11 @@ button#ff-add-field {
   min-width: 180px;
 }
 
+/**
+ * Focus state for Forge Fields custom select controls.
+ *
+ * Applies the primary border color, elevated shadow, and an outer focus ring.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-global .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-settings .ff-select-wrap select:focus,
@@ -735,6 +1238,13 @@ button#ff-add-field {
     0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
+/**
+ * Enhanced search input used on Forge Fields list screens.
+ *
+ * Adds fixed sizing, internal left padding for the search icon,
+ * rounded borders, subtle elevation, and an inline SVG search icon
+ * as the background image.
+ */
 .wrap.ff-admin.ff-list .ff-search-input {
   height: 36px;
   line-height: 22px;
@@ -754,10 +1264,19 @@ button#ff-add-field {
   background-position: 10px center;
 }
 
+/**
+ * Muted placeholder color for the list search field.
+ */
 .wrap.ff-admin.ff-list .ff-search-input::placeholder {
   color: #9aa1ab;
 }
 
+/**
+ * Focus state for the list search field.
+ *
+ * Replaces the browser outline with a blue focus ring and preserves
+ * the field's subtle resting shadow.
+ */
 .wrap.ff-admin.ff-list .ff-search-input:focus {
   outline: none;
   box-shadow:
@@ -765,10 +1284,16 @@ button#ff-add-field {
     0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
+/**
+ * Increase spacing between controls inside the list search form.
+ */
 .wrap.ff-admin.ff-list .ff-search-form {
   gap: 10px;
 }
 
+/**
+ * Size the primary search-form button to align with the search input.
+ */
 .wrap.ff-admin.ff-list .ff-search-form .button.button-primary {
   height: 36px;
   line-height: 34px;
@@ -776,6 +1301,12 @@ button#ff-add-field {
   border-radius: 8px;
 }
 
+/**
+ * Forge Fields page-title action button.
+ *
+ * Restyles the WordPress page-title action as a compact secondary button
+ * with consistent height, spacing, typography, border, and elevation.
+ */
 .wrap.ff-admin .page-title-action {
   display: inline-flex;
   align-items: center;
@@ -797,6 +1328,11 @@ button#ff-add-field {
     transform 0.02s;
 }
 
+/**
+ * Page-title action hover state.
+ *
+ * Lightens the background and increases elevation.
+ */
 .wrap.ff-admin .page-title-action:hover {
   background: #f8fafc;
   box-shadow:
@@ -804,10 +1340,18 @@ button#ff-add-field {
     0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
+/**
+ * Page-title action pressed state.
+ */
 .wrap.ff-admin .page-title-action:active {
   transform: translateY(1px);
 }
 
+/**
+ * Page-title action keyboard-focus state.
+ *
+ * Combines elevated shadows with an outer focus ring.
+ */
 .wrap.ff-admin .page-title-action:focus {
   outline: none;
   box-shadow:
@@ -816,6 +1360,12 @@ button#ff-add-field {
     0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
+/**
+ * Remove WordPress table cell border colors from Forge Fields list tables.
+ *
+ * Explicit row/cell separators are applied later, so the native border
+ * colors are made transparent here to avoid duplicate lines.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table td,
 .wrap.ff-admin.ff-list table.ff-list-table th,
 .wrap.ff-admin.ff-list table.ff-list-table td.check-column,
@@ -824,6 +1374,12 @@ button#ff-add-field {
   border-bottom-color: transparent !important;
 }
 
+/**
+ * Base list-table body-row styling.
+ *
+ * Forces a white background, adds an inset bottom divider, and enables
+ * a smooth hover-background transition.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr {
   box-shadow: inset 0 -1px #e9edf3;
   background: #fff !important;
@@ -831,12 +1387,21 @@ button#ff-add-field {
   transition: background-color 0.12s ease-in-out;
 }
 
+/**
+ * Add both top and bottom inset separators to the first list-table row.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child {
   box-shadow:
     inset 0 -1px #e9edf3,
     inset 0 1px #e9edf3;
 }
 
+/**
+ * Hover state for custom select controls.
+ *
+ * Strengthens the border and increases elevation when the pointer
+ * is positioned over a selectable control.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-global .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-settings .ff-select-wrap select:hover,
@@ -849,6 +1414,12 @@ button#ff-add-field {
   );
 }
 
+/**
+ * Disabled custom-select state.
+ *
+ * Uses muted colors, removes elevation, and shows the not-allowed cursor
+ * to communicate that the control cannot currently be changed.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap select:disabled,
 .wrap.ff-admin.ff-global .ff-select-wrap select:disabled,
 .wrap.ff-admin.ff-settings .ff-select-wrap select:disabled {
@@ -859,6 +1430,10 @@ button#ff-add-field {
   cursor: not-allowed;
 }
 
+/**
+ * Apply consistent semibold typography to WordPress widefat
+ * table header and footer cells.
+ */
 .wrap.ff-admin .widefat tfoot tr td,
 .wrap.ff-admin .widefat tfoot tr th,
 .wrap.ff-admin .widefat thead tr td,
@@ -866,37 +1441,73 @@ button#ff-add-field {
   font-weight: 600;
 }
 
+/**
+ * Disable alternating row striping in Forge Fields list tables.
+ *
+ * Both odd and even rows are explicitly forced to the same white background.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:nth-child(even) {
   background: #fff !important;
 }
 
+/**
+ * List-table hover state.
+ *
+ * Applies a subtle highlighted background to the hovered row.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:hover {
   background: #f7f9fc !important;
   background: #f7f9fc;
 }
 
+/**
+ * Base edit-table row styling.
+ *
+ * Forces a white background and enables smooth background changes.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
   background: #fff !important;
   transition: background-color 0.12s ease-in-out;
 }
 
+/**
+ * Override WordPress striped-table backgrounds on edit screens.
+ *
+ * Both odd and even rows remain white.
+ */
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
   background: #fff !important;
 }
 
+/**
+ * Shared row hover-transition timing for both Forge Fields list
+ * and edit tables.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr,
 .wrap.ff-admin.ff-edit table.widefat tbody tr {
   transition: background-color 0.12s ease-in-out;
 }
 
+/**
+ * Additional override ensuring every striped edit-table row remains white.
+ *
+ * The base row selector plus explicit odd/even selectors prevent WordPress
+ * striped-table styles from overriding the Forge Fields row background.
+ */
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr,
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(odd),
 .wrap.ff-admin.ff-edit table.widefat.striped tbody tr:nth-child(even) {
   background: #fff !important;
 }
 
+/**
+ * Edit-table header and footer appearance.
+ *
+ * Uses a light gray header/footer background while removing native
+ * WordPress borders and shadows.
+ */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
   background: #f5f6f8;
@@ -904,41 +1515,79 @@ button#ff-add-field {
   box-shadow: none !important;
 }
 
+/**
+ * Force fixed striped edit-table cells to use a white background.
+ *
+ * Applying the background directly to the table cells prevents row-level
+ * WordPress striping styles from showing through.
+ */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td {
   background: #fff !important;
   transition: background-color 0.12s ease-in-out;
 }
 
+/**
+ * Apply the edit-table hover background directly to cells.
+ */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr:hover > td {
   background: #f7f9fc !important;
 }
 
+/**
+ * Remove any cell-to-cell shadow separators from fixed striped edit tables.
+ */
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td + td {
   box-shadow: none;
 }
 
+/**
+ * Add explicit bottom separators between list-table rows.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr > td {
   border-bottom: 1px solid #e9edf3 !important;
 }
 
+/**
+ * Add an explicit top border to the first list-table row.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tbody tr:first-child > td {
   border-top: 1px solid #e9edf3 !important;
 }
 
+/**
+ * Base edit-table cell styling.
+ *
+ * Forces white cell backgrounds, enables smooth hover transitions,
+ * and adds explicit row separators.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr > td {
   background: #fff !important;
   transition: background-color 0.12s ease-in-out;
   border-bottom: 1px solid #e9edf3 !important;
 }
 
+/**
+ * Apply the edit-table hover background directly to every cell
+ * in the hovered row.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr:hover > td {
   background: #f7f9fc !important;
 }
 
+/**
+ * Add an explicit top separator to the first edit-table row.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr:first-child > td {
   border-top: 1px solid #e9edf3 !important;
 }
 
+/**
+ * Shared header and footer cell styling for both Forge Fields edit tables
+ * and list tables.
+ *
+ * Applies a consistent muted background, divider, and cell spacing across
+ * the two primary admin table layouts.
+ */
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th,
 .wrap.ff-admin.ff-list table.ff-list-table thead.ff-list-bar th,
@@ -948,20 +1597,41 @@ button#ff-add-field {
   padding: 10px 12px;
 }
 
+/**
+ * List-table footer adjustment.
+ *
+ * Adds a separator above the footer while removing the bottom divider
+ * already supplied by the shared header/footer rule.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tfoot.ff-list-bar th {
   border-top: 1px solid #e5e7eb;
   border-bottom: 0;
 }
 
+/**
+ * Vertically center content inside edit-table cells.
+ */
 .wrap.ff-admin.ff-edit table.widefat td {
   vertical-align: middle;
 }
 
+/**
+ * Edit-screen select wrapper layout.
+ *
+ * Uses inline flex positioning so custom select controls remain aligned
+ * correctly with surrounding form content and dropdown indicators.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap {
   display: inline-flex;
   align-items: center;
 }
 
+/**
+ * Normalize edit-screen select dimensions.
+ *
+ * Applies a consistent 36px control height and reserves right-side
+ * space for the custom dropdown indicator.
+ */
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
   height: 36px;
@@ -970,6 +1640,12 @@ button#ff-add-field {
   margin: 0;
 }
 
+/**
+ * Firefox-specific select normalization.
+ *
+ * Removes vertical select padding in Firefox so the controls maintain
+ * the same visual height and alignment as other browsers.
+ */
 @-moz-document url-prefix() {
   .wrap.ff-admin.ff-edit .ff-select-wrap select,
   .wrap.ff-admin.ff-edit select#ff_location {
@@ -978,6 +1654,12 @@ button#ff-add-field {
   }
 }
 
+/**
+ * Forge Fields list-table outer shape.
+ *
+ * Separate border rendering and hidden overflow allow the table's
+ * 12px rounded corners to display cleanly.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table {
   border-collapse: separate;
   border-spacing: 0;
@@ -985,22 +1667,40 @@ button#ff-add-field {
   overflow: hidden;
 }
 
+/**
+ * Round the upper-left corner of the list-table header.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table thead th:first-child {
   border-top-left-radius: 12px;
 }
 
+/**
+ * Round the upper-right corner of the list-table header.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table thead th:last-child {
   border-top-right-radius: 12px;
 }
 
+/**
+ * Round the lower-left corner of the list-table footer.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:first-child {
   border-bottom-left-radius: 12px;
 }
 
+/**
+ * Round the lower-right corner of the list-table footer.
+ */
 .wrap.ff-admin.ff-list table.ff-list-table tfoot th:last-child {
   border-bottom-right-radius: 12px;
 }
 
+/**
+ * Forge Fields edit-table outer shape.
+ *
+ * Uses separate borders and hidden overflow so the full edit table
+ * receives the same 12px rounded-card appearance as list tables.
+ */
 .wrap.ff-admin.ff-edit table.widefat {
   border-collapse: separate;
   border-spacing: 0;
@@ -1008,18 +1708,30 @@ button#ff-add-field {
   overflow: hidden;
 }
 
+/**
+ * Round the upper-left corner of the edit-table header.
+ */
 .wrap.ff-admin.ff-edit table.widefat thead th:first-child {
   border-top-left-radius: 12px;
 }
 
+/**
+ * Round the upper-right corner of the edit-table header.
+ */
 .wrap.ff-admin.ff-edit table.widefat thead th:last-child {
   border-top-right-radius: 12px;
 }
 
+/**
+ * Round the lower-left corner of the edit-table footer.
+ */
 .wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
   border-bottom-left-radius: 12px;
 }
 
+/**
+ * Round the lower-right corner of the edit-table footer.
+ */
 .wrap.ff-admin.ff-edit table.widefat tfoot th:last-child {
   border-bottom-right-radius: 12px;
 }
@@ -1028,10 +1740,20 @@ button#ff-add-field {
    EDIT FIELD GROUP — TABLE FOOTER
    --------------------------------------------------------- */
 
+/**
+ * Remove the normal row divider underneath the final edit-table body row
+ * so it transitions cleanly into the table footer.
+ */
 .wrap.ff-admin.ff-edit table.widefat tbody tr:last-child > td {
   border-bottom: 0 !important;
 }
 
+/**
+ * Edit-table footer styling.
+ *
+ * Keeps the footer visually integrated with the rounded table container
+ * by removing extra borders and shadows.
+ */
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
   background: #f5f6f8;
   border-top: 0 !important;
@@ -1039,14 +1761,26 @@ button#ff-add-field {
   box-shadow: none !important;
 }
 
+/**
+ * Preserve the rounded lower-left corner on the edit-table footer.
+ */
 .wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
   border-bottom-left-radius: 12px;
 }
 
+/**
+ * Preserve the rounded lower-right corner on the edit-table footer.
+ */
 .wrap.ff-admin.ff-edit table.widefat tfoot th:last-child {
   border-bottom-right-radius: 12px;
 }
 
+/**
+ * Style select optgroup labels.
+ *
+ * Group headings use muted text, stronger weight, increased letter spacing,
+ * and smaller type to distinguish categories from selectable options.
+ */
 .wrap.ff-admin select optgroup {
   color: #8a94a6;
   font-weight: 600;
@@ -1054,6 +1788,9 @@ button#ff-add-field {
   font-size: 12px;
 }
 
+/**
+ * Reset individual options inside optgroups to normal field styling.
+ */
 .wrap.ff-admin select optgroup option {
   color: #0f172a;
   text-transform: none;
@@ -1061,6 +1798,16 @@ button#ff-add-field {
   font-size: 13px;
 }
 
+/**
+ * Field-key copy button.
+ *
+ * Presents the copy action as a compact square icon button with:
+ * - Centered icon alignment.
+ * - Shared border styling.
+ * - Rounded corners.
+ * - Subtle elevation.
+ * - Neutral icon/text coloring.
+ */
 .wrap.ff-admin .ff-copy-key {
   display: inline-flex;
   align-items: center;
@@ -1078,6 +1825,12 @@ button#ff-add-field {
   text-decoration: none;
 }
 
+/**
+ * Visually hide accessibility-only text inside copy controls.
+ *
+ * The text remains available to screen readers while occupying only
+ * a single clipped pixel visually.
+ */
 .wrap.ff-admin .ff-copy-key .screen-reader-text {
   position: absolute !important;
   width: 1px;
@@ -1090,6 +1843,12 @@ button#ff-add-field {
   border: 0;
 }
 
+/**
+ * Render the default copy icon using an inline SVG background image.
+ *
+ * The pseudo-element keeps the icon independent from any accessible
+ * text contained in the control.
+ */
 .wrap.ff-admin .ff-copy-key::before {
   content: "";
   display: block;
@@ -1101,22 +1860,43 @@ button#ff-add-field {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>');
 }
 
+/**
+ * Copy-button hover state.
+ *
+ * Lightens the background and strengthens the border while slightly
+ * darkening the control color.
+ */
 .wrap.ff-admin .ff-copy-key:hover {
   background: #f8fafc;
   border-color: var(--ff-color-border-strong, #c7ccd6);
   color: #475569;
 }
 
+/**
+ * Successful copy state.
+ *
+ * Applied temporarily by JavaScript after a field key is successfully
+ * copied to the clipboard.
+ */
 .wrap.ff-admin .ff-copy-key.is-copied {
   background: #ecfdf5;
   border-color: #86efac;
   color: #166534;
 }
 
+/**
+ * Replace the normal copy icon with a green checkmark while the
+ * copied-success state is active.
+ */
 .wrap.ff-admin .ff-copy-key.is-copied::before {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23065f46" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>');
 }
 
+/**
+ * Field-group key display.
+ *
+ * Renders technical group identifiers as compact monospace pills.
+ */
 .wrap.ff-admin .ff-group-key {
   display: inline-block;
   padding: 4px 10px;
@@ -1139,22 +1919,43 @@ button#ff-add-field {
   margin-bottom: 4px;
 }
 
+/**
+ * Keyboard-focus state for copy controls.
+ *
+ * Removes the native outline and replaces it with a Forge Fields focus ring.
+ */
 .wrap.ff-admin .ff-copy-key:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.25);
 }
 
+/**
+ * Normalize inline SVG dimensions when an SVG element is placed
+ * directly inside a copy control.
+ */
 .wrap.ff-admin .ff-copy-key svg {
   width: 16px;
   height: 16px;
   display: block;
 }
 
+/**
+ * Global-options layout tokens.
+ *
+ * Defines the maximum width for the options card and the fields
+ * contained within it.
+ */
 .wrap.ff-admin.ff-global {
   --ff-card-max-w: 1100px;
   --ff-field-max-w: 720px;
 }
 
+/**
+ * Global-options card container.
+ *
+ * Creates a bordered, elevated, rounded white surface around
+ * the WordPress settings form.
+ */
 .wrap.ff-admin.ff-global .ff-options-card {
   max-width: var(--ff-card-max-w);
   background: #fff;
@@ -1165,6 +1966,11 @@ button#ff-add-field {
   margin: 10px 0 20px;
 }
 
+/**
+ * Reset the WordPress form table inside global-options cards.
+ *
+ * The table fills the card while using separate borders with no spacing.
+ */
 .wrap.ff-admin.ff-global .ff-options-card .form-table {
   width: 100%;
   margin: 0;
@@ -1172,6 +1978,12 @@ button#ff-add-field {
   border-spacing: 0;
 }
 
+/**
+ * Shared settings-row cell styling.
+ *
+ * Applies transparent backgrounds, row separators, consistent padding,
+ * and vertical alignment to both heading and value cells.
+ */
 .wrap.ff-admin.ff-global .ff-options-card .form-table th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table td {
   background: transparent !important;
@@ -1180,16 +1992,28 @@ button#ff-add-field {
   vertical-align: middle;
 }
 
+/**
+ * Remove the divider beneath the final settings row.
+ */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child th,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:last-child td {
   border-bottom: 0;
 }
 
+/**
+ * Highlight both cells of a global-options row when hovered.
+ */
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover td,
 .wrap.ff-admin.ff-global .ff-options-card .form-table tr:hover th {
   background: #f7f9fc;
 }
 
+/**
+ * Standardize field widths across Forge Fields global settings.
+ *
+ * Text-based controls, textareas, wrapped selects, and regular selects
+ * all fill the available width up to the configured field maximum.
+ */
 .wrap.ff-admin.ff-global input[type="text"],
 .wrap.ff-admin.ff-global input[type="email"],
 .wrap.ff-admin.ff-global input[type="url"],
@@ -1202,23 +2026,48 @@ button#ff-add-field {
   width: 100%;
 }
 
+/**
+ * Global-options primary submit button.
+ *
+ * Gives the primary save action a consistent minimum width and
+ * additional separation from the form above it.
+ */
 .wrap.ff-admin.ff-global .submit .button-primary {
   min-width: 180px;
   margin-top: 8px;
 }
 
+/**
+ * Apply a compact minimum height to the global test textarea.
+ */
 textarea#ff_global_test {
   min-height: 40px;
 }
 
+/**
+ * Apply the same compact minimum height to the standard Forge Fields textarea.
+ */
 textarea#ff_textarea {
   min-height: 40px;
 }
 
+/**
+ * Field-width token used when Forge Fields controls appear inside
+ * a WordPress postbox.
+ *
+ * This provides a consistent maximum width for standard form controls.
+ */
 #poststuff .postbox .ff-admin {
   --ff-field-max: 560px;
 }
 
+/**
+ * Standardize the width of common Forge Fields controls displayed
+ * inside WordPress postboxes.
+ *
+ * Controls fill their available space while respecting the shared
+ * maximum field width.
+ */
 #poststuff .postbox .ff-admin .form-table td input[type="text"],
 #poststuff .postbox .ff-admin .form-table td input[type="email"],
 #poststuff .postbox .ff-admin .form-table td input[type="url"],
@@ -1231,64 +2080,119 @@ textarea#ff_textarea {
   max-width: var(--ff-field-max);
 }
 
+/**
+ * Match password-field wrappers to the same maximum postbox field width.
+ */
 #poststuff .postbox .ff-admin .ff-password-wrap {
   max-width: var(--ff-field-max);
   width: 100%;
 }
 
+/**
+ * Match range-field wrappers to the same maximum postbox field width.
+ */
 #poststuff .postbox .ff-admin .ff-range-wrap {
   max-width: var(--ff-field-max);
   width: 100%;
 }
 
+/**
+ * Allow the range slider inside postbox range controls to grow
+ * into the available horizontal space.
+ */
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-slider {
   flex: 1 1 auto;
   min-width: 0;
 }
 
+/**
+ * Give the numeric control paired with postbox range sliders
+ * a compact fixed width.
+ */
 #poststuff .postbox .ff-admin .ff-range-wrap .ff-range-number {
   width: 74px;
 }
 
+/**
+ * Mobile postbox field-width adjustment.
+ *
+ * On narrower WordPress admin screens, remove the fixed maximum
+ * and allow fields to use the full available width.
+ */
 @media (max-width: 782px) {
   #poststuff .postbox .ff-admin {
     --ff-field-max: 100%;
   }
 }
 
+/**
+ * Standard text fields and textareas inside #poststuff.
+ *
+ * Limits larger text-based controls to 640px while still allowing
+ * them to shrink responsively.
+ */
 #poststuff .ff-admin input.regular-text:not(.ff-number-input),
 #poststuff .ff-admin textarea {
   width: min(100%, 640px);
   max-width: 640px;
 }
 
+/**
+ * Dedicated numeric-input sizing.
+ *
+ * Numeric fields remain compact instead of inheriting the wider
+ * regular-text dimensions.
+ */
 #poststuff .ff-admin input.ff-number-input {
   width: 140px !important;
   min-width: 140px;
   padding-right: 28px;
 }
 
+/**
+ * Range-control layout inside WordPress post content areas.
+ *
+ * Keeps the slider and number field aligned horizontally.
+ */
 #poststuff .ff-admin .ff-range-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/**
+ * Range-slider sizing inside #poststuff.
+ *
+ * Uses a preferred width of 220px while limiting the slider
+ * relative to the viewport width.
+ */
 #poststuff .ff-admin .ff-range-wrap .ff-range-slider {
   width: 220px;
   max-width: 40vw;
 }
 
+/**
+ * Numeric field paired with range sliders inside #poststuff.
+ */
 #poststuff .ff-admin .ff-range-wrap .ff-range-number {
   width: 90px !important;
   min-width: 90px;
   padding: 6px 8px;
 }
 
+/**
+ * Slightly soften all WordPress Dashicons.
+ */
 span.dashicons {
   opacity: 0.7;
 }
 
+/**
+ * Forge Fields brand bar.
+ *
+ * When the body carries ff-has-brandbar, the brand bar is fixed beneath
+ * the WordPress admin toolbar and positioned beside the expanded admin menu.
+ */
 .ff-has-brandbar .ff-brandbar {
   position: fixed;
   z-index: 1000;
@@ -1300,11 +2204,18 @@ span.dashicons {
   box-sizing: border-box;
 }
 
+/**
+ * Reposition the brand bar when the WordPress admin menu is folded.
+ */
 .ff-has-brandbar.folded .ff-brandbar {
   left: 36px;
   width: calc(100% - 36px);
 }
 
+/**
+ * On narrower admin screens, allow the brand bar to span
+ * the entire viewport width.
+ */
 @media (max-width: 960px) {
   .ff-has-brandbar .ff-brandbar {
     left: 0;
@@ -1312,10 +2223,20 @@ span.dashicons {
   }
 }
 
+/**
+ * Add top spacing to WordPress content so it is not covered
+ * by the fixed Forge Fields brand bar.
+ */
 .ff-has-brandbar #wpcontent {
   padding-top: 64px;
 }
 
+/**
+ * Internal brand-bar layout.
+ *
+ * Places the left branding area and right-side controls on opposite
+ * sides of the bar while keeping both vertically centered.
+ */
 .ff-brandbar__inner {
   display: flex;
   align-items: center;
@@ -1324,6 +2245,11 @@ span.dashicons {
   height: 40px;
 }
 
+/**
+ * Left side of the brand bar.
+ *
+ * Holds the Forge Fields logo, title, and subtitle.
+ */
 .ff-brandbar__left {
   display: flex;
   align-items: center;
@@ -1331,6 +2257,9 @@ span.dashicons {
   min-width: 0;
 }
 
+/**
+ * Compact Forge Fields logo block.
+ */
 .ff-brandbar__logo {
   display: inline-flex;
   align-items: center;
@@ -1345,6 +2274,9 @@ span.dashicons {
   margin-right: 8px;
 }
 
+/**
+ * Primary brand-bar title typography.
+ */
 .ff-brandbar__title {
   font-weight: 600;
   font-size: 14px;
@@ -1352,16 +2284,27 @@ span.dashicons {
   margin-right: 6px;
 }
 
+/**
+ * Secondary brand-bar subtitle styling.
+ */
 .ff-brandbar__subtitle {
   opacity: 0.9;
   font-size: 13px;
 }
 
+/**
+ * Right side of the brand bar.
+ *
+ * Prevents the actions area from shrinking and adds right-side spacing.
+ */
 .ff-brandbar__right {
   flex: 0 0 auto;
   padding-right: 16px;
 }
 
+/**
+ * Button styling specifically for controls inside the brand bar.
+ */
 .ff-brandbar__btn.button {
   padding: 6px 10px;
   line-height: 1.2;
@@ -1369,15 +2312,28 @@ span.dashicons {
   text-decoration: none;
 }
 
+/**
+ * Add a subtle lower separator beneath the fixed brand bar.
+ */
 .ff-brandbar {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
 }
 
+/**
+ * Increase the brand-bar inner left padding when WordPress
+ * is operating with a folded or auto-folded admin menu.
+ */
 .folded .ff-brandbar__inner,
 .auto-fold .ff-brandbar__inner {
   padding-left: 40px;
 }
 
+/**
+ * Forge Fields secondary page bar.
+ *
+ * Provides a full-width white navigation/header strip beneath the
+ * brand bar with generous horizontal spacing and a lower divider.
+ */
 .ff-subbar {
   background: #fff;
   margin: 0 -20px 16px;
@@ -1385,6 +2341,11 @@ span.dashicons {
   border-bottom: 1px solid #e2e4e7;
 }
 
+/**
+ * Internal subbar layout.
+ *
+ * Aligns the title and related actions horizontally with fixed spacing.
+ */
 .ff-subbar__inner {
   width: 100%;
   display: flex;
@@ -1393,39 +2354,59 @@ span.dashicons {
   gap: 35px;
 }
 
+/**
+ * Main subbar page title.
+ */
 .ff-subbar__title {
   margin: 0;
   font-size: 26px;
   line-height: 1.2;
 }
 
+/**
+ * Primary action button displayed directly inside the subbar.
+ *
+ * Uses flex alignment to keep its text vertically and horizontally centered.
+ */
 a.button.button-primary.ff-subbar__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   height: 40px;
   margin: 0;
   padding: 0 20px;
-
   border-radius: 8px;
-
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
 }
 
+/**
+ * Responsive subbar adjustments for WordPress's mobile admin breakpoint.
+ */
 @media (max-width: 782px) {
+  /**
+   * Reduce subbar margins and internal spacing on smaller screens.
+   */
   .ff-subbar {
     margin: 0 -10px 16px;
     padding: 16px 20px;
   }
 
+  /**
+   * Reduce the page-title size on smaller screens.
+   */
   .ff-subbar__title {
     font-size: 22px;
   }
 }
 
+/**
+ * Forge Fields list-page toolbar.
+ *
+ * Places list filters/navigation on one side and search controls
+ * on the other.
+ */
 .ff-list .ff-list-toolbar {
   display: flex;
   align-items: center;
@@ -1434,10 +2415,20 @@ a.button.button-primary.ff-subbar__btn {
   margin: 12px 0 6px;
 }
 
+/**
+ * Remove default WordPress margins from sub-navigation when it is
+ * displayed inside the custom list toolbar.
+ */
 .ff-list .ff-list-toolbar .subsubsub {
   margin: 0;
 }
 
+/**
+ * Search controls inside the list toolbar.
+ *
+ * The left auto margin pushes the form toward the right side
+ * of the toolbar.
+ */
 .ff-list .ff-search-form {
   display: flex;
   align-items: center;
@@ -1445,33 +2436,54 @@ a.button.button-primary.ff-subbar__btn {
   margin-left: auto;
 }
 
+/**
+ * Preferred desktop width for the list search input.
+ */
 .ff-list .ff-search-form .regular-text.ff-search-input {
   width: 260px;
 }
 
+/**
+ * Responsive list-toolbar behavior at the WordPress mobile breakpoint.
+ */
 @media (max-width: 782px) {
+  /**
+   * Allow toolbar controls to wrap to additional lines.
+   */
   .ff-list .ff-list-toolbar {
     flex-wrap: wrap;
     gap: 10px;
   }
 
+  /**
+   * Make the search form occupy a full row on narrow screens.
+   */
   .ff-list .ff-search-form {
     margin-left: 0;
     width: 100%;
   }
 
+  /**
+   * Allow the search input to grow into available horizontal space.
+   */
   .ff-list .ff-search-form .regular-text.ff-search-input {
     flex: 1 1 auto;
     width: auto;
   }
 }
 
+/**
+ * Container for multiple subbar action controls.
+ */
 .ff-subbar__actions {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
+/**
+ * Shared button styling within the subbar action group.
+ */
 .ff-subbar__actions .button {
   border-radius: 8px;
   padding: 6px 16px;
@@ -1481,40 +2493,72 @@ a.button.button-primary.ff-subbar__btn {
   height: auto;
 }
 
+/**
+ * Remove the normal primary-button shadow specifically inside
+ * the subbar action group.
+ */
 .ff-subbar__actions .button.button-primary {
   box-shadow: none;
 }
 
+/**
+ * Explicit border for the Add Field button.
+ */
 button#ff-add-field {
   border: 1px solid #d0d5dd;
 }
 
+/**
+ * Shared subtle lower shadow for both fixed Forge Fields navigation bars.
+ */
 .ff-brandbar,
 .ff-subbar {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
+/**
+ * Explicit typography for the subbar's H1 title.
+ */
 h1.ff-subbar__title {
   font-family: inter, arial, sans-serif;
   font-weight: 400;
 }
 
+/**
+ * Hidden confirmation-modal state.
+ */
 .ff-confirm.is-hidden {
   display: none;
 }
 
+/**
+ * Full-screen confirmation-modal container.
+ *
+ * The high z-index ensures the dialog appears above WordPress admin UI.
+ */
 .ff-confirm {
   position: fixed;
   inset: 0;
   z-index: 100010;
 }
 
+/**
+ * Confirmation-modal background overlay.
+ *
+ * Covers the entire viewport with a semi-transparent dark layer.
+ */
 .ff-confirm__overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
 }
 
+/**
+ * Confirmation dialog panel.
+ *
+ * Centers the dialog in the viewport and constrains its width
+ * responsively between 320px and 420px.
+ */
 .ff-confirm__dialog {
   position: absolute;
   left: 50%;
@@ -1528,21 +2572,37 @@ h1.ff-subbar__title {
   outline: none;
 }
 
+/**
+ * Confirmation dialog title spacing and typography.
+ */
 .ff-confirm__title {
   margin: 0 24px 8px 0;
   font-size: 18px;
 }
 
+/**
+ * Confirmation dialog description spacing.
+ */
 .ff-confirm__desc {
   margin: 0 0 16px;
 }
 
+/**
+ * Confirmation action-button layout.
+ *
+ * Buttons are aligned to the right side of the dialog.
+ */
 .ff-confirm__actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
 
+/**
+ * Confirmation dialog close button.
+ *
+ * Positioned in the upper-right corner without default button chrome.
+ */
 .ff-confirm__x {
   position: absolute;
   top: 8px;
@@ -1554,12 +2614,18 @@ h1.ff-subbar__title {
   cursor: pointer;
 }
 
+/**
+ * General destructive-action button styling.
+ */
 .ff-button-danger {
   background: #dc3232;
   border-color: #b32d2e;
   color: #fff;
 }
 
+/**
+ * Destructive button hover and focus state.
+ */
 .ff-button-danger:hover,
 .ff-button-danger:focus {
   background: #b32d2e;
@@ -1567,6 +2633,12 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+/**
+ * Confirmation-dialog destructive action override.
+ *
+ * Inside the confirmation dialog, the destructive action intentionally
+ * uses the Forge Fields primary palette instead of the general red style.
+ */
 .ff-confirm__actions .ff-button-danger,
 .ff-confirm__actions .ff-button-danger.button {
   background: var(--ff-primary);
@@ -1574,6 +2646,9 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+/**
+ * Confirmation-dialog destructive action hover and focus states.
+ */
 .ff-confirm__actions .ff-button-danger:hover,
 .ff-confirm__actions .ff-button-danger:focus,
 .ff-confirm__actions .ff-button-danger.button:hover,
@@ -1583,6 +2658,9 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+/**
+ * Confirmation-dialog destructive action pressed state.
+ */
 .ff-confirm__actions .ff-button-danger:active,
 .ff-confirm__actions .ff-button-danger.button:active {
   background: var(--ff-primary-active);
@@ -1590,23 +2668,41 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+/**
+ * Brand-bar title link typography.
+ *
+ * Keeps the title visually consistent whether rendered as text or a link.
+ */
 .ff-brandbar__title {
   font-family: inter, arial, sans-serif;
   color: inherit;
   text-decoration: none;
 }
 
+/**
+ * Preserve inherited brand-bar title color and remove underlines
+ * during hover and focus states.
+ */
 .ff-brandbar__title:hover,
 .ff-brandbar__title:focus {
   color: inherit;
   text-decoration: none;
 }
 
+/**
+ * Remove WordPress's default focus outline/shadow specifically
+ * from linked brand-bar titles.
+ */
 a.ff-brandbar__title:focus {
   box-shadow: none;
   outline: none;
 }
 
+/**
+ * Image preview displayed for Forge Fields media/image controls.
+ *
+ * Constrains both width and height while preserving the image's aspect ratio.
+ */
 .ff-media-preview {
   max-width: 160px;
   height: auto;
@@ -1615,17 +2711,26 @@ a.ff-brandbar__title:focus {
   border-radius: 8px;
 }
 
+/**
+ * Main wrapper around Forge Fields media controls.
+ */
 .ff-media-wrap {
   display: block;
   margin: 8px 0 16px;
 }
 
+/**
+ * Layout for an image preview and its neighboring media controls.
+ */
 .ff-media-preview-wrap {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/**
+ * Layout for selected file information.
+ */
 .ff-media-fileline {
   display: flex;
   align-items: center;
@@ -1633,6 +2738,9 @@ a.ff-brandbar__title:focus {
   font-size: 14px;
 }
 
+/**
+ * Shared presentation for media Select and Clear controls.
+ */
 .ff-media-select,
 .ff-media-clear {
   margin-right: 8px;
@@ -1641,6 +2749,10 @@ a.ff-brandbar__title:focus {
   font-weight: 500;
 }
 
+/**
+ * Normalize button typography and radius inside option cards
+ * and across Forge Fields admin controls.
+ */
 .ff-options-card .button,
 .ff-admin .button {
   border-radius: 8px;
@@ -1648,10 +2760,19 @@ a.ff-brandbar__title:focus {
   font-weight: 500;
 }
 
+/**
+ * Add spacing above WordPress editor wrappers.
+ */
 .wp-editor-wrap {
   margin-top: 6px;
 }
 
+/**
+ * Form-table layout used by Forge Fields meta boxes and options cards.
+ *
+ * Separate borders with vertical spacing create distinct rows
+ * without collapsing them together.
+ */
 .ff-mb .form-table,
 .ff-options-card .form-table {
   width: 100%;
@@ -1659,6 +2780,9 @@ a.ff-brandbar__title:focus {
   border-spacing: 0 12px;
 }
 
+/**
+ * Label/header cells inside Forge Fields meta-box and options-card tables.
+ */
 .ff-mb th,
 .ff-options-card th {
   width: 180px;
@@ -1668,11 +2792,21 @@ a.ff-brandbar__title:focus {
   font-weight: 600;
 }
 
+/**
+ * Remove default table-cell padding from Forge Fields value cells.
+ */
 .ff-mb td,
 .ff-options-card td {
   padding: 0;
 }
 
+/**
+ * Standard Forge Fields meta-box form controls.
+ *
+ * Applies a consistent responsive width, border, radius, padding,
+ * background, line-height, and inset shadow to common inputs,
+ * selects, textareas, and regular-text controls inside .ff-mb.
+ */
 #poststuff .postbox .ff-admin .ff-mb input[type="text"],
 #poststuff .postbox .ff-admin .ff-mb input[type="password"],
 #poststuff .postbox .ff-admin .ff-mb input[type="email"],
@@ -1692,6 +2826,13 @@ a.ff-brandbar__title:focus {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
 }
 
+/**
+ * Standard Forge Fields global-options form controls.
+ *
+ * These controls fill the available width up to the global
+ * --ff-field-max-w limit while using the same visual treatment
+ * as meta-box fields.
+ */
 .wrap.ff-admin.ff-global .ff-options-card input[type="text"],
 .wrap.ff-admin.ff-global .ff-options-card input[type="password"],
 .wrap.ff-admin.ff-global .ff-options-card input[type="email"],
@@ -1710,6 +2851,12 @@ a.ff-brandbar__title:focus {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) inset;
 }
 
+/**
+ * Shared focus treatment for meta-box and options-card controls.
+ *
+ * Replaces the browser outline with the Forge Fields primary border
+ * color and a subtle outer focus ring.
+ */
 .ff-mb input:focus,
 .ff-mb select:focus,
 .ff-mb textarea:focus,
@@ -1721,6 +2868,9 @@ a.ff-brandbar__title:focus {
   box-shadow: 0 0 0 3px rgba(54, 54, 55, 0.15);
 }
 
+/**
+ * Shared button styling inside meta boxes and options cards.
+ */
 .ff-mb .button,
 .ff-options-card .button {
   border-radius: 8px;
@@ -1728,6 +2878,12 @@ a.ff-brandbar__title:focus {
   padding: 6px 12px;
 }
 
+/**
+ * Media-control layout inside meta boxes and options cards.
+ *
+ * Places preview content and media buttons in a flexible horizontal row
+ * that can wrap when horizontal space is limited.
+ */
 .ff-mb .ff-media-wrap,
 .ff-options-card .ff-media-wrap {
   display: flex;
@@ -1736,6 +2892,12 @@ a.ff-brandbar__title:focus {
   flex-wrap: wrap;
 }
 
+/**
+ * Media preview styling inside meta boxes and options cards.
+ *
+ * Forces previews into a compact square thumbnail and crops overflowing
+ * image content while preserving a clean rounded presentation.
+ */
 .ff-mb .ff-media-preview,
 .ff-options-card .ff-media-preview {
   width: 64px;
@@ -1747,6 +2909,11 @@ a.ff-brandbar__title:focus {
   display: block;
 }
 
+/**
+ * Selected-file information layout.
+ *
+ * Keeps file metadata and related controls aligned on the same row.
+ */
 .ff-mb .ff-media-fileline,
 .ff-options-card .ff-media-fileline {
   display: flex;
@@ -1755,11 +2922,20 @@ a.ff-brandbar__title:focus {
   color: #50575e;
 }
 
+/**
+ * Muted text used when no media file has been selected.
+ */
 .ff-mb .ff-media-nofile,
 .ff-options-card .ff-media-nofile {
   color: #8c8f94;
 }
 
+/**
+ * WordPress editor wrapper inside Forge Fields meta boxes and options cards.
+ *
+ * Adds a custom border, rounded corners, white background, and clips
+ * child editor UI to the rounded container.
+ */
 .ff-mb .wp-editor-wrap,
 .ff-options-card .wp-editor-wrap {
   border: 1px solid #ccd0d4;
@@ -1768,16 +2944,27 @@ a.ff-brandbar__title:focus {
   background: #fff;
 }
 
+/**
+ * Remove WordPress's default border from the editor content container.
+ */
 .ff-mb .wp-editor-container,
 .ff-options-card .wp-editor-container {
   border: 0;
 }
 
+/**
+ * Add a divider beneath the Quicktags toolbar.
+ */
 .ff-mb .quicktags-toolbar,
 .ff-options-card .quicktags-toolbar {
   border-bottom: 1px solid #e7eaee;
 }
 
+/**
+ * Range-field layout inside meta boxes and options cards.
+ *
+ * Keeps the range slider and its associated numeric field aligned horizontally.
+ */
 .ff-mb .ff-range-wrap,
 .ff-options-card .ff-range-wrap {
   display: flex;
@@ -1785,6 +2972,12 @@ a.ff-brandbar__title:focus {
   gap: 10px;
 }
 
+/**
+ * Forge Fields editor card.
+ *
+ * Wraps WordPress editor controls in a bordered, rounded, elevated
+ * white container.
+ */
 .ff-editor-card {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -1794,6 +2987,11 @@ a.ff-brandbar__title:focus {
   max-width: 100%;
 }
 
+/**
+ * Editor wrapper inside a Forge Fields editor card.
+ *
+ * Gives the WordPress editor its own inner border and muted background.
+ */
 .ff-editor-card .wp-editor-wrap {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
@@ -1801,20 +2999,37 @@ a.ff-brandbar__title:focus {
   background: #fafafa;
 }
 
+/**
+ * Add spacing around the WordPress media buttons inside editor cards.
+ */
 .ff-editor-card .wp-media-buttons {
   margin: 6px 8px;
 }
 
+/**
+ * Round media-button corners to match the editor card styling.
+ */
 .ff-editor-card .wp-media-buttons .button {
   border-radius: 6px;
 }
 
+/**
+ * Shared toolbar styling for TinyMCE and Quicktags editor controls.
+ *
+ * Adds a lower divider and a light toolbar background.
+ */
 .ff-editor-card .mce-top-part,
 .ff-editor-card .quicktags-toolbar {
   border-bottom: 1px solid #e5e7eb !important;
   background: #f9fafb !important;
 }
 
+/**
+ * Visual/Text editor switch buttons.
+ *
+ * Removes the default WordPress button chrome and presents the switches
+ * as lightweight tab-style controls.
+ */
 .ff-editor-card .wp-switch-editor {
   border: 0;
   background: transparent;
@@ -1824,21 +3039,38 @@ a.ff-brandbar__title:focus {
   border-radius: 6px;
 }
 
+/**
+ * Remove shadows from both TinyMCE and HTML editor switches.
+ */
 .ff-editor-card .wp-switch-editor.switch-tmce,
 .ff-editor-card .wp-switch-editor.switch-html {
   box-shadow: none;
 }
 
+/**
+ * Keyboard-focus state for editor switch controls.
+ */
 .ff-editor-card .wp-switch-editor:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
 }
 
+/**
+ * Active editor-mode tab.
+ *
+ * Uses a blue-tinted background and darker blue text to distinguish
+ * the currently active editor mode.
+ */
 .ff-editor-card .wp-switch-editor.active {
   background: #e5edff;
   color: #1e40af;
 }
 
+/**
+ * WordPress editor textarea styling inside editor cards.
+ *
+ * Removes the native border and normalizes internal spacing and typography.
+ */
 .ff-editor-card .wp-editor-area {
   border: 0 !important;
   background: #fff;
@@ -1847,11 +3079,19 @@ a.ff-brandbar__title:focus {
   line-height: 1.55;
 }
 
+/**
+ * Restore the correct icon font for WordPress Dashicons and TinyMCE icons
+ * inside Forge Fields admin screens.
+ */
 .ff-admin .dashicons,
 .ff-admin .mce-ico {
   font-family: "dashicons" !important;
 }
 
+/**
+ * Force global editor containers and textarea areas to use the full
+ * available width of their editor card.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
   width: 100% !important;
@@ -1859,15 +3099,25 @@ a.ff-brandbar__title:focus {
   box-sizing: border-box;
 }
 
+/**
+ * Ensure the Quicktags toolbar spans the full global editor width.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
   box-sizing: border-box;
   width: 100%;
 }
 
+/**
+ * Remove the outer editor-card padding specifically on global settings screens.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card {
   padding: 0;
 }
 
+/**
+ * Apply consistent horizontal spacing to major editor UI sections
+ * inside global editor cards.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons,
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar,
@@ -1876,6 +3126,10 @@ a.ff-brandbar__title:focus {
   padding-right: 10px;
 }
 
+/**
+ * Force the global editor wrapper to use the intended border,
+ * radius, clipping, and background regardless of WordPress defaults.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap {
   border: 1px solid #e5e7eb !important;
   border-radius: 6px !important;
@@ -1883,12 +3137,20 @@ a.ff-brandbar__title:focus {
   background: #fafafa !important;
 }
 
+/**
+ * Force consistent toolbar borders and backgrounds inside
+ * global editor cards.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .mce-top-part,
 .wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
   border-bottom: 1px solid #e5e7eb !important;
   background: #f9fafb !important;
 }
 
+/**
+ * Force global editor mode-switch controls to use the custom
+ * Forge Fields tab-like styling.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor {
   border: 0 !important;
   background: transparent !important;
@@ -1899,11 +3161,20 @@ a.ff-brandbar__title:focus {
   box-shadow: none !important;
 }
 
+/**
+ * Force the active editor mode to use the blue-highlighted state.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor.active {
   background: #e5edff !important;
   color: #1e40af !important;
 }
 
+/**
+ * Global editor textarea normalization.
+ *
+ * Forces border removal, spacing, typography, line-height, and width
+ * so WordPress defaults cannot override the Forge Fields layout.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-area {
   border: 0 !important;
   padding: 10px !important;
@@ -1912,56 +3183,107 @@ a.ff-brandbar__title:focus {
   width: 100% !important;
 }
 
+/**
+ * Ensure every major layer of the global editor stack spans
+ * the full available width.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap,
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container,
 .wrap.ff-admin.ff-global .ff-editor-card textarea.wp-editor-area {
   width: 100% !important;
 }
 
+/**
+ * Increase the minimum textarea height when the WordPress editor
+ * is operating in HTML/Text mode.
+ */
 .wrap.ff-admin.ff-global .wp-editor-wrap.html-active .wp-editor-area {
   min-height: 260px !important;
 }
 
+/**
+ * Force media buttons inside global editor cards to retain
+ * the intended rounded corners.
+ */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button {
   border-radius: 6px !important;
 }
 
+/**
+ * Remove outer margin from this specific generated WordPress editor wrapper.
+ */
 div#wp-ff_global_4353453-wrap {
   margin: 0;
 }
 
+/**
+ * Fixed width for the global range field's numeric input.
+ */
 input#ff_global_range_num {
   width: 75px;
 }
 
+/**
+ * Fixed width for the global range slider.
+ */
 input#ff_global_range_slider {
   width: 300px;
 }
 
+/**
+ * Increase the minimum height of the Choices field-setting textarea
+ * so multiple options are easier to edit.
+ */
 .ff-field-setting.ff-setting-choices textarea {
   min-height: 80px;
 }
 
+/**
+ * Indent field-settings table cells to visually separate them
+ * from the primary field row above.
+ */
 tr.ff-field-settings td {
   padding-left: 40px;
 }
 
+/**
+ * Fixed width for the internal Forge Fields range slider.
+ */
 input#_ff_range_slider {
   width: 300px;
 }
 
+/**
+ * Button-group layout.
+ *
+ * Displays grouped choice controls inline while allowing them to wrap
+ * when horizontal space becomes limited.
+ */
 .ff-button-group {
   display: inline-flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/**
+ * Visually hide the underlying radio/checkbox input used by a
+ * Forge Fields button-group option.
+ *
+ * The actual input remains present in the DOM and can still provide
+ * its checked state to the styled label/button control.
+ */
 .ff-button-group__input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
+/**
+ * Visual button used for each button-group option.
+ *
+ * Provides the bordered, rounded, clickable surface that represents
+ * the hidden form input.
+ */
 .ff-button-group__btn {
   position: relative;
   display: inline-flex;
@@ -1974,11 +3296,24 @@ input#_ff_range_slider {
   background: #fff;
 }
 
+/**
+ * Selected button-group state.
+ *
+ * When the hidden input inside a button-group button is checked,
+ * strengthen the border and add an inset outline using the primary color.
+ */
 .ff-button-group__btn:has(.ff-button-group__input:checked) {
   border-color: var(--ff-primary);
   box-shadow: 0 0 0 1px var(--ff-primary) inset;
 }
 
+/**
+ * Apply the pointer cursor to labels and adjacent content associated
+ * with radio buttons and checkboxes inside Forge Fields admin screens.
+ *
+ * This communicates that clicking the label/content will interact
+ * with the associated form control.
+ */
 .ff-admin input[type="radio"] + *,
 .ff-admin input[type="checkbox"] + *,
 .ff-admin label:has(input[type="radio"]),
@@ -1986,14 +3321,26 @@ input#_ff_range_slider {
   cursor: pointer;
 }
 
+/**
+ * Add a stronger drop shadow to confirmation-dialog action buttons.
+ */
 .ff-confirm__dialog .ff-confirm__actions button {
   box-shadow: 1px 3px 7px 1px rgba(0, 0, 0, 0.1) !important;
 }
 
+/**
+ * Remove outer margin from Forge Fields meta-box content.
+ */
 .postbox .inside .ff-mb {
   margin: 0;
 }
 
+/**
+ * Meta-box form-table layout.
+ *
+ * Keeps the table full width and removes spacing between table cells
+ * so separators and padding can be controlled explicitly.
+ */
 .postbox .inside .ff-mb .form-table {
   width: 100%;
   border-collapse: separate;
@@ -2001,11 +3348,20 @@ input#_ff_range_slider {
   margin: 0;
 }
 
+/**
+ * Reduce top padding on the first row of a Forge Fields meta-box table.
+ */
 .postbox .inside .ff-mb .form-table tbody tr:first-child th,
 .postbox .inside .ff-mb .form-table tbody tr:first-child td {
   padding-top: 4px;
 }
 
+/**
+ * Shared meta-box table-cell styling.
+ *
+ * Applies consistent spacing, top alignment, and row separators
+ * to both field labels and field values.
+ */
 .postbox .inside .ff-mb .form-table th,
 .postbox .inside .ff-mb .form-table td {
   padding: 14px 12px;
@@ -2013,27 +3369,44 @@ input#_ff_range_slider {
   border-top: 1px solid var(--ff-border, #dcdcde);
 }
 
+/**
+ * Remove the top divider from the first meta-box row.
+ */
 .postbox .inside .ff-mb .form-table tbody tr:first-child th,
 .postbox .inside .ff-mb .form-table tbody tr:first-child td {
   border-top: 0;
 }
 
+/**
+ * Meta-box field-label column.
+ *
+ * Gives the heading column a consistent width and semibold text styling.
+ */
 .postbox .inside .ff-mb .form-table th {
   width: 180px;
   font-weight: 600;
   color: var(--ff-text, #1d2327);
 }
 
+/**
+ * Style labels contained inside meta-box heading cells.
+ */
 .postbox .inside .ff-mb .form-table th label {
   display: inline-block;
   font-weight: 600;
   color: var(--ff-text, #1d2327);
 }
 
+/**
+ * Allow meta-box value cells to consume the remaining table width.
+ */
 .postbox .inside .ff-mb .form-table td {
   width: auto;
 }
 
+/**
+ * Apply a generous maximum width to standard meta-box form controls.
+ */
 .postbox .inside .ff-mb input[type="text"],
 .postbox .inside .ff-mb input[type="email"],
 .postbox .inside .ff-mb input[type="url"],
@@ -2044,34 +3417,61 @@ input#_ff_range_slider {
   max-width: 760px;
 }
 
+/**
+ * Large textarea variant.
+ *
+ * Allows the textarea to span the full available width and provides
+ * additional vertical editing space.
+ */
 .postbox .inside .ff-mb textarea.large-text {
   width: 100%;
   max-width: none;
   min-height: 120px;
 }
 
+/**
+ * WordPress regular-text field width inside Forge Fields meta boxes.
+ */
 .postbox .inside .ff-mb .regular-text {
   width: min(100%, 350px);
 }
 
+/**
+ * Compact width for WordPress small-text inputs.
+ */
 .postbox .inside .ff-mb .small-text {
   width: 90px;
 }
 
+/**
+ * Range-control layout inside Forge Fields meta boxes.
+ */
 .postbox .inside .ff-mb .ff-range-wrap {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/**
+ * Responsive width for range sliders inside meta boxes.
+ */
 .postbox .inside .ff-mb .ff-range-slider {
   width: min(100%, 260px);
 }
 
+/**
+ * Width of the numeric input paired with a range slider.
+ */
 .postbox .inside .ff-mb .ff-range-number {
   width: 80px;
 }
 
+/**
+ * Media-control layout inside Forge Fields meta boxes.
+ *
+ * Stacks media preview/details and controls vertically and aligns
+ * everything to the left.
+ */
 .postbox .inside .ff-mb .ff-media-wrap {
   display: flex;
   flex-direction: column;
@@ -2079,30 +3479,51 @@ input#_ff_range_slider {
   gap: 10px;
 }
 
+/**
+ * Remove bottom margin from media file and preview rows.
+ */
 .postbox .inside .ff-mb .ff-media-fileline,
 .postbox .inside .ff-mb .ff-media-preview-wrap {
   margin-bottom: 0 !important;
 }
 
+/**
+ * Constrain media-preview height and apply rounded corners.
+ */
 .postbox .inside .ff-mb .ff-media-preview {
   max-height: 80px;
   border-radius: 6px;
 }
 
+/**
+ * Add spacing after media Select and Clear controls.
+ */
 .postbox .inside .ff-mb .ff-media-select,
 .postbox .inside .ff-mb .ff-media-clear {
   margin-right: 8px;
 }
 
+/**
+ * Limit the maximum width of WordPress editors inside meta boxes.
+ */
 .postbox .inside .ff-mb .wp-editor-wrap {
   max-width: 880px;
 }
 
+/**
+ * Round and clip the WordPress editor content container.
+ */
 .postbox .inside .ff-mb .wp-editor-container {
   border-radius: 6px;
   overflow: hidden;
 }
 
+/**
+ * Checkbox-label layout inside Forge Fields meta boxes.
+ *
+ * Keeps the checkbox and its label text aligned on one row
+ * with standard body-weight text.
+ */
 .postbox .inside .ff-mb label:has(input[type="checkbox"]) {
   display: inline-flex;
   align-items: center;
@@ -2110,16 +3531,28 @@ input#_ff_range_slider {
   font-weight: 400;
 }
 
+/**
+ * Remove default checkbox margin inside Forge Fields meta boxes.
+ */
 .postbox .inside .ff-mb input[type="checkbox"] {
   margin: 0;
 }
 
+/**
+ * Hide field-group key pills on screens up to 1440px wide.
+ */
 @media screen and (max-width: 1440px) {
   .ff-group-key {
     display: none !important;
   }
 }
 
+/**
+ * Password-field wrapper.
+ *
+ * Establishes a positioning context for the visibility toggle and
+ * limits the overall field width.
+ */
 .ff-password-wrap {
   position: relative;
   display: block;
@@ -2127,6 +3560,12 @@ input#_ff_range_slider {
   max-width: 420px;
 }
 
+/**
+ * Password input inside the custom wrapper.
+ *
+ * Fills the wrapper and reserves additional right-side space for
+ * the visibility-toggle button.
+ */
 .ff-password-wrap .ff-password-input.regular-text {
   width: 100%;
   max-width: none;
@@ -2135,6 +3574,12 @@ input#_ff_range_slider {
   box-sizing: border-box;
 }
 
+/**
+ * Password visibility-toggle control.
+ *
+ * Positions the toggle inside the right side of the input and removes
+ * normal button chrome so only the icon remains visible.
+ */
 .ff-password-wrap .ff-password-toggle {
   position: absolute;
   top: 50%;
@@ -2154,6 +3599,11 @@ input#_ff_range_slider {
   color: #6b7280;
 }
 
+/**
+ * Password-toggle hover and focus states.
+ *
+ * Keeps the control visually transparent while darkening the icon color.
+ */
 .ff-password-wrap .ff-password-toggle:hover,
 .ff-password-wrap .ff-password-toggle:focus {
   background: transparent;
@@ -2162,6 +3612,9 @@ input#_ff_range_slider {
   outline: none;
 }
 
+/**
+ * Normalize the Dashicon dimensions used inside the password toggle.
+ */
 .ff-password-wrap .ff-password-toggle .dashicons {
   width: 18px;
   height: 18px;
@@ -2169,6 +3622,11 @@ input#_ff_range_slider {
   line-height: 18px;
 }
 
+/**
+ * Media-control layout inside meta boxes.
+ *
+ * Reasserts the vertical stacked layout for Forge Fields media fields.
+ */
 .postbox .inside .ff-mb .ff-media-wrap {
   display: flex;
   flex-direction: column;
@@ -2176,16 +3634,28 @@ input#_ff_range_slider {
   gap: 10px;
 }
 
+/**
+ * Reassert removal of bottom margin from media detail rows.
+ */
 .postbox .inside .ff-mb .ff-media-fileline,
 .postbox .inside .ff-mb .ff-media-preview-wrap {
   margin-bottom: 0 !important;
 }
 
+/**
+ * Remove margins from meta-box media Select and Clear buttons.
+ */
 .postbox .inside .ff-mb .ff-media-select,
 .postbox .inside .ff-mb .ff-media-clear {
   margin: 0;
 }
 
+/**
+ * WordPress editor wrapper styling inside Forge Fields meta boxes.
+ *
+ * Applies the Forge Fields border, larger rounded corners,
+ * white background, and clipped overflow.
+ */
 .postbox .inside .ff-mb .wp-editor-wrap {
   border: 1px solid var(--ff-border, #dcdcde);
   border-radius: 10px;
@@ -2193,24 +3663,45 @@ input#_ff_range_slider {
   background: #fff;
 }
 
+/**
+ * WordPress editor-tools area.
+ *
+ * Adds internal spacing and separates the editor controls from
+ * the editor content below.
+ */
 .postbox .inside .ff-mb .wp-editor-tools {
   padding: 10px 12px 0;
   background: #fff;
   border-bottom: 1px solid var(--ff-border, #dcdcde);
 }
 
+/**
+ * Add spacing beneath WordPress media buttons in the editor toolbar.
+ */
 .postbox .inside .ff-mb .wp-media-buttons {
   margin: 0 0 10px;
 }
 
+/**
+ * Remove additional top padding from the WordPress editor tabs.
+ */
 .postbox .inside .ff-mb .wp-editor-tabs {
   padding-top: 0;
 }
 
+/**
+ * Round the upper corners of the Visual/Text editor switch controls.
+ */
 .postbox .inside .ff-mb .wp-switch-editor {
   border-radius: 8px 8px 0 0;
 }
 
+/**
+ * Quicktags toolbar styling inside Forge Fields meta boxes.
+ *
+ * Removes side/top borders, preserves the lower divider, and
+ * applies a light toolbar background.
+ */
 .postbox .inside .ff-mb .quicktags-toolbar {
   border-top: 0;
   border-left: 0;
@@ -2219,11 +3710,22 @@ input#_ff_range_slider {
   background: #f8f9fb;
 }
 
+/**
+ * WordPress editor content container.
+ *
+ * Removes its default border and keeps the editing surface white.
+ */
 .postbox .inside .ff-mb .wp-editor-container {
   border: 0;
   background: #fff;
 }
 
+/**
+ * HTML/Text editor textarea inside Forge Fields meta boxes.
+ *
+ * Forces full available width, provides a useful minimum editing height,
+ * adds internal padding, and normalizes box sizing.
+ */
 .postbox .inside .ff-mb textarea.wp-editor-area {
   width: 100% !important;
   max-width: none !important;
@@ -2233,11 +3735,22 @@ input#_ff_range_slider {
   display: block;
 }
 
+/**
+ * Keep both TinyMCE and HTML editor modes on a white editing surface.
+ */
 .postbox .inside .ff-mb .tmce-active .wp-editor-area,
 .postbox .inside .ff-mb .html-active .wp-editor-area {
   background: #fff;
 }
 
+/**
+ * Shared button styling inside Forge Fields meta boxes.
+ *
+ * Applies a neutral WordPress-compatible button appearance to:
+ * - Standard buttons.
+ * - Media buttons.
+ * - Quicktags toolbar buttons.
+ */
 .postbox .inside .ff-mb .button,
 .postbox .inside .ff-mb .wp-media-buttons .button,
 .postbox .inside .ff-mb .quicktags-toolbar input.button {
@@ -2253,6 +3766,11 @@ input#_ff_range_slider {
     color 0.15s ease;
 }
 
+/**
+ * Hover state for meta-box buttons.
+ *
+ * Slightly darkens the surface, border, and text for clearer interaction feedback.
+ */
 .postbox .inside .ff-mb .button:hover,
 .postbox .inside .ff-mb .wp-media-buttons .button:hover,
 .postbox .inside .ff-mb .quicktags-toolbar input.button:hover {
@@ -2261,6 +3779,12 @@ input#_ff_range_slider {
   color: #1d2327;
 }
 
+/**
+ * Focus and active states for standard meta-box buttons.
+ *
+ * Uses the same neutral pressed appearance while removing native
+ * outlines and shadows.
+ */
 .postbox .inside .ff-mb .button:focus,
 .postbox .inside .ff-mb .button:active {
   background: #f6f7f7;
@@ -2270,15 +3794,31 @@ input#_ff_range_slider {
   outline: none;
 }
 
+/**
+ * Secondary text used to describe or display the currently selected
+ * location target.
+ */
 .ff-location-target {
   color: #8c8f94;
   font-weight: 400;
 }
 
+/**
+ * Base Forge Fields tabs container.
+ *
+ * Removes additional top spacing so tab navigation aligns directly
+ * with the surrounding content.
+ */
 .ff-tabs {
   margin-top: 0;
 }
 
+/**
+ * Tab navigation container.
+ *
+ * Displays tab buttons in a compact horizontal group with a muted
+ * background, rounded border, and consistent internal spacing.
+ */
 .ff-tab-nav {
   display: inline-flex;
   align-items: center;
@@ -2290,6 +3830,12 @@ input#_ff_range_slider {
   border-radius: 10px;
 }
 
+/**
+ * Base tab button styling.
+ *
+ * Removes native button appearance and presents each tab as a lightweight,
+ * rounded control with smooth hover and active-state transitions.
+ */
 .ff-tab-button {
   appearance: none;
   border: 0;
@@ -2308,17 +3854,34 @@ input#_ff_range_slider {
     box-shadow 0.15s ease;
 }
 
+/**
+ * Tab-button hover state.
+ *
+ * Adds a subtle light background and darker text to indicate
+ * that the tab is interactive.
+ */
 .ff-tab-button:hover {
   background: rgba(255, 255, 255, 0.7);
   color: #2c3338;
 }
 
+/**
+ * Active tab-button state.
+ *
+ * Uses a white surface, Forge Fields primary color, and subtle elevation
+ * to distinguish the currently selected tab.
+ */
 .ff-tab-button.is-active {
   background: #fff;
   color: var(--ff-primary);
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
 }
 
+/**
+ * Base tab-panel state.
+ *
+ * Panels remain hidden until JavaScript applies the is-active class.
+ */
 .ff-tab-panel {
   display: none;
   padding: 0;
@@ -2328,22 +3891,43 @@ input#_ff_range_slider {
   box-shadow: none;
 }
 
+/**
+ * Active tab-panel state.
+ *
+ * Displays the panel associated with the currently active tab.
+ */
 .ff-tab-panel.is-active {
   display: block;
 }
 
+/**
+ * Remove extra top margin from form tables inside tab panels.
+ */
 .ff-tab-panel .form-table {
   margin-top: 0;
 }
 
+/**
+ * Add internal spacing around the tab navigation when tabs appear
+ * inside an options card.
+ */
 .ff-options-card .ff-tabs {
   padding: 16px 16px 0;
 }
 
+/**
+ * Add internal spacing around tab-panel content inside options cards.
+ */
 .ff-options-card .ff-tab-panel {
   padding: 0 16px 16px;
 }
 
+/**
+ * Disabled field-name state.
+ *
+ * Used when a field type, such as a Tab field, should not allow
+ * a normal field name to be entered.
+ */
 .ff-name-disabled {
   background: #f6f7f7 !important;
   color: #8c8f94;
@@ -2351,10 +3935,19 @@ input#_ff_range_slider {
   border-color: #dcdcde;
 }
 
+/**
+ * Muted placeholder color for disabled field-name inputs.
+ */
 .ff-name-disabled::placeholder {
   color: #a7aaad;
 }
 
+/**
+ * Forge Fields brand-bar logo container.
+ *
+ * Provides a fixed square area for the brand image and keeps
+ * its contents centered and clipped if necessary.
+ */
 .ff-brandbar__logo {
   display: flex;
   align-items: center;
@@ -2364,6 +3957,12 @@ input#_ff_range_slider {
   overflow: hidden;
 }
 
+/**
+ * Brand image sizing inside the logo container.
+ *
+ * Preserves the source image's aspect ratio while constraining it
+ * to the available logo area.
+ */
 .ff-brandbar__logo img {
   max-width: 100%;
   max-height: 100%;
@@ -2373,6 +3972,12 @@ input#_ff_range_slider {
   display: block;
 }
 
+/**
+ * Last-saved status displayed inside the subbar action area.
+ *
+ * Keeps the timestamp/status compact, muted, and aligned with
+ * neighboring action controls.
+ */
 .ff-subbar__actions .ff-last-saved {
   display: inline-flex;
   align-items: center;
@@ -2383,17 +3988,34 @@ input#_ff_range_slider {
   white-space: nowrap;
 }
 
+/**
+ * Main Forge Fields settings-page container.
+ *
+ * Limits the page width and adds vertical separation from the
+ * fixed navigation/header area above.
+ */
 .ff-settings {
   max-width: 1100px;
   margin-top: 54px;
 }
 
+/**
+ * Settings-card grid layout.
+ *
+ * Uses a single-column grid with consistent spacing between cards.
+ */
 .ff-settings-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
 }
 
+/**
+ * Individual settings card.
+ *
+ * Provides a padded white surface with shared Forge Fields border,
+ * rounded corners, and lightweight elevation.
+ */
 .ff-settings-card {
   padding: 24px;
   background: var(--ff-surface);
@@ -2402,38 +4024,68 @@ input#_ff_range_slider {
   box-shadow: var(--ff-shadow);
 }
 
+/**
+ * Settings-card heading typography and spacing.
+ */
 .ff-settings-card h2 {
   margin: 0 0 8px;
   font-size: 18px;
 }
 
+/**
+ * Introductory or descriptive text directly beneath a settings-card heading.
+ */
 .ff-settings-card > p {
   margin: 0 0 22px;
   color: var(--ff-text-muted);
 }
 
+/**
+ * Vertical spacing between individual settings fields.
+ */
 .ff-settings-field {
   margin-bottom: 20px;
 }
 
+/**
+ * Primary label for a settings field.
+ *
+ * Displays as a block above the control with semibold emphasis.
+ */
 .ff-settings-field > label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
 }
 
+/**
+ * Ensure file inputs appear on their own line.
+ */
 .ff-settings-field input[type="file"] {
   display: block;
 }
 
+/**
+ * Set a consistent width for wrapped select controls
+ * inside settings fields.
+ */
 .ff-settings-field .ff-select-wrap {
   width: 240px;
 }
 
+/**
+ * Allow settings-field selects to fill their wrapper width.
+ */
 .ff-settings-field select {
   width: 100%;
 }
 
+/**
+ * Settings textarea sizing.
+ *
+ * Allows the textarea to use full available width up to 700px,
+ * provides a useful minimum editing height, and permits vertical resizing.
+ */
 .ff-settings-field textarea {
   width: 100%;
   max-width: 700px;
@@ -2445,15 +4097,30 @@ input#_ff_range_slider {
    FORGE FIELDS — PAGE / POST METABOX
    ========================================================= */
 
+/**
+ * Main Forge Fields metabox container inside WordPress postboxes.
+ *
+ * Defines reusable width tokens for:
+ * - The label column.
+ * - The field/control column.
+ *
+ * Also removes inherited spacing and ensures the Forge Fields UI
+ * font stack is used throughout the metabox.
+ */
 #poststuff .postbox .inside .ff-mb {
   --ff-metabox-label-w: 180px;
   --ff-metabox-field-w: 720px;
-
   margin: 0;
   padding: 0;
   font-family: var(--ff-f-ui);
 }
 
+/**
+ * Shared transition behavior for Forge Fields metabox inputs,
+ * textareas, and custom select controls.
+ *
+ * Smooths border and shadow changes during hover and focus states.
+ */
 #poststuff .postbox .inside .ff-mb input,
 #poststuff .postbox .inside .ff-mb textarea,
 #poststuff .postbox .inside .ff-mb .ff-select-wrap select {
@@ -2466,6 +4133,12 @@ input#_ff_range_slider {
    REMOVE OLD WORDPRESS TABLE APPEARANCE
    --------------------------------------------------------- */
 
+/**
+ * Reset WordPress's default form-table behavior.
+ *
+ * The form table is converted into a block-level layout so individual
+ * rows can be controlled using CSS Grid instead of native table layout.
+ */
 #poststuff .postbox .inside .ff-mb .form-table {
   display: block;
   width: 100%;
@@ -2475,6 +4148,10 @@ input#_ff_range_slider {
   border-spacing: 0;
 }
 
+/**
+ * Convert the table body to block layout so its rows can behave
+ * as independently styled grid containers.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tbody {
   display: block;
 }
@@ -2483,44 +4160,62 @@ input#_ff_range_slider {
    FIELD ROWS
    --------------------------------------------------------- */
 
+/**
+ * Forge Fields metabox field row.
+ *
+ * Each WordPress table row is converted into a two-column CSS Grid:
+ * - Fixed-width label column.
+ * - Flexible field/control column.
+ *
+ * Rows also receive spacing, separators, a white surface,
+ * and a subtle hover transition.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tr {
   display: grid;
   grid-template-columns: var(--ff-metabox-label-w) minmax(0, 1fr);
   align-items: center;
   column-gap: 28px;
-
   width: 100%;
   padding: 16px 12px;
-
   background: #fff;
   border-bottom: 1px solid #e5e7eb;
-
   transition: background-color 0.15s ease;
 }
 
+/**
+ * Slightly reduce top spacing on the first metabox field row.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tr:first-child {
   padding-top: 14px;
 }
 
+/**
+ * Remove the lower separator from the final metabox field row.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tr:last-child {
   border-bottom: 0;
 }
 
+/**
+ * Highlight a metabox field row when hovered.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tr:hover {
   background: #f8fafc;
 }
 
-/* Undo WordPress table-cell behavior */
+/**
+ * Undo WordPress table-cell behavior.
+ *
+ * Header and value cells become block elements so they participate
+ * normally inside the CSS Grid row instead of retaining table-cell layout.
+ */
 #poststuff .postbox .inside .ff-mb .form-table th,
 #poststuff .postbox .inside .ff-mb .form-table td {
   display: block;
-
   width: auto;
   min-width: 0;
-
   margin: 0;
   padding: 0;
-
   border: 0;
   background: transparent !important;
   vertical-align: middle;
@@ -2530,6 +4225,9 @@ input#_ff_range_slider {
    LABELS
    --------------------------------------------------------- */
 
+/**
+ * Metabox field-label column typography.
+ */
 #poststuff .postbox .inside .ff-mb .form-table th {
   font-size: 13px;
   font-weight: 600;
@@ -2537,6 +4235,9 @@ input#_ff_range_slider {
   color: #1f2937;
 }
 
+/**
+ * Preserve semibold label styling without extra outer spacing.
+ */
 #poststuff .postbox .inside .ff-mb .form-table th label {
   margin: 0;
   font-weight: 600;
@@ -2546,6 +4247,12 @@ input#_ff_range_slider {
    FIELD COLUMN
    --------------------------------------------------------- */
 
+/**
+ * Main metabox field/control column.
+ *
+ * Allows the field area to fill its grid column while limiting
+ * its maximum width to the configured metabox field token.
+ */
 #poststuff .postbox .inside .ff-mb .form-table td {
   width: 100%;
   max-width: var(--ff-metabox-field-w);
@@ -2555,31 +4262,36 @@ input#_ff_range_slider {
    TEXT INPUTS
    --------------------------------------------------------- */
 
+/**
+ * Standard text-based Forge Fields metabox inputs.
+ *
+ * Provides a consistent:
+ * - Full-width layout.
+ * - 40px height.
+ * - Horizontal padding.
+ * - Border and radius.
+ * - Typography.
+ * - White background.
+ * - Subtle elevation.
+ */
 #poststuff .postbox .inside .ff-mb input[type="text"],
 #poststuff .postbox .inside .ff-mb input[type="email"],
 #poststuff .postbox .inside .ff-mb input[type="url"],
 #poststuff .postbox .inside .ff-mb input[type="password"],
 #poststuff .postbox .inside .ff-mb input[type="number"] {
   display: block;
-
   width: 100% !important;
   max-width: none !important;
   height: 40px;
-
   margin: 0;
   padding: 0 12px;
-
   border: 1px solid #c7ccd6;
   border-radius: 8px;
-
   background: #fff;
   color: #1f2937;
-
   font-size: 13px;
   line-height: 38px;
-
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -2589,29 +4301,27 @@ input#_ff_range_slider {
    TEXTAREA
    --------------------------------------------------------- */
 
+/**
+ * Forge Fields metabox textarea.
+ *
+ * Fills the available field column, provides a useful minimum height,
+ * and allows vertical resizing while matching the standard input styling.
+ */
 #poststuff .postbox .inside .ff-mb textarea {
   display: block;
-
   width: 100% !important;
   max-width: none !important;
   min-height: 110px;
-
   margin: 0;
   padding: 10px 12px;
-
   border: 1px solid #c7ccd6;
   border-radius: 8px;
-
   background: #fff;
   color: #1f2937;
-
   font-size: 13px;
   line-height: 1.5;
-
   resize: vertical;
-
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -2621,59 +4331,62 @@ input#_ff_range_slider {
    SELECT
    --------------------------------------------------------- */
 
+/**
+ * Custom select wrapper inside Forge Fields metaboxes.
+ *
+ * Establishes the positioning context for the custom dropdown arrow
+ * while limiting the control to a preferred width of 360px.
+ */
 #poststuff .postbox .inside .ff-mb .ff-select-wrap {
   position: relative;
   display: inline-block;
-
   width: 360px !important;
   max-width: 100% !important;
 }
 
+/**
+ * Forge Fields metabox select control.
+ *
+ * Removes native browser appearance so the select can use consistent
+ * Forge Fields sizing, borders, spacing, and custom arrow styling.
+ */
 #poststuff .postbox .inside .ff-mb .ff-select-wrap select {
   display: block;
-
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-
   width: 100% !important;
   max-width: 360px !important;
   height: 40px;
-
   margin: 0;
   padding: 0 40px 0 12px;
-
   border: 1px solid #c7ccd6;
   border-radius: 8px;
-
   background: #fff !important;
   background-image: none !important;
-
   color: #1f2937;
-
   font-size: 13px;
   line-height: 38px;
-
   cursor: pointer;
-
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
+/**
+ * Custom dropdown arrow for Forge Fields metabox selects.
+ *
+ * Positioned above the select and made non-interactive so pointer
+ * events continue to reach the native select element beneath it.
+ */
 #poststuff .postbox .inside .ff-mb .ff-select-wrap::after {
   content: "▾";
-
   position: absolute;
   z-index: 2;
-
   top: 50%;
   right: 12px;
-
   transform: translateY(-50%);
-
   color: #6b7280;
   font-size: 10px;
   line-height: 1;
-
   pointer-events: none;
 }
 
@@ -2681,17 +4394,27 @@ input#_ff_range_slider {
    FOCUS / HOVER
    --------------------------------------------------------- */
 
+/**
+ * Shared hover treatment for metabox inputs, textareas, and selects.
+ *
+ * Strengthens the border and increases elevation to provide
+ * clear pointer interaction feedback.
+ */
 #poststuff .postbox .inside .ff-mb input:hover,
 #poststuff .postbox .inside .ff-mb textarea:hover,
 #poststuff .postbox .inside .ff-mb .ff-select-wrap select:hover {
   border-color: #aeb4bf;
-
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.08),
     0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
-/* Text inputs + textarea focus */
+/**
+ * Text inputs and textarea focus state.
+ *
+ * Replaces browser/WordPress focus styling with the Forge Fields
+ * primary border and a subtle layered focus treatment.
+ */
 #poststuff .postbox .inside .ff-mb input[type="text"]:focus,
 #poststuff .postbox .inside .ff-mb input[type="email"]:focus,
 #poststuff .postbox .inside .ff-mb input[type="url"]:focus,
@@ -2699,22 +4422,24 @@ input#_ff_range_slider {
 #poststuff .postbox .inside .ff-mb input[type="number"]:focus,
 #poststuff .postbox .inside .ff-mb textarea:focus {
   outline: none !important;
-
   border-color: var(--ff-primary) !important;
   border-radius: 8px;
-
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.07),
     0 1px 2px rgba(16, 24, 40, 0.05),
     0 0 0 1px rgba(54, 54, 55, 0.14) !important;
 }
 
+/**
+ * Select focus state.
+ *
+ * Uses the Forge Fields primary border plus a slightly stronger
+ * outer focus ring than standard text controls.
+ */
 #poststuff .postbox .inside .ff-mb .ff-select-wrap select:focus {
   outline: none !important;
-
   border-color: var(--ff-primary) !important;
   border-radius: 8px;
-
   box-shadow:
     0 2px 6px rgba(16, 24, 40, 0.08),
     0 1px 2px rgba(16, 24, 40, 0.06),
@@ -2725,46 +4450,59 @@ input#_ff_range_slider {
    CHECKBOX / RADIO
    --------------------------------------------------------- */
 
+/**
+ * Override WordPress admin theme colors inside the Forge Fields metabox.
+ *
+ * This ensures native WordPress checkbox/radio controls inherit the
+ * Forge Fields dark primary palette for checked and focused states.
+ */
 #poststuff .postbox .inside .ff-mb {
   --wp-admin-theme-color: #363637;
   --wp-admin-theme-color-darker-10: #242425;
   --wp-admin-theme-color-darker-20: #18181a;
 }
 
+/**
+ * Base checkbox and radio styling inside Forge Fields metaboxes.
+ *
+ * Normalizes control size, spacing, border color, shadow, and cursor.
+ */
 #poststuff .postbox .inside .ff-mb input[type="checkbox"],
 #poststuff .postbox .inside .ff-mb input[type="radio"] {
   width: 18px;
   height: 18px;
-
   margin: 0 8px 0 0;
-
   border-color: #9ca3af;
-
   box-shadow: none;
-
   cursor: pointer;
 }
 
+/**
+ * Keyboard-focus treatment for checkbox and radio controls.
+ *
+ * Uses the Forge Fields primary border color with a subtle outer ring.
+ */
 #poststuff .postbox .inside .ff-mb input[type="checkbox"]:focus,
 #poststuff .postbox .inside .ff-mb input[type="radio"]:focus {
   border-color: var(--ff-primary);
-
   box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
 }
 
+/**
+ * Labels that contain checkbox or radio controls.
+ *
+ * Keeps the input and label text aligned horizontally, adds spacing
+ * between neighboring choices, and makes the full label clickable.
+ */
 #poststuff .postbox .inside .ff-mb label:has(input[type="checkbox"]),
 #poststuff .postbox .inside .ff-mb label:has(input[type="radio"]) {
   display: inline-flex !important;
   align-items: center;
-
   min-height: 32px;
-
   margin: 0 18px 0 0 !important;
-
   font-size: 13px;
   line-height: 1.4;
   color: #1f2937;
-
   cursor: pointer;
 }
 
@@ -2772,12 +4510,17 @@ input#_ff_range_slider {
    MEDIA FIELDS
    --------------------------------------------------------- */
 
+/**
+ * Media-field layout inside Forge Fields metaboxes.
+ *
+ * Displays media controls in a flexible horizontal row, allows them
+ * to wrap when needed, and uses the full available field-column width.
+ */
 #poststuff .postbox .inside .ff-mb .ff-media-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-
   width: 100%;
 }
 
@@ -2785,11 +4528,16 @@ input#_ff_range_slider {
    RANGE
    --------------------------------------------------------- */
 
+/**
+ * Range-field layout inside Forge Fields metaboxes.
+ *
+ * Keeps the slider and its numeric companion control aligned
+ * horizontally with consistent spacing.
+ */
 #poststuff .postbox .inside .ff-mb .ff-range-wrap {
   display: flex;
   align-items: center;
   gap: 12px;
-
   width: 100%;
 }
 
@@ -2797,15 +4545,19 @@ input#_ff_range_slider {
    WYSIWYG
    --------------------------------------------------------- */
 
+/**
+ * WordPress WYSIWYG editor wrapper inside Forge Fields metaboxes.
+ *
+ * Allows the editor to use the full field-column width while applying
+ * the same border, radius, clipping, and background treatment as
+ * other Forge Fields controls.
+ */
 #poststuff .postbox .inside .ff-mb .wp-editor-wrap {
   width: 100%;
   max-width: none;
-
   margin: 0;
-
   border: 1px solid #c7ccd6;
   border-radius: 8px;
-
   overflow: hidden;
   background: #fff;
 }
@@ -2814,20 +4566,37 @@ input#_ff_range_slider {
    MOBILE
    --------------------------------------------------------- */
 
+/**
+ * Responsive Forge Fields metabox layout.
+ *
+ * At the WordPress mobile breakpoint, each field row switches from
+ * the two-column label/control grid to a single-column stacked layout.
+ */
 @media (max-width: 782px) {
+  /**
+   * Stack labels and controls vertically and reduce row padding.
+   */
   #poststuff .postbox .inside .ff-mb .form-table tr {
     grid-template-columns: 1fr;
     row-gap: 8px;
-
     padding: 14px 10px;
   }
 
+  /**
+   * Remove the desktop field-column maximum width on mobile.
+   */
   #poststuff .postbox .inside .ff-mb .form-table td {
     max-width: none;
   }
 }
 
-/* Prevent Forge metabox rows/fields from overflowing the postbox */
+/**
+ * Prevent Forge Fields metabox rows and fields from overflowing
+ * the WordPress postbox container.
+ *
+ * Every major structural layer is constrained to the available width
+ * and uses border-box sizing.
+ */
 #poststuff .postbox .inside .ff-mb,
 #poststuff .postbox .inside .ff-mb .form-table,
 #poststuff .postbox .inside .ff-mb .form-table tbody,
@@ -2838,15 +4607,30 @@ input#_ff_range_slider {
   box-sizing: border-box;
 }
 
+/**
+ * Refine the metabox row grid so the label column can shrink
+ * between 140px and 180px while the field column remains flexible.
+ */
 #poststuff .postbox .inside .ff-mb .form-table tr {
   grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
 }
 
+/**
+ * Prevent field-column content from forcing the grid wider than
+ * its available space.
+ */
 #poststuff .postbox .inside .ff-mb .form-table td {
   min-width: 0;
   overflow: hidden;
 }
 
+/**
+ * Constrain all major Forge Fields metabox controls and wrappers
+ * to the available postbox width.
+ *
+ * Border-box sizing ensures padding and borders remain included
+ * within that maximum width.
+ */
 #poststuff .postbox .inside .ff-mb input,
 #poststuff .postbox .inside .ff-mb textarea,
 #poststuff .postbox .inside .ff-mb select,
@@ -2859,38 +4643,67 @@ input#_ff_range_slider {
 }
 
 /* Field row selection */
+
+/**
+ * Checkbox column used for selecting field rows in the edit table.
+ *
+ * Keeps the selection column compact and centers its checkbox.
+ */
 .wrap.ff-admin.ff-edit .ff-field-check-column {
   width: 42px;
   text-align: center;
   vertical-align: middle;
 }
 
+/**
+ * Remove default checkbox margin inside the field-selection column.
+ */
 .wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"] {
   margin: 0;
 }
 
 /* Bulk field actions */
+
+/**
+ * Bulk field-action toolbar.
+ *
+ * Aligns the action selector and Apply button horizontally with
+ * consistent spacing above the control group.
+ */
 .wrap.ff-admin.ff-edit .ff-field-bulk-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-
   margin-top: 12px;
 }
 
+/**
+ * Set a consistent width for the bulk-action select wrapper.
+ */
 .wrap.ff-admin.ff-edit .ff-field-bulk-actions .ff-select-wrap {
   width: 190px;
   min-width: 190px;
 }
 
+/**
+ * Allow the bulk-action select to fill its wrapper completely.
+ */
 .wrap.ff-admin.ff-edit .ff-field-bulk-actions .ff-select-wrap select {
   width: 100%;
 }
 
+/**
+ * Remove additional margin from the bulk-action Apply button.
+ */
 .wrap.ff-admin.ff-edit #ff-apply-field-bulk-action {
   margin: 0;
 }
 
+/**
+ * Forge Fields version text shown on the settings screen.
+ *
+ * Keeps version information compact, muted, and prevented from wrapping.
+ */
 .ff-settings-version {
   font-size: 12px;
   color: var(--ff-text-muted);

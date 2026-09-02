@@ -1,11 +1,11 @@
-/**
-* Forge Fields import, export, settings, and feedback functionality.
-*
-* This file renders the Forge Fields Settings screen and handles
-* field-group JSON exports, JSON imports, and feedback submissions.
-*/
-
 <?php
+
+/**
+ * Forge Fields import, export, settings, and feedback functionality.
+ *
+ * This file renders the Forge Fields Settings screen and handles
+ * field-group JSON exports, JSON imports, and feedback submissions.
+ */
 
 /**
  * Prevent direct access to this file outside of WordPress.
