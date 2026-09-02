@@ -12,7 +12,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('FF_VERSION', '0.1.1');
+define('FF_VERSION', '0.1.2');
 define('FF_PATH', plugin_dir_path(__FILE__));
 define('FF_URL',  plugin_dir_url(__FILE__));
 
@@ -23,6 +23,7 @@ require_once FF_PATH . 'includes/core.php';
 if (is_admin()) {
     require_once FF_PATH . 'includes/admin-page.php';
     require_once FF_PATH . 'includes/admin-ui.php';
+    require_once FF_PATH . 'includes/import-export.php';
 }
 
 /**

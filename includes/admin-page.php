@@ -124,7 +124,18 @@ function ff_normalize_choices_string($raw)
 
 add_action('in_admin_header', function () {
     $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-    if (!in_array($page, ['forge-fields', 'forge-fields-edit', 'forge-fields-global'], true)) {
+    if (
+        ! in_array(
+            $page,
+            [
+                'forge-fields',
+                'forge-fields-edit',
+                'forge-fields-global',
+                'forge-fields-settings',
+            ],
+            true
+        )
+    ) {
         return;
     }
 
@@ -183,11 +194,21 @@ add_action('in_admin_header', function () {
 
 
     $is_new   = ($page === 'forge-fields-edit' && empty($_GET['group']));
-    $subtitle = ($page === 'forge-fields')
-        ? 'Field Groups'
-        : (($page === 'forge-fields-global')
-            ? 'Global Fields'
-            : ($is_new ? 'Add New Field Group' : 'Edit Field Group'));
+    if ($page === 'forge-fields') {
+
+        $subtitle = 'Field Groups';
+    } elseif ($page === 'forge-fields-global') {
+
+        $subtitle = 'Global Fields';
+    } elseif ($page === 'forge-fields-settings') {
+
+        $subtitle = 'Settings';
+    } else {
+
+        $subtitle = $is_new
+            ? 'Add New Field Group'
+            : 'Edit Field Group';
+    }
 
     ff_render_admin_brandbar($subtitle, '');
 
@@ -278,6 +299,17 @@ add_action('in_admin_header', function () {
         %s',
             $last_saved_html
         );
+    }
+
+    if ($page === 'forge-fields-settings') {
+        ff_render_admin_subbar(
+            $subtitle,
+            '',
+            '',
+            ''
+        );
+
+        return;
     }
 
     ff_render_admin_subbar($subtitle, '', 'Add New', $right_html);
@@ -407,6 +439,16 @@ add_action('admin_menu', function () {
         'ff_render_global_options_page'
     );
 
+    // Settings
+    add_submenu_page(
+        $parent_slug,
+        'Settings',
+        'Settings',
+        'manage_options',
+        'forge-fields-settings',
+        'ff_render_settings_page'
+    );
+
     add_submenu_page(
         null,
         'Delete Forge Fields',
@@ -420,7 +462,18 @@ add_action('admin_menu', function () {
 // Adds a body class only on Forge Fields admin screens so we can pad #wpcontent for the fixed brand bar.
 add_filter('admin_body_class', function ($classes) {
     $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-    if (in_array($page, ['forge-fields', 'forge-fields-edit', 'forge-fields-global'], true)) {
+    if (
+        in_array(
+            $page,
+            [
+                'forge-fields',
+                'forge-fields-edit',
+                'forge-fields-global',
+                'forge-fields-settings',
+            ],
+            true
+        )
+    ) {
         $classes .= ' ff-has-brandbar';
     }
     return $classes;
