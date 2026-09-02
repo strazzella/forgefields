@@ -1,53 +1,64 @@
-<?php echo ff_get_field('field_name'); ?>
+/**
+ * Forge Fields Usage Examples
+ *
+ * These examples show common ways to retrieve and safely output
+ * Forge Fields values in a WordPress theme or plugin.
+ */
 
-<h1><?php echo ff_get_field('hero_title'); ?></h1>
 
-<h1><?php echo esc_html(ff_get_field('hero_title')); ?></h1>
+/*
+|--------------------------------------------------------------------------
+| Get a field from the current post/page
+|--------------------------------------------------------------------------
+*/
 
-<?php
-$image_id = ff_get_field('hero_image');
+$value = ff_get_field('field_name');
 
-if ($image_id) {
-    echo wp_get_attachment_image($image_id, 'full');
-}
-?>
+
+/*
+|--------------------------------------------------------------------------
+| Output a text field safely
+|--------------------------------------------------------------------------
+*/
+
+<h1>
+    <?php echo esc_html(ff_get_field('hero_title')); ?>
+</h1>
+
+
+/*
+|--------------------------------------------------------------------------
+| Get a field from a specific post/page
+|--------------------------------------------------------------------------
+*/
+
+$value = ff_get_field('field_name', 123);
+
+
+/*
+|--------------------------------------------------------------------------
+| Output WYSIWYG content
+|--------------------------------------------------------------------------
+|
+| wp_kses_post() allows standard WordPress-safe HTML while removing
+| potentially unsafe markup.
+|
+*/
 
 <?php echo wp_kses_post(ff_get_field('content')); ?>
 
-<?php echo ff_get_field('field_name', 'global'); ?>
 
-<h2><?php echo esc_html(ff_get_field('company_name', 'global')); ?></h2>
-
-<?php echo ff_get_global('field_name'); ?>
-
-ff_get_field('company_name', 'global');
-
-ff_get_global('company_name');
-
-ff_get_field('field_name');
-
-ff_get_field('field_name', 123);
-
-<title><?php echo esc_html(ff_get_global('home')); ?></title>
-
-<meta
-    name="description"
-    content="<?php echo esc_attr(ff_get_global('home_meta_description')); ?>"
->
+/*
+|--------------------------------------------------------------------------
+| Output an Image field
+|--------------------------------------------------------------------------
+|
+| Forge Fields stores WordPress attachment IDs for image fields.
+|
+*/
 
 <?php
-$image_id = ff_get_field('hero_image');
-$image_url = wp_get_attachment_image_url($image_id, 'full');
-?>
-
-<?php if ($image_url) : ?>
-    <img
-        src="<?php echo esc_url($image_url); ?>"
-        alt="">
-<?php endif; ?>
-
-<?php
-$image_id = ff_get_global_field('site_logo');
+$image_id = absint(ff_get_field('hero_image'));
 
 if ($image_id) {
     echo wp_get_attachment_image(
@@ -56,3 +67,131 @@ if ($image_id) {
     );
 }
 ?>
+
+
+/*
+|--------------------------------------------------------------------------
+| Get the URL for an Image field
+|--------------------------------------------------------------------------
+*/
+
+<?php
+$image_id = absint(ff_get_field('hero_image'));
+
+$image_url = wp_get_attachment_image_url(
+    $image_id,
+    'full'
+);
+?>
+
+<?php if ($image_url) : ?>
+    <img
+        src="<?php echo esc_url($image_url); ?>"
+        alt=""
+    >
+<?php endif; ?>
+
+
+/*
+|--------------------------------------------------------------------------
+| Get a Global Field
+|--------------------------------------------------------------------------
+*/
+
+$value = ff_get_global('field_name');
+
+
+/*
+|--------------------------------------------------------------------------
+| Output a Global text field safely
+|--------------------------------------------------------------------------
+*/
+
+<h2>
+    <?php echo esc_html(ff_get_global('company_name')); ?>
+</h2>
+
+
+/*
+|--------------------------------------------------------------------------
+| Get a Global Field using ff_get_field()
+|--------------------------------------------------------------------------
+|
+| Global Fields can also be retrieved by passing "global"
+| as the second argument.
+|
+*/
+
+$value = ff_get_field('company_name', 'global');
+
+
+/*
+|--------------------------------------------------------------------------
+| Output a Global Field inside normal HTML
+|--------------------------------------------------------------------------
+*/
+
+<title>
+    <?php echo esc_html(ff_get_global('home')); ?>
+</title>
+
+
+/*
+|--------------------------------------------------------------------------
+| Output a Global Field inside an HTML attribute
+|--------------------------------------------------------------------------
+|
+| Use esc_attr() when inserting a Forge Fields value into
+| an HTML attribute.
+|
+*/
+
+<meta
+    name="description"
+    content="<?php echo esc_attr(
+        ff_get_global('home_meta_description')
+    ); ?>"
+>
+
+
+/*
+|--------------------------------------------------------------------------
+| Output a Global Image field
+|--------------------------------------------------------------------------
+*/
+
+<?php
+$image_id = absint(
+    ff_get_global('site_logo')
+);
+
+if ($image_id) {
+    echo wp_get_attachment_image(
+        $image_id,
+        'full'
+    );
+}
+?>
+
+
+/*
+|--------------------------------------------------------------------------
+| Common escaping rules
+|--------------------------------------------------------------------------
+|
+| Text:
+| esc_html()
+|
+| HTML attributes:
+| esc_attr()
+|
+| URLs:
+| esc_url()
+|
+| WYSIWYG / allowed WordPress HTML:
+| wp_kses_post()
+|
+| Image/File attachment IDs:
+| absint()
+|
+*/

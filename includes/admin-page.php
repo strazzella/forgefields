@@ -299,7 +299,7 @@ function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'A
             <div class="ff-brandbar__left">
                 <span class="ff-brandbar__logo">
                     <a href="<?php echo esc_url($home_url); ?>">
-                        <img src="<?php echo FF_URL . 'assets/img/forge-logo2.png'; ?>" alt="Forge Fields Logo"></span>
+                        <img src="<?php echo esc_url(FF_URL . 'assets/img/forge-logo2.png'); ?>" alt="Forge Fields Logo"></span>
                 </a>
                 <?php if ($is_current) : ?>
                     <a class="ff-brandbar__title" href="<?php echo esc_url($home_url); ?>">Forge Fields</a>
