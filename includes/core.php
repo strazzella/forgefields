@@ -1,16 +1,36 @@
 <?php
+
+/**
+ * Prevent direct access to this file outside of WordPress.
+ */
 if (! defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Runtime registry for active Forge Fields field groups.
+ *
+ * Field groups loaded during WordPress initialization are registered
+ * here for use throughout the current request.
+ */
 global $ff_field_groups;
 $ff_field_groups = [];
 
+/**
+ * Generate a unique identifier for a field group.
+ *
+ * @return string Unique Forge Fields group ID.
+ */
 function ff_generate_group_id()
 {
     return uniqid('ff_group_');
 }
 
+/**
+ * Retrieve all saved Forge Fields field groups.
+ *
+ * @return array Saved field groups, or an empty array when none exist.
+ */
 function ff_get_all_groups()
 {
     $groups = get_option('ff_field_groups', []);
@@ -18,6 +38,14 @@ function ff_get_all_groups()
     return is_array($groups) ? $groups : [];
 }
 
+/**
+ * Return the registered Forge Fields core field types.
+ *
+ * Each field type maps to a render callback and sanitization callback.
+ * The registry is filterable through the ff_field_types hook.
+ *
+ * @return array Registered field type definitions.
+ */
 function ff_get_field_types()
 {
     static $types = null;
@@ -64,6 +92,13 @@ function ff_get_field_types()
     return $types;
 }
 
+/**
+ * Render a standard text field input.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_text(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -77,6 +112,13 @@ function ff_render_type_text(array $field, $value, WP_Post $post)
     );
 }
 
+/**
+ * Render a multiline textarea field.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_textarea(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -90,6 +132,13 @@ function ff_render_type_textarea(array $field, $value, WP_Post $post)
     );
 }
 
+/**
+ * Render a numeric input field.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_number(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -103,6 +152,13 @@ function ff_render_type_number(array $field, $value, WP_Post $post)
     );
 }
 
+/**
+ * Render an email input field.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_email(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -116,6 +172,13 @@ function ff_render_type_email(array $field, $value, WP_Post $post)
     );
 }
 
+/**
+ * Render a URL input field.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_url(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -129,6 +192,13 @@ function ff_render_type_url(array $field, $value, WP_Post $post)
     );
 }
 
+/**
+ * Render a synchronized range slider and numeric input.
+ *
+ * @param array   $field Field definition, including optional min/max values.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_range(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -163,6 +233,13 @@ function ff_render_type_range(array $field, $value, WP_Post $post)
 <?php
 }
 
+/**
+ * Render a password field with a visibility toggle control.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_password(array $field, $value, WP_Post $post)
 {
     $name = $field['name'];
@@ -193,6 +270,15 @@ function ff_render_type_password(array $field, $value, WP_Post $post)
     echo '</div>';
 }
 
+/**
+ * Render a tab placeholder for field-group section organization.
+ *
+ * Tab fields are structural and do not store a value themselves.
+ *
+ * @param array   $field Field definition.
+ * @param mixed   $value Current field value.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_type_tab(array $field, $value, WP_Post $post)
 {
     $label = isset($field['label']) ? $field['label'] : 'Tab';
@@ -203,16 +289,45 @@ function ff_render_type_tab(array $field, $value, WP_Post $post)
 }
 
 
+/**
+ * Sanitize a standard text field value before storage.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Sanitized text value.
+ */
 function ff_sanitize_type_text($raw, array $field, $post_id)
 {
     return sanitize_text_field($raw);
 }
 
+/**
+ * Sanitize a textarea field value before storage.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Sanitized textarea value.
+ */
 function ff_sanitize_type_textarea($raw, array $field, $post_id)
 {
     return sanitize_textarea_field($raw);
 }
 
+/**
+ * Sanitize a numeric field value before storage.
+ *
+ * Empty or non-numeric values are normalized to an empty string.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return int|float|string Sanitized numeric value or an empty string.
+ */
 function ff_sanitize_type_number($raw, array $field, $post_id)
 {
     $raw = trim((string) $raw);
@@ -222,12 +337,33 @@ function ff_sanitize_type_number($raw, array $field, $post_id)
     return is_numeric($raw) ? $raw + 0 : '';
 }
 
+/**
+ * Sanitize an email field value before storage.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Sanitized email address.
+ */
 function ff_sanitize_type_email($raw, array $field, $post_id)
 {
     $san = sanitize_email($raw);
     return $san ? $san : '';
 }
 
+/**
+ * Sanitize a URL field value before storage.
+ *
+ * Adds an HTTPS scheme when the submitted value does not include
+ * an HTTP or HTTPS scheme.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Sanitized URL.
+ */
 function ff_sanitize_type_url($raw, array $field, $post_id)
 {
     $raw = trim($raw);
@@ -248,6 +384,17 @@ function ff_sanitize_type_url($raw, array $field, $post_id)
     return $san ? $san : '';
 }
 
+/**
+ * Sanitize and constrain a range field value.
+ *
+ * Numeric values are clamped to the configured minimum and maximum.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return float|string Sanitized range value or an empty string.
+ */
 function ff_sanitize_type_range($raw, array $field, $post_id)
 {
     $raw = trim((string) $raw);
@@ -269,6 +416,15 @@ function ff_sanitize_type_range($raw, array $field, $post_id)
     return $value;
 }
 
+/**
+ * Normalize a password field value before storage.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Normalized password value.
+ */
 function ff_sanitize_type_password($raw, array $field, $post_id)
 {
     $raw = (string) $raw;
@@ -278,11 +434,30 @@ function ff_sanitize_type_password($raw, array $field, $post_id)
     return $raw;
 }
 
+/**
+ * Return an empty value for structural tab fields.
+ *
+ * Tab fields organize the admin interface and do not store post meta.
+ *
+ * @param mixed $raw     Raw submitted value.
+ * @param array $field   Field definition.
+ * @param int   $post_id Current post ID.
+ *
+ * @return string Always an empty string.
+ */
 function ff_sanitize_type_tab($raw, array $field, $post_id)
 {
     return '';
 }
 
+/**
+ * Register a field group in the current request's runtime registry.
+ *
+ * Applies default group values and ensures the fields collection is
+ * represented as an array before registration.
+ *
+ * @param array $group Field group definition.
+ */
 function ff_register_field_group(array $group)
 {
     global $ff_field_groups;
@@ -306,6 +481,12 @@ function ff_register_field_group(array $group)
     $ff_field_groups[$group['id']] = $group;
 }
 
+/**
+ * Load saved field groups and register active groups during WordPress boot.
+ *
+ * Also migrates the legacy single-group option into the current
+ * multi-group storage format when necessary.
+ */
 function ff_boot_field_groups()
 {
     $groups = get_option('ff_field_groups', null);
@@ -351,6 +532,12 @@ function ff_boot_field_groups()
     }
 }
 
+/**
+ * Register Forge Fields meta boxes on supported post and page screens.
+ *
+ * Only active groups matching the current content type and optional
+ * location target are registered.
+ */
 add_action('add_meta_boxes', function () {
     $groups = ff_get_all_groups();
     if (empty($groups) || ! is_array($groups)) {
@@ -393,6 +580,15 @@ add_action('add_meta_boxes', function () {
     }
 });
 
+/**
+ * Render a single Forge Fields row inside a post/page meta box.
+ *
+ * The field definition determines which control is rendered and the
+ * current value is loaded from post meta.
+ *
+ * @param array   $field Field definition.
+ * @param WP_Post $post  Current post object.
+ */
 function ff_render_metabox_field_row(array $field, WP_Post $post)
 {
     $name = $field['name'] ?? '';
@@ -616,6 +812,15 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
     echo '</tr>';
 }
 
+/**
+ * Render a complete Forge Fields field-group meta box.
+ *
+ * Handles the field-group nonce, optional tab navigation, and rendering
+ * of each individual field row.
+ *
+ * @param WP_Post $post Current post object.
+ * @param array   $box  WordPress meta box configuration.
+ */
 function ff_render_field_group_metabox($post, $box)
 {
     $group_id = isset($box['args']['group_id']) ? $box['args']['group_id'] : '';
@@ -679,6 +884,14 @@ function ff_render_field_group_metabox($post, $box)
     echo '</div>';
 }
 
+/**
+ * Save Forge Fields values when a post or page is saved.
+ *
+ * The save routine ignores autosaves and revisions, verifies the Forge
+ * Fields nonce and user capability, limits processing to applicable
+ * active groups, sanitizes values by field type, and updates or removes
+ * the corresponding post meta.
+ */
 add_action('save_post', function ($post_id) {
     if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 
@@ -842,6 +1055,18 @@ add_action('save_post', function ($post_id) {
     }
 });
 
+/**
+ * Retrieve a Forge Fields value.
+ *
+ * By default the value is read from the current post. Passing a post ID
+ * retrieves a value from that post, while passing "global" or "option"
+ * retrieves a Global Fields value.
+ *
+ * @param string          $field_name Field name.
+ * @param int|string|null $post_id    Post ID, "global", "option", or null.
+ *
+ * @return mixed Stored field value or an empty string when unavailable.
+ */
 function ff_get_field($field_name, $post_id = null)
 {
     if (! $field_name) {
@@ -866,6 +1091,17 @@ function ff_get_field($field_name, $post_id = null)
     return $value;
 }
 
+/**
+ * Retrieve a Global Fields value.
+ *
+ * Provides a concise wrapper around ff_get_field() for global values and
+ * allows a fallback value when the field is empty.
+ *
+ * @param string $name    Global field name.
+ * @param mixed  $default Value returned when the field is empty.
+ *
+ * @return mixed Stored global value or the supplied default.
+ */
 function ff_get_global($name, $default = '')
 {
     $value = ff_get_field($name, 'global');
@@ -877,7 +1113,20 @@ function ff_get_global($name, $default = '')
     return $value;
 }
 
+/**
+ * Define the choices parser only when another implementation has not
+ * already been registered.
+ */
 if (! function_exists('ff_parse_choices_string')) {
+    /**
+     * Parse a multiline choices definition into a value => label array.
+     *
+     * Supports "value|label", "value:label", or plain label lines.
+     *
+     * @param mixed $raw Raw multiline choices string.
+     *
+     * @return array Sanitized choice values and labels.
+     */
     function ff_parse_choices_string($raw)
     {
         $out = [];
@@ -902,6 +1151,16 @@ if (! function_exists('ff_parse_choices_string')) {
     }
 }
 
+/**
+ * Organize field definitions into tabbed sections.
+ *
+ * Groups normal fields beneath structural Tab fields. When no Tab fields
+ * exist, all fields are returned in a single untitled section.
+ *
+ * @param array $fields Field definitions.
+ *
+ * @return array Field sections suitable for meta-box rendering.
+ */
 function ff_group_fields_into_tab_sections(array $fields)
 {
     $has_tabs = false;
@@ -956,6 +1215,11 @@ function ff_group_fields_into_tab_sections(array $fields)
     return $sections;
 }
 
+/**
+ * Persist the complete Forge Fields field-group collection.
+ *
+ * @param array $groups Field groups to save.
+ */
 function ff_save_all_groups(array $groups)
 {
     update_option('ff_field_groups', $groups);

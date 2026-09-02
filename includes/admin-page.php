@@ -1,9 +1,26 @@
 <?php
+
+/**
+ * Prevent direct access to this file outside of WordPress.
+ */
 if (! defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Define the shared choices parser only when another implementation
+ * has not already been loaded.
+ */
 if (! function_exists('ff_parse_choices_string')) {
+    /**
+     * Parse a multiline choices string into a sanitized value => label map.
+     *
+     * Supports "value|label", "value:label", and plain label formats.
+     *
+     * @param mixed $raw Raw choices string.
+     *
+     * @return array Sanitized choices map.
+     */
     function ff_parse_choices_string($raw)
     {
         $out = [];
@@ -28,6 +45,16 @@ if (! function_exists('ff_parse_choices_string')) {
     }
 }
 
+/**
+ * Normalize and validate multiline field choices before saving.
+ *
+ * Converts supported choice formats into a consistent representation
+ * and returns validation errors or warnings when encountered.
+ *
+ * @param mixed $raw Raw choices string.
+ *
+ * @return array Normalized choices plus validation messages.
+ */
 function ff_normalize_choices_string($raw)
 {
 
@@ -94,6 +121,13 @@ function ff_normalize_choices_string($raw)
 
 
 
+/**
+ * Customize Forge Fields admin screens before the standard admin header.
+ *
+ * Adds Forge Fields body classes, screen-specific styles and scripts,
+ * renders the branded admin header/subheader, and supplies contextual
+ * actions such as Add Field and Save Changes.
+ */
 add_action('in_admin_header', function () {
     $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
     if (
@@ -111,6 +145,13 @@ add_action('in_admin_header', function () {
         return;
     }
 
+    /**
+     * Add Forge Fields-specific body classes on plugin admin screens.
+     *
+     * @param string $classes Existing WordPress admin body classes.
+     *
+     * @return string Updated body class string.
+     */
     add_filter('admin_body_class', function ($classes) {
         return trim($classes . ' ff-has-brandbar ff-has-subbar');
     });
@@ -286,6 +327,13 @@ add_action('in_admin_header', function () {
     ff_render_admin_subbar($subtitle, '', 'Add New', $right_html);
 });
 
+/**
+ * Render the Forge Fields branded admin header.
+ *
+ * @param string $subtitle  Optional current-screen subtitle.
+ * @param string $add_url   Optional URL for a header action button.
+ * @param string $add_label Optional label for the header action button.
+ */
 function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'Add New')
 {
     $page       = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
@@ -324,6 +372,17 @@ function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'A
 <?php
 }
 
+/**
+ * Render the Forge Fields secondary admin navigation bar.
+ *
+ * Displays the current screen title and either a contextual action button
+ * or prebuilt right-side action markup.
+ *
+ * @param string $title      Screen title.
+ * @param string $cta_url    Optional call-to-action URL.
+ * @param string $cta_label  Optional call-to-action label.
+ * @param string $right_html Optional trusted internal action markup.
+ */
 function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $right_html = '')
 { ?>
     <div class="ff-subbar" role="navigation" aria-label="Forge Fields secondary bar">
@@ -345,6 +404,9 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
     </div>
 <?php }
 
+/**
+ * Register Forge Fields admin menu and submenu pages.
+ */
 add_action('admin_menu', function () {
 
     $parent_slug = 'forge-fields';
@@ -424,8 +486,18 @@ add_filter('admin_body_class', function ($classes) {
     return $classes;
 });
 
+/**
+ * Process field-group save requests during admin initialization.
+ */
 add_action('admin_init', 'ff_handle_field_group_save');
 
+/**
+ * Validate, sanitize, and persist a Forge Fields field group.
+ *
+ * Handles capability and nonce checks, field definitions, location rules,
+ * duplicate names/titles, choice normalization, validation errors, and
+ * the final field-group save/redirect flow.
+ */
 function ff_handle_field_group_save()
 {
     if (! current_user_can('manage_options')) {
@@ -781,8 +853,17 @@ function ff_handle_field_group_save()
     exit;
 }
 
+/**
+ * Process individual and bulk field-group actions during admin initialization.
+ */
 add_action('admin_init', 'ff_handle_field_group_actions');
 
+/**
+ * Handle field-group lifecycle and bulk actions.
+ *
+ * Supports trash, restore, permanent delete, activate, deactivate,
+ * duplicate, and cache-clearing actions with nonce verification.
+ */
 function ff_handle_field_group_actions()
 {
 
@@ -1063,6 +1144,12 @@ function ff_handle_field_group_actions()
     exit;
 }
 
+/**
+ * Render the main Forge Fields field-group list screen.
+ *
+ * Provides filtering, search, sorting, counts, bulk actions, status controls,
+ * location details, and links for managing existing field groups.
+ */
 function ff_render_field_groups_list()
 {
 
@@ -1630,6 +1717,15 @@ function ff_render_field_groups_list()
 <?php
 }
 
+/**
+ * Render a single Global Fields settings row.
+ *
+ * Chooses the appropriate control based on the field type and uses the
+ * currently stored global value when available.
+ *
+ * @param array $field  Global field definition.
+ * @param array $stored Stored global field values.
+ */
 function ff_render_global_field_row(array $field, array $stored)
 {
     if (empty($field['name'])) {
@@ -1882,6 +1978,12 @@ function ff_render_global_field_row(array $field, array $stored)
 <?php
 }
 
+/**
+ * Render and process the Global Fields settings page.
+ *
+ * Loads all global field-group definitions, validates and saves submitted
+ * global values, records the last-saved timestamp, and renders each field.
+ */
 function ff_render_global_options_page()
 {
 
@@ -2222,6 +2324,10 @@ function ff_normalize_choices_textarea($raw_text)
     return [implode("\n", $out_lines), $warnings, $errors];
 }
 
+/**
+ * Replace the default plugin Delete action with the Forge Fields
+ * controlled uninstall flow.
+ */
 add_filter(
     'plugin_action_links_forge-fields/forge-fields.php',
     'ff_plugin_action_links'
@@ -2247,6 +2353,12 @@ function ff_plugin_action_links($actions)
     return $actions;
 }
 
+/**
+ * Render the Forge Fields uninstall confirmation screen.
+ *
+ * Allows administrators to choose whether plugin data should also be
+ * removed before the plugin itself is deleted.
+ */
 function ff_render_uninstall_page()
 {
 
@@ -2311,6 +2423,12 @@ function ff_render_uninstall_page()
 
 add_action('admin_init', 'ff_handle_plugin_uninstall');
 
+/**
+ * Handle the confirmed Forge Fields uninstall request.
+ *
+ * Verifies permissions and nonce, stores the user's data-removal choice,
+ * deactivates the plugin if necessary, and invokes WordPress plugin deletion.
+ */
 function ff_handle_plugin_uninstall()
 {
 
@@ -2363,6 +2481,13 @@ function ff_handle_plugin_uninstall()
     exit;
 }
 
+/**
+ * Render the Add/Edit Field Group screen.
+ *
+ * Loads an existing group when editing, restores validation errors when
+ * present, prepares location targets and field definitions, and renders
+ * the field-group editor interface.
+ */
 function ff_render_field_group_edit()
 {
 
