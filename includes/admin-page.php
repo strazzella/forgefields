@@ -799,7 +799,7 @@ function ff_handle_field_group_save()
             : '',
         'fields'          => $fields,
         'status'          => $current_status,
-        'last_saved'      => current_time('timestamp'),
+        'last_saved' => time(),
     ];
 
     $groups[$posted_group_id] = $group;
@@ -2115,7 +2115,7 @@ function ff_render_global_options_page()
         update_option('ff_global_fields', $new_values);
         update_option(
             'ff_global_fields_last_saved',
-            current_time('timestamp')
+            time()
         );
         $stored  = $new_values; // use fresh values for display
         $notices[] = [

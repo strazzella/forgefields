@@ -206,7 +206,7 @@ function ff_handle_field_group_export()
         'forge_fields_version' => $plugin_version,
         'exported_at'          => wp_date(
             'c',
-            current_time('timestamp'),
+            time(),
             wp_timezone()
         ),
         'field_groups'         => $groups,
@@ -225,7 +225,7 @@ function ff_handle_field_group_export()
         'forge-fields-%s.json',
         wp_date(
             'Y-m-d-His',
-            current_time('timestamp'),
+            time(),
             wp_timezone()
         )
     );
@@ -483,7 +483,7 @@ function ff_handle_field_group_import()
         /*
          * Imported timestamp becomes the current site import time.
          */
-        $group['last_saved'] = current_time('timestamp');
+        $group['last_saved'] = time();
 
         $already_exists = isset(
             $existing_groups[$import_id]
