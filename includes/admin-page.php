@@ -2474,6 +2474,7 @@ function ff_render_field_group_edit()
                             <input
                                 type="checkbox"
                                 id="ff-select-all-fields"
+                                class="ff-select-all-fields"
                                 aria-label="Select all fields">
                         </th>
 
@@ -2594,6 +2595,24 @@ function ff_render_field_group_edit()
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th style="width:30px;"></th>
+
+                        <th style="width:42px;" class="ff-field-check-column">
+                            <input
+                                type="checkbox"
+                                id="ff-select-all-fields-bottom"
+                                class="ff-select-all-fields"
+                                aria-label="Select all fields">
+                        </th>
+
+                        <th class="ff-bar-title">Label</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th style="width:80px;"></th>
+                    </tr>
+                </tfoot>
             </table>
 
             <div class="ff-field-bulk-actions">

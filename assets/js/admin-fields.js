@@ -667,50 +667,63 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     true,
   );
 
-  const selectAllFields = document.getElementById("ff-select-all-fields");
+  const selectAllFields = document.querySelectorAll(".ff-select-all-fields");
 
-  const bulkAction = document.getElementById("ff-field-bulk-action");
+  function syncSelectAllFields() {
+    const fieldCheckboxes = Array.from(
+      document.querySelectorAll("#ff-fields-body .ff-field-select"),
+    );
 
-  const bulkApply = document.getElementById("ff-apply-field-bulk-action");
+    const checkedCount = fieldCheckboxes.filter(function (checkbox) {
+      return checkbox.checked;
+    }).length;
 
-  /*
-   * Select/deselect every field.
-   */
-  if (selectAllFields) {
-    selectAllFields.addEventListener("change", function () {
-      document
-        .querySelectorAll("#ff-fields-body .ff-field-select")
-        .forEach(function (checkbox) {
-          checkbox.checked = selectAllFields.checked;
-        });
+    selectAllFields.forEach(function (selectAll) {
+      selectAll.checked =
+        fieldCheckboxes.length > 0 && checkedCount === fieldCheckboxes.length;
+
+      selectAll.indeterminate =
+        checkedCount > 0 && checkedCount < fieldCheckboxes.length;
     });
   }
 
   /*
-   * Keep Select All state accurate.
+   * Top or bottom Select All checkbox.
+   */
+  selectAllFields.forEach(function (selectAll) {
+    selectAll.addEventListener("change", function () {
+      const checked = selectAll.checked;
+
+      document
+        .querySelectorAll("#ff-fields-body .ff-field-select")
+        .forEach(function (checkbox) {
+          checkbox.checked = checked;
+        });
+
+      /*
+       * Keep both Select All checkboxes synchronized.
+       */
+      selectAllFields.forEach(function (otherSelectAll) {
+        otherSelectAll.checked = checked;
+        otherSelectAll.indeterminate = false;
+      });
+    });
+  });
+
+  /*
+   * Individual field checkbox changed.
    */
   document.addEventListener("change", function (e) {
     if (!e.target.classList.contains("ff-field-select")) {
       return;
     }
 
-    const checkboxes = Array.from(
-      document.querySelectorAll("#ff-fields-body .ff-field-select"),
-    );
-
-    if (!selectAllFields || !checkboxes.length) {
-      return;
-    }
-
-    const checked = checkboxes.filter(function (checkbox) {
-      return checkbox.checked;
-    });
-
-    selectAllFields.checked = checked.length === checkboxes.length;
-
-    selectAllFields.indeterminate =
-      checked.length > 0 && checked.length < checkboxes.length;
+    syncSelectAllFields();
   });
+
+  const bulkAction = document.getElementById("ff-field-bulk-action");
+
+  const bulkApply = document.getElementById("ff-apply-field-bulk-action");
 
   /*
    * Apply bulk action.

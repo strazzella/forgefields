@@ -900,7 +900,8 @@ button#ff-add-field {
 .wrap.ff-admin.ff-edit table.widefat thead th,
 .wrap.ff-admin.ff-edit table.widefat tfoot th {
   background: #f5f6f8;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
 }
 
 .wrap.ff-admin.ff-edit table.widefat.fixed.striped tbody tr > td {
@@ -1013,6 +1014,29 @@ button#ff-add-field {
 
 .wrap.ff-admin.ff-edit table.widefat thead th:last-child {
   border-top-right-radius: 12px;
+}
+
+.wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
+  border-bottom-left-radius: 12px;
+}
+
+.wrap.ff-admin.ff-edit table.widefat tfoot th:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* ---------------------------------------------------------
+   EDIT FIELD GROUP — TABLE FOOTER
+   --------------------------------------------------------- */
+
+.wrap.ff-admin.ff-edit table.widefat tbody tr:last-child > td {
+  border-bottom: 0 !important;
+}
+
+.wrap.ff-admin.ff-edit table.widefat tfoot th {
+  background: #f5f6f8;
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
 }
 
 .wrap.ff-admin.ff-edit table.widefat tfoot th:first-child {
