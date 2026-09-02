@@ -201,18 +201,82 @@ add_action('in_admin_header', function () {
     }
 
     if ($page === 'forge-fields-edit') {
-        // Buttons target the form by id="ff-edit-form"
+
+        $last_saved_html = '';
+
+        $group_id = isset($_GET['group'])
+            ? sanitize_text_field(wp_unslash($_GET['group']))
+            : '';
+
+        if ($group_id) {
+            $groups = ff_get_all_groups();
+
+            if (
+                isset($groups[$group_id]['last_saved'])
+                && $groups[$group_id]['last_saved']
+            ) {
+                $last_saved_html = sprintf(
+                    '<span class="ff-last-saved">Last saved: %s</span>',
+                    esc_html(
+                        wp_date(
+                            'F j, Y \a\t g:i:s A',
+                            (int) $groups[$group_id]['last_saved'],
+                            wp_timezone()
+                        )
+                    )
+                );
+            }
+        }
+
         $right_html = sprintf(
-            '<button type="button" class="button ff-subbar__btn" id="ff-add-field">Add Field</button>
-             <button type="submit" class="button button-primary ff-subbar__btn"
-                     form="ff-edit-form" name="ff_save_field_group" value="1">Save Changes</button>'
+            '<button type="button"
+                 class="button ff-subbar__btn"
+                 id="ff-add-field">
+            Add Field
+        </button>
+
+        <button type="submit"
+                class="button button-primary ff-subbar__btn"
+                form="ff-edit-form"
+                name="ff_save_field_group"
+                value="1">
+            Save Changes
+        </button>
+
+        %s',
+            $last_saved_html
         );
     }
 
     if ($page === 'forge-fields-global') {
+
+        $last_saved = get_option('ff_global_fields_last_saved');
+
+        $last_saved_html = '';
+
+        if ($last_saved) {
+            $last_saved_html = sprintf(
+                '<span class="ff-last-saved">Last saved: %s</span>',
+                esc_html(
+                    wp_date(
+                        'F j, Y \a\t g:i:s A',
+                        (int) $last_saved,
+                        wp_timezone()
+                    )
+                )
+            );
+        }
+
         $right_html = sprintf(
-            '<button type="submit" class="button button-primary ff-subbar__btn"
-                 form="ff-global-form" name="ff_save_global" value="1">Save Global Fields</button>'
+            '<button type="submit"
+                 class="button button-primary ff-subbar__btn"
+                 form="ff-global-form"
+                 name="ff_save_global"
+                 value="1">
+            Save Global Fields
+        </button>
+        %s',
+            $last_saved_html
         );
     }
 
@@ -376,6 +440,335 @@ add_filter('admin_body_class', function ($classes) {
  * - clear cache
  * - bulk actions
  */
+/**
+ * Handle Add/Edit Field Group saves before WordPress outputs admin HTML.
+ */
+add_action('admin_init', 'ff_handle_field_group_save');
+
+function ff_handle_field_group_save()
+{
+    if (! current_user_can('manage_options')) {
+        return;
+    }
+
+    $page = isset($_REQUEST['page'])
+        ? sanitize_key(wp_unslash($_REQUEST['page']))
+        : '';
+
+    if ($page !== 'forge-fields-edit') {
+        return;
+    }
+
+    if (! isset($_POST['ff_save_field_group'])) {
+        return;
+    }
+
+    check_admin_referer('ff_save_field_group');
+
+    $groups = ff_get_all_groups();
+
+    $posted_group_id = isset($_POST['ff_group_id'])
+        ? sanitize_text_field(wp_unslash($_POST['ff_group_id']))
+        : '';
+
+    $title = isset($_POST['ff_group_title'])
+        ? substr(
+            sanitize_text_field(
+                wp_unslash($_POST['ff_group_title'])
+            ),
+            0,
+            100
+        )
+        : '';
+
+    $location = isset($_POST['ff_location'])
+        ? sanitize_text_field(wp_unslash($_POST['ff_location']))
+        : 'page';
+
+    $location_target = '';
+
+    if ($location === 'page') {
+        $location_target = isset($_POST['ff_location_target_page'])
+            ? absint($_POST['ff_location_target_page'])
+            : 0;
+    } elseif ($location === 'post') {
+        $location_target = isset($_POST['ff_location_target_post'])
+            ? absint($_POST['ff_location_target_post'])
+            : 0;
+    }
+
+    $fields_raw = isset($_POST['ff_fields']) && is_array($_POST['ff_fields'])
+        ? $_POST['ff_fields']
+        : [];
+
+    $fields          = [];
+    $has_save_errors = false;
+    $used_names      = [];
+    $error_messages  = [];
+
+    foreach ($fields_raw as $field_raw) {
+
+        $name = isset($field_raw['name'])
+            ? substr(sanitize_key($field_raw['name']), 0, 50)
+            : '';
+
+        $label = isset($field_raw['label'])
+            ? substr(
+                sanitize_text_field(
+                    wp_unslash($field_raw['label'])
+                ),
+                0,
+                50
+            )
+            : '';
+
+        $type = isset($field_raw['type'])
+            ? sanitize_text_field(
+                wp_unslash($field_raw['type'])
+            )
+            : 'text';
+
+        /*
+         * Skip completely empty rows.
+         */
+        if ($name === '' && $label === '') {
+            continue;
+        }
+
+        /*
+         * Tabs have labels but no field names.
+         */
+        if ($type === 'tab') {
+
+            if ($label === '') {
+                $has_save_errors = true;
+                $error_messages[] = 'Each Tab field must have a label.';
+                continue;
+            }
+
+            $fields[] = [
+                'label' => $label,
+                'name'  => '',
+                'type'  => 'tab',
+            ];
+
+            continue;
+        }
+
+        /*
+         * Normal fields require labels.
+         */
+        if ($label === '') {
+
+            $has_save_errors = true;
+            $error_messages[] = 'Each field must have a label.';
+
+            $fields[] = [
+                'label' => '',
+                'name'  => $name,
+                'type'  => $type,
+            ];
+
+            continue;
+        }
+
+        /*
+         * Generate field name from label when blank.
+         */
+        if ($name === '') {
+            $name = sanitize_key(
+                strtolower(
+                    str_replace(' ', '_', $label)
+                )
+            );
+        }
+
+        if ($name === '') {
+
+            $has_save_errors = true;
+
+            $error_messages[] = sprintf(
+                'Field "%s" needs a valid name.',
+                $label
+            );
+
+            continue;
+        }
+
+        /*
+         * Prevent duplicate field names.
+         */
+        if (isset($used_names[$name])) {
+
+            $has_save_errors = true;
+
+            $error_messages[] = sprintf(
+                'Duplicate field name "%s" is not allowed.',
+                $name
+            );
+
+            continue;
+        }
+
+        $used_names[$name] = true;
+
+        /*
+         * Choice fields.
+         */
+        $choice_types = [
+            'select',
+            'checkbox',
+            'radio',
+            'button_group',
+        ];
+
+        $choices_to_save = '';
+
+        if (in_array($type, $choice_types, true)) {
+
+            $choices_raw = isset($field_raw['choices'])
+                ? trim(
+                    wp_unslash(
+                        (string) $field_raw['choices']
+                    )
+                )
+                : '';
+
+            $result = ff_normalize_choices_string($choices_raw);
+
+            if (! empty($result['errors'])) {
+
+                $has_save_errors = true;
+
+                foreach ($result['errors'] as $message) {
+                    $error_messages[] = sprintf(
+                        'Field "%s": %s',
+                        $label,
+                        $message
+                    );
+                }
+
+                $choices_to_save = $choices_raw;
+            } else {
+                $choices_to_save = $result['normalized'];
+            }
+        }
+
+        $row = [
+            'name'  => $name,
+            'label' => $label,
+            'type'  => $type,
+        ];
+
+        if (in_array($type, $choice_types, true)) {
+            $row['choices'] = $choices_to_save;
+        }
+
+        $fields[] = $row;
+    }
+
+    /*
+     * Group title required.
+     */
+    if ($title === '') {
+        $has_save_errors = true;
+        $error_messages[] = 'Please enter a Field Group title.';
+    }
+
+    /*
+     * If validation failed, return to the edit screen.
+     *
+     * We store the errors temporarily so the renderer can show them.
+     */
+    if ($has_save_errors) {
+
+        $error_key = 'ff_save_errors_' . get_current_user_id();
+
+        set_transient(
+            $error_key,
+            $error_messages,
+            60
+        );
+
+        $redirect_url = admin_url(
+            'admin.php?page=forge-fields-edit'
+        );
+
+        if ($posted_group_id !== '' && $posted_group_id !== 'new') {
+            $redirect_url = add_query_arg(
+                'group',
+                $posted_group_id,
+                $redirect_url
+            );
+        }
+
+        $redirect_url = add_query_arg(
+            'ff_notice',
+            'save_error',
+            $redirect_url
+        );
+
+        wp_safe_redirect($redirect_url);
+        exit;
+    }
+
+    /*
+     * Preserve status for existing groups.
+     */
+    $current_status = 'active';
+
+    if (
+        $posted_group_id &&
+        isset($groups[$posted_group_id]['status'])
+    ) {
+        $current_status = $groups[$posted_group_id]['status'];
+    }
+
+    /*
+     * Generate an ID for a new group.
+     */
+    if (
+        $posted_group_id === ''
+        || $posted_group_id === 'new'
+    ) {
+        $posted_group_id = ff_generate_group_id();
+    }
+
+    /*
+     * Save field group.
+     */
+    $group = [
+        'id'              => $posted_group_id,
+        'title'           => $title,
+        'location'        => $location,
+        'location_target' => $location_target
+            ? (string) $location_target
+            : '',
+        'fields'          => $fields,
+        'status'          => $current_status,
+        'last_saved'      => current_time('timestamp'),
+    ];
+
+    $groups[$posted_group_id] = $group;
+
+    ff_save_all_groups($groups);
+
+    /*
+     * POST -> Redirect -> GET
+     */
+    $redirect_url = add_query_arg(
+        [
+            'page'      => 'forge-fields-edit',
+            'group'     => $posted_group_id,
+            'ff_notice' => 'saved',
+        ],
+        admin_url('admin.php')
+    );
+
+    wp_safe_redirect($redirect_url);
+    exit;
+}
+
 add_action('admin_init', 'ff_handle_field_group_actions');
 
 function ff_handle_field_group_actions()
@@ -675,103 +1068,6 @@ function ff_render_field_groups_list()
     // 1) Load groups
     // ---------------------------------------------------------------------
     $groups = ff_get_all_groups();
-
-    // ---------------------------------------------------------------------
-    // 2) Handle actions: trash / restore / delete
-    // ---------------------------------------------------------------------
-    $action     = isset($_GET['ff_action']) ? sanitize_key(wp_unslash($_GET['ff_action'])) : '';
-    $group_id   = isset($_GET['group_id']) ? sanitize_text_field(wp_unslash($_GET['group_id'])) : '';
-    $notice_msg = ''; // will be turned into a query arg
-
-    if ($action && $group_id && isset($groups[$group_id])) {
-        $nonce = isset($_GET['_wpnonce']) ? $_GET['_wpnonce'] : '';
-
-        if (wp_verify_nonce($nonce, 'ff_group_action_' . $action . '_' . $group_id)) {
-
-            switch ($action) {
-                case 'trash':
-                    $groups[$group_id]['status'] = 'trash';
-                    ff_save_all_groups($groups);
-                    $notice_msg = 'trashed';
-                    break;
-
-                case 'restore':
-                    $groups[$group_id]['status'] = 'active';
-                    ff_save_all_groups($groups);
-                    $notice_msg = 'restored';
-                    break;
-
-                case 'delete':
-                    unset($groups[$group_id]);
-                    ff_save_all_groups($groups);
-                    $notice_msg = 'deleted';
-                    break;
-
-                case 'deactivate':
-                    $groups[$group_id]['status'] = 'inactive';
-                    ff_save_all_groups($groups);
-                    $notice_msg = 'deactivated';
-                    break;
-
-                case 'activate':
-                    $groups[$group_id]['status'] = 'active';
-                    ff_save_all_groups($groups);
-                    $notice_msg = 'activated';
-                    break;
-
-                case 'duplicate':
-                    // >>> your original logic stays exactly the same <<<
-                    $original = $groups[$group_id];
-
-                    // New ID for the copy.
-                    $new_id = ff_generate_group_id();
-
-                    // Clone the group and adjust.
-                    $copy           = $original;
-                    $copy['id']     = $new_id;
-                    $copy['status'] = 'active';
-
-                    $base_title    = isset($original['title']) ? $original['title'] : '';
-                    $copy['title'] = $base_title !== ''
-                        ? $base_title . ' (Copy)'
-                        : '(no title) (Copy)';
-
-                    // Save under the new key.
-                    $groups[$new_id] = $copy;
-                    ff_save_all_groups($groups);
-
-                    $notice_msg = 'duplicated';
-                    break;
-
-                case 'clear_cache':
-                    wp_cache_delete('ff_field_groups', 'options');
-                    $notice_msg = 'cache_cleared';
-                    break;
-            }
-
-            // Redirect back to list, carrying notice code & current view
-            $redirect_url = remove_query_arg(['ff_action', 'group_id', '_wpnonce'], admin_url('admin.php?page=forge-fields'));
-
-            if (isset($_GET['ff_view'])) {
-                $redirect_url = add_query_arg(
-                    'ff_view',
-                    sanitize_key(wp_unslash($_GET['ff_view'])),
-                    $redirect_url
-                );
-            }
-
-            if ($notice_msg) {
-                $redirect_url = add_query_arg('ff_notice', $notice_msg, $redirect_url);
-            }
-
-            wp_safe_redirect($redirect_url);
-            exit;
-        }
-    }
-
-    // Re-load after any modifications (mainly useful if something changed).
-    $groups = ff_get_all_groups();
-
     // ---------------------------------------------------------------------
     // 3) Determine current view: all | active | trash
     //     - "All" = everything that is NOT in trash
@@ -1764,6 +2060,10 @@ function ff_render_global_options_page()
         }
 
         update_option('ff_global_fields', $new_values);
+        update_option(
+            'ff_global_fields_last_saved',
+            current_time('timestamp')
+        );
         $stored  = $new_values; // use fresh values for display
         $notices[] = [
             'type'    => 'updated',
@@ -1795,7 +2095,6 @@ function ff_render_global_options_page()
                 <p><?php echo esc_html($notice['message']); ?></p>
             </div>
         <?php endforeach; ?>
-
 
         <?php if (empty($global_groups)) : ?>
             <p>No global field groups found. Create a field group with
@@ -2152,6 +2451,39 @@ function ff_render_field_group_edit()
     $is_new   = true;
     $notices  = [];
 
+    if (isset($_GET['ff_notice'])) {
+
+        $notice_code = sanitize_key(
+            wp_unslash($_GET['ff_notice'])
+        );
+
+        if ($notice_code === 'saved') {
+            $notices[] = [
+                'type'    => 'updated',
+                'message' => 'Field group saved.',
+            ];
+        }
+
+        if ($notice_code === 'save_error') {
+
+            $error_key = 'ff_save_errors_' . get_current_user_id();
+
+            $saved_errors = get_transient($error_key);
+
+            if (is_array($saved_errors)) {
+
+                foreach ($saved_errors as $message) {
+                    $notices[] = [
+                        'type'    => 'error',
+                        'message' => $message,
+                    ];
+                }
+            }
+
+            delete_transient($error_key);
+        }
+    }
+
     // Base empty group for "Add New"
     $group = [
         'id'       => '',
@@ -2168,247 +2500,7 @@ function ff_render_field_group_edit()
         $is_new  = false;
     }
 
-    // Handle SAVE
-    if (isset($_POST['ff_save_field_group'])) {
 
-        check_admin_referer('ff_save_field_group');
-
-        $posted_group_id = isset($_POST['ff_group_id'])
-            ? sanitize_text_field(wp_unslash($_POST['ff_group_id']))
-            : '';
-
-        $title = isset($_POST['ff_group_title'])
-            ? substr(sanitize_text_field(wp_unslash($_POST['ff_group_title'])), 0, 100)
-            : '';
-
-        $location = isset($_POST['ff_location'])
-            ? sanitize_text_field(wp_unslash($_POST['ff_location']))
-            : 'page';
-
-        $location_target = '';
-
-        if ($location === 'page') {
-            $location_target = isset($_POST['ff_location_target_page'])
-                ? absint($_POST['ff_location_target_page'])
-                : 0;
-        } elseif ($location === 'post') {
-            $location_target = isset($_POST['ff_location_target_post'])
-                ? absint($_POST['ff_location_target_post'])
-                : 0;
-        }
-
-        $fields_raw = isset($_POST['ff_fields']) && is_array($_POST['ff_fields'])
-            ? $_POST['ff_fields']
-            : [];
-
-        $fields = [];
-
-        $has_save_errors = false;
-        $used_names = [];
-
-        foreach ($fields_raw as $field_raw) {
-            $name  = isset($field_raw['name'])  ? substr(sanitize_key($field_raw['name']), 0, 50) : '';
-            $label = isset($field_raw['label']) ? substr(sanitize_text_field($field_raw['label']), 0, 50) : '';
-            $type  = isset($field_raw['type'])  ? sanitize_text_field($field_raw['type'])  : 'text';
-
-            // Skip completely empty rows
-            if ($name === '' && $label === '') {
-                continue;
-            }
-
-            // Tabs are layout-only markers. They require a label, but never a name.
-            if ($type === 'tab') {
-                if ($label === '') {
-                    $notices[] = [
-                        'type'    => 'error',
-                        'message' => 'Each Tab field must have a label.',
-                    ];
-                    continue;
-                }
-
-                $fields[] = [
-                    'label' => $label,
-                    'name'  => '',
-                    'type'  => 'tab',
-                ];
-                continue;
-            }
-
-            // Normal fields must have a label
-            if ($label === '') {
-                $notices[] = [
-                    'type'    => 'error',
-                    'message' => 'Each field must have a label.',
-                ];
-                $has_save_errors = true;
-
-                $fields[] = [
-                    'label' => '',
-                    'name'  => $name,
-                    'type'  => $type,
-                ];
-
-                continue;
-            }
-
-            // If name blank but label set, derive slug from label
-            if ($name === '') {
-                $name = sanitize_key(strtolower(str_replace(' ', '_', $label)));
-            }
-
-            // If name is still blank after sanitizing, block save
-            if ($name === '') {
-                $notices[] = [
-                    'type'    => 'error',
-                    'message' => sprintf('Field "%s" needs a valid name.', $label),
-                ];
-                $has_save_errors = true;
-
-                $fields[] = [
-                    'label' => $label,
-                    'name'  => '',
-                    'type'  => $type,
-                ];
-
-                continue;
-            }
-
-            if (isset($used_names[$name])) {
-                $notices[] = [
-                    'type'    => 'error',
-                    'message' => sprintf('Duplicate field name "%s" is not allowed.', $name),
-                ];
-                $has_save_errors = true;
-
-                $fields[] = [
-                    'label' => $label,
-                    'name'  => $name,
-                    'type'  => $type,
-                ];
-
-                continue;
-            }
-
-            $used_names[$name] = true;
-
-            // Capture the raw choices textarea (only relevant types will use it)
-            $choice_types = ['select', 'checkbox', 'radio', 'button_group', 'true_false'];
-            $choices_raw  = '';
-            if (in_array($type, $choice_types, true)) {
-                $choices_raw = isset($field_raw['choices'])
-                    ? trim(wp_unslash((string) $field_raw['choices']))
-                    : '';
-            }
-
-
-            // Normalize + validate ONLY for real choice lists (true_false ignores choices)
-            $choices_to_save = $choices_raw;
-
-            if (in_array($type, ['select', 'checkbox', 'radio', 'button_group'], true)) {
-
-                $result = ff_normalize_choices_string($choices_raw);
-
-                if (! empty($result['errors'])) {
-                    $field_label_for_error = $label !== '' ? $label : $name;
-
-                    foreach ($result['errors'] as $msg) {
-                        $notices[] = [
-                            'type'    => 'error',
-                            'message' => sprintf('Field "%s": %s', $field_label_for_error, $msg),
-                        ];
-                    }
-
-                    // Keep raw so user can fix it (we also block saving later because $notices not empty)
-                    $choices_to_save = $choices_raw;
-                } else {
-                    // Save normalized canonical "value : Label"
-                    $choices_to_save = $result['normalized'];
-
-                    // One warning per field if we had to clean anything
-                    if (! empty($result['warnings'])) {
-                        $field_label_for_error = $label !== '' ? $label : $name;
-
-                        $notices[] = [
-                            'type'    => 'warning',
-                            'message' => sprintf(
-                                'Field "%s": choices were cleaned and normalized on save.',
-                                $field_label_for_error
-                            ),
-                        ];
-                    }
-                }
-            }
-
-            // Build row
-            $row = [
-                'name'  => $name,
-                'label' => $label,
-                'type'  => $type,
-            ];
-
-            // Store choices only for types that need them (prevents junk being stored on non-choice types)
-            if (in_array($type, ['select', 'checkbox', 'radio', 'button_group'], true)) {
-                $row['choices'] = $choices_to_save;
-            }
-
-            $fields[] = $row;
-        }
-
-
-        // Basic validation: title required
-        if ($title === '') {
-            $notices[] = [
-                'type'    => 'error',
-                'message' => 'Please enter a Field Group title.',
-            ];
-            $has_save_errors = true;
-        }
-
-        if (! $has_save_errors) {
-
-            // Determine status: preserve existing if editing, else "active".
-            $current_status = 'active';
-            if ($posted_group_id && isset($groups[$posted_group_id]['status'])) {
-                $current_status = $groups[$posted_group_id]['status'];
-            }
-
-            // New group? Generate ID.
-            if ($posted_group_id === '' || $posted_group_id === 'new') {
-                $posted_group_id = ff_generate_group_id();
-                $is_new          = false;
-            }
-
-            $group = [
-                'id'       => $posted_group_id,
-                'title'    => $title,
-                'location' => $location,
-                'location_target' => $location_target ? (string) $location_target : '',
-                'fields'   => $fields,
-                'status'   => $current_status,
-            ];
-
-            $groups[$posted_group_id] = $group;
-            ff_save_all_groups($groups);
-
-            $group_id = $posted_group_id;
-
-            $notices[] = [
-                'type'    => 'updated',
-                'message' => 'Field group saved.',
-            ];
-        } else {
-            // Keep posted values in the $group variable so the form is repopulated
-            $group = [
-                'id'       => $posted_group_id,
-                'title'    => $title,
-                'location' => $location,
-                'location_target' => $location_target ? (string) $location_target : '',
-                'fields'   => $fields,
-                'status'   => isset($group['status']) ? $group['status'] : 'active',
-            ];
-            $is_new = ($posted_group_id === '' || $posted_group_id === 'new');
-        }
-    }
 
     // Final values for the form
     $title           = isset($group['title']) ? $group['title'] : '';

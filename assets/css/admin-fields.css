@@ -1543,6 +1543,29 @@ h1.ff-subbar__title {
   color: #fff;
 }
 
+.ff-confirm__actions .ff-button-danger,
+.ff-confirm__actions .ff-button-danger.button {
+  background: var(--ff-primary);
+  border-color: var(--ff-primary);
+  color: #fff;
+}
+
+.ff-confirm__actions .ff-button-danger:hover,
+.ff-confirm__actions .ff-button-danger:focus,
+.ff-confirm__actions .ff-button-danger.button:hover,
+.ff-confirm__actions .ff-button-danger.button:focus {
+  background: var(--ff-primary-hover);
+  border-color: var(--ff-primary-hover);
+  color: #fff;
+}
+
+.ff-confirm__actions .ff-button-danger:active,
+.ff-confirm__actions .ff-button-danger.button:active {
+  background: var(--ff-primary-active);
+  border-color: var(--ff-primary-active);
+  color: #fff;
+}
+
 .ff-brandbar__title {
   font-family: inter, arial, sans-serif;
   color: inherit;
@@ -2356,4 +2379,14 @@ input#_ff_range_slider {
   height: auto;
   object-fit: contain;
   display: block;
+}
+
+.ff-subbar__actions .ff-last-saved {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  white-space: nowrap;
 }
