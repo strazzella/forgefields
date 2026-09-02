@@ -13,7 +13,9 @@
  * - Font families.
  * - Shared font sizes.
  */
-.ff-admin {
+.ff-admin,
+.ff-brandbar,
+.ff-subbar {
   /**
    * Core background and surface colors.
    */
@@ -1039,8 +1041,12 @@ button#ff-add-field {
 
 /**
  * Primary button appearance.
+ *
+ * Applies Forge Fields branding to primary actions both inside
+ * plugin content and within the secondary admin bar.
  */
-.wrap.ff-admin .button-primary {
+.wrap.ff-admin .button-primary,
+.ff-subbar .button-primary {
   background: var(--ff-primary);
   border: 1px solid var(--ff-primary);
   color: #ffffff;
@@ -1049,17 +1055,21 @@ button#ff-add-field {
 /**
  * Primary button hover state.
  */
-.wrap.ff-admin .button-primary:hover {
+.wrap.ff-admin .button-primary:hover,
+.ff-subbar .button-primary:hover {
   background: var(--ff-primary-hover);
   border-color: var(--ff-primary-hover);
+  color: #ffffff;
 }
 
 /**
  * Primary button active color state.
  */
-.wrap.ff-admin .button-primary:active {
+.wrap.ff-admin .button-primary:active,
+.ff-subbar .button-primary:active {
   background: var(--ff-primary-active);
   border-color: var(--ff-primary-active);
+  color: #ffffff;
 }
 
 /**
