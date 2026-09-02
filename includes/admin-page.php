@@ -2469,6 +2469,14 @@ function ff_render_field_group_edit()
                 <thead>
                     <tr>
                         <th style="width:30px;"></th>
+
+                        <th style="width:42px;" class="ff-field-check-column">
+                            <input
+                                type="checkbox"
+                                id="ff-select-all-fields"
+                                aria-label="Select all fields">
+                        </th>
+
                         <th class="ff-bar-title">Label</th>
                         <th>Name</th>
                         <th>Type</th>
@@ -2500,6 +2508,13 @@ function ff_render_field_group_edit()
                         ?>
                         <tr class="ff-field-row" data-index="<?php echo esc_attr($index); ?>">
                             <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
+
+                            <td class="ff-field-check-column">
+                                <input
+                                    type="checkbox"
+                                    class="ff-field-select"
+                                    aria-label="Select field">
+                            </td>
 
                             <td>
                                 <input type="text"
@@ -2567,7 +2582,7 @@ function ff_render_field_group_edit()
                             data-ff-settings
                             <?php echo $is_choice ? '' : 'style="display:none"'; ?>>
 
-                            <td colspan="5">
+                            <td colspan="6">
                                 <div class="ff-field-setting ff-setting-choices">
                                     <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
                                     <textarea name="ff_fields[<?php echo $index; ?>][choices]" rows="3" class="large-text" placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea($choices_raw); ?></textarea>
@@ -2581,9 +2596,34 @@ function ff_render_field_group_edit()
                 </tbody>
             </table>
 
+            <div class="ff-field-bulk-actions">
+
+                <div class="ff-select-wrap">
+                    <select id="ff-field-bulk-action">
+                        <option value="">Bulk actions</option>
+                        <option value="remove">Remove selected</option>
+                    </select>
+                </div>
+
+                <button
+                    type="button"
+                    class="button"
+                    id="ff-apply-field-bulk-action">
+                    Apply
+                </button>
+
+            </div>
+
             <script type="text/html" id="ff-field-row-template">
                 <tr class="ff-field-row" data-index="__INDEX__">
                     <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
+
+                    <td class="ff-field-check-column">
+                        <input
+                            type="checkbox"
+                            class="ff-field-select"
+                            aria-label="Select field">
+                    </td>
 
                     <td>
                         <input type="text"
@@ -2643,7 +2683,7 @@ function ff_render_field_group_edit()
                 </tr>
 
                 <tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
-                    <td colspan="5">
+                    <td colspan="6">
                         <div class="ff-field-setting ff-setting-choices">
                             <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
                             <textarea name="ff_fields[__INDEX__][choices]"
@@ -2663,7 +2703,9 @@ function ff_render_field_group_edit()
         <div id="ff-confirm" class="ff-confirm is-hidden" role="dialog" aria-modal="true" aria-labelledby="ff-confirm-title" aria-describedby="ff-confirm-desc">
             <div class="ff-confirm__overlay" data-ff-close></div>
             <div class="ff-confirm__dialog" role="document" tabindex="-1">
-                <h2 id="ff-confirm-title" class="ff-confirm__title">Remove field?</h2>
+                <h2 id="ff-confirm-title" class="ff-confirm__title">
+                    Remove field?
+                </h2>
                 <p id="ff-confirm-desc" class="ff-confirm__desc">
                     This will remove <strong class="ff-confirm__field-name">this field</strong> from the group.
                 </p>

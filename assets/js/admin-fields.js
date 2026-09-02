@@ -427,6 +427,7 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
   const nameEl = modal.querySelector(".ff-confirm__field-name");
 
   let pendingRow = null;
+  let pendingRows = [];
   let lastFocus = null;
 
   function openConfirm(row) {
@@ -442,13 +443,47 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     document.addEventListener("keydown", onKeydown, true);
   }
 
+  function openBulkConfirm(rows) {
+    pendingRow = null;
+    pendingRows = Array.from(rows);
+    lastFocus = document.activeElement;
+
+    const titleEl = modal.querySelector("#ff-confirm-title");
+    const descEl = modal.querySelector("#ff-confirm-desc");
+
+    titleEl.textContent = "Remove fields?";
+
+    descEl.innerHTML =
+      "This will remove <strong>" +
+      pendingRows.length +
+      "</strong> selected field" +
+      (pendingRows.length === 1 ? "" : "s") +
+      " from the group.";
+
+    modal.classList.remove("is-hidden");
+    dlg.focus();
+
+    document.addEventListener("keydown", onKeydown, true);
+  }
+
   function closeConfirm() {
     modal.classList.add("is-hidden");
     document.removeEventListener("keydown", onKeydown, true);
+
     if (lastFocus && typeof lastFocus.focus === "function") {
       lastFocus.focus();
     }
+
     pendingRow = null;
+    pendingRows = [];
+
+    const titleEl = modal.querySelector("#ff-confirm-title");
+    const descEl = modal.querySelector("#ff-confirm-desc");
+
+    titleEl.textContent = "Remove field?";
+
+    descEl.innerHTML =
+      'This will remove <strong class="ff-confirm__field-name">this field</strong> from the group.';
   }
 
   function onKeydown(e) {
@@ -492,40 +527,118 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     });
   }
 
+  function submitFieldGroupForm() {
+    const form = document.getElementById("ff-edit-form");
+
+    if (!form) return;
+
+    let saveInput = form.querySelector('input[name="ff_save_field_group"]');
+
+    if (!saveInput) {
+      saveInput = document.createElement("input");
+      saveInput.type = "hidden";
+      saveInput.name = "ff_save_field_group";
+      saveInput.value = "1";
+
+      form.appendChild(saveInput);
+    }
+
+    form.submit();
+  }
+
   btnYes.addEventListener("click", function () {
+    const tbody = document.querySelector("#ff-fields-body");
+
+    if (!tbody) {
+      closeConfirm();
+      return;
+    }
+
+    /*
+     * Bulk removal
+     */
+    if (pendingRows.length) {
+      pendingRows.forEach(function (row) {
+        /*
+         * Also remove the settings row belonging to this field,
+         * if one exists.
+         */
+        const index = row.dataset.index;
+
+        const settingsRow = tbody.querySelector(
+          '.ff-field-settings[data-index="' + index + '"]',
+        );
+
+        if (settingsRow) {
+          settingsRow.remove();
+        }
+
+        row.remove();
+      });
+
+      /*
+       * Forge Fields always keeps at least one editable row.
+       */
+      if (!tbody.querySelector(".ff-field-row")) {
+        const addBtn = document.getElementById("ff-add-field");
+
+        if (addBtn) {
+          addBtn.click();
+        }
+      }
+
+      reindexFieldRows();
+
+      submitFieldGroupForm();
+      closeConfirm();
+
+      return;
+    }
+
+    /*
+     * Normal single-field removal
+     */
     if (!pendingRow) {
       closeConfirm();
       return;
     }
 
-    const tbody = document.querySelector("#ff-fields-body");
-    const rows = tbody ? tbody.querySelectorAll(".ff-field-row") : [];
+    const rows = tbody.querySelectorAll(".ff-field-row");
+
+    const index = pendingRow.dataset.index;
+
+    const settingsRow = tbody.querySelector(
+      '.ff-field-settings[data-index="' + index + '"]',
+    );
 
     if (rows.length === 1) {
-      pendingRow.querySelectorAll("input").forEach((input) => {
-        input.value = "";
+      pendingRow.querySelectorAll("input").forEach(function (input) {
+        if (input.type !== "checkbox") {
+          input.value = "";
+        }
       });
+
       const typeSelect = pendingRow.querySelector(".ff-field-type");
-      if (typeSelect) typeSelect.selectedIndex = 0;
+
+      if (typeSelect) {
+        typeSelect.selectedIndex = 0;
+      }
+
+      if (settingsRow) {
+        settingsRow.style.display = "none";
+        settingsRow.classList.add("is-hidden");
+      }
     } else {
-      pendingRow.parentNode.removeChild(pendingRow);
+      if (settingsRow) {
+        settingsRow.remove();
+      }
+
+      pendingRow.remove();
     }
 
     reindexFieldRows();
 
-    const form = document.getElementById("ff-edit-form");
-    if (form) {
-      let saveInput = form.querySelector('input[name="ff_save_field_group"]');
-      if (!saveInput) {
-        saveInput = document.createElement("input");
-        saveInput.type = "hidden";
-        saveInput.name = "ff_save_field_group";
-        saveInput.value = "1";
-        form.appendChild(saveInput);
-      }
-      form.submit();
-    }
-
+    submitFieldGroupForm();
     closeConfirm();
   });
 
@@ -553,6 +666,76 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     },
     true,
   );
+
+  const selectAllFields = document.getElementById("ff-select-all-fields");
+
+  const bulkAction = document.getElementById("ff-field-bulk-action");
+
+  const bulkApply = document.getElementById("ff-apply-field-bulk-action");
+
+  /*
+   * Select/deselect every field.
+   */
+  if (selectAllFields) {
+    selectAllFields.addEventListener("change", function () {
+      document
+        .querySelectorAll("#ff-fields-body .ff-field-select")
+        .forEach(function (checkbox) {
+          checkbox.checked = selectAllFields.checked;
+        });
+    });
+  }
+
+  /*
+   * Keep Select All state accurate.
+   */
+  document.addEventListener("change", function (e) {
+    if (!e.target.classList.contains("ff-field-select")) {
+      return;
+    }
+
+    const checkboxes = Array.from(
+      document.querySelectorAll("#ff-fields-body .ff-field-select"),
+    );
+
+    if (!selectAllFields || !checkboxes.length) {
+      return;
+    }
+
+    const checked = checkboxes.filter(function (checkbox) {
+      return checkbox.checked;
+    });
+
+    selectAllFields.checked = checked.length === checkboxes.length;
+
+    selectAllFields.indeterminate =
+      checked.length > 0 && checked.length < checkboxes.length;
+  });
+
+  /*
+   * Apply bulk action.
+   */
+  if (bulkApply) {
+    bulkApply.addEventListener("click", function () {
+      if (!bulkAction || bulkAction.value !== "remove") {
+        return;
+      }
+
+      const selectedRows = Array.from(
+        document.querySelectorAll("#ff-fields-body .ff-field-select:checked"),
+      )
+        .map(function (checkbox) {
+          return checkbox.closest(".ff-field-row");
+        })
+        .filter(Boolean);
+
+      if (!selectedRows.length) {
+        return;
+      }
+
+      openBulkConfirm(selectedRows);
+    });
+  }
 })();
 
 document.addEventListener("click", function (e) {

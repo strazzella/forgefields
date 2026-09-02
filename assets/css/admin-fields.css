@@ -2833,3 +2833,36 @@ input#_ff_range_slider {
   max-width: 100%;
   box-sizing: border-box;
 }
+
+/* Field row selection */
+.wrap.ff-admin.ff-edit .ff-field-check-column {
+  width: 42px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Bulk field actions */
+.wrap.ff-admin.ff-edit .ff-field-bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-bulk-actions .ff-select-wrap {
+  width: 190px;
+  min-width: 190px;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-bulk-actions .ff-select-wrap select {
+  width: 100%;
+}
+
+.wrap.ff-admin.ff-edit #ff-apply-field-bulk-action {
+  margin: 0;
+}
