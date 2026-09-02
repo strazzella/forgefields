@@ -267,11 +267,17 @@ add_action('in_admin_header', function () {
     }
 
     if ($page === 'forge-fields-settings') {
+
+        $version_html = sprintf(
+            '<span class="ff-settings-version">Forge Fields - Version %s</span>',
+            esc_html(FF_VERSION)
+        );
+
         ff_render_admin_subbar(
             $subtitle,
             '',
             '',
-            ''
+            $version_html
         );
 
         return;
