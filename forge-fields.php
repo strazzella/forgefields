@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Forge Fields
  * Description: Lightweight custom fields framework.
- * Version:     0.1.2
+ * Version:     0.1.3
  * Author:      Forge Plugins
  * License:     GPL2+
  */
@@ -24,7 +24,7 @@ if (! defined('ABSPATH')) {
  * FF_PATH provides the absolute filesystem path to the plugin.
  * FF_URL provides the public URL to the plugin directory.
  */
-define('FF_VERSION', '0.1.2');
+define('FF_VERSION', '0.1.3');
 
 define('FF_PATH', plugin_dir_path(__FILE__));
 
