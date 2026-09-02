@@ -109,6 +109,7 @@ body.ff-has-brandbar {
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select,
 .wrap.ff-admin.ff-global .ff-select-wrap select,
+.wrap.ff-admin.ff-settings .ff-select-wrap select,
 .wrap.ff-admin.ff-edit select#ff_location {
   appearance: none;
   padding: 8px 34px 8px 10px;
@@ -132,7 +133,8 @@ body.ff-has-brandbar {
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap::after,
-.wrap.ff-admin.ff-global .ff-select-wrap::after {
+.wrap.ff-admin.ff-global .ff-select-wrap::after,
+.wrap.ff-admin.ff-settings .ff-select-wrap::after {
   content: "▾";
   position: absolute;
   right: 10px;
@@ -711,7 +713,8 @@ button#ff-add-field {
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap,
-.wrap.ff-admin.ff-global .ff-select-wrap {
+.wrap.ff-admin.ff-global .ff-select-wrap,
+.wrap.ff-admin.ff-settings .ff-select-wrap {
   position: relative;
   display: inline-block;
   min-width: 180px;
@@ -719,6 +722,7 @@ button#ff-add-field {
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-global .ff-select-wrap select:focus,
+.wrap.ff-admin.ff-settings .ff-select-wrap select:focus,
 .wrap.ff-admin.ff-edit select#ff_location:focus {
   outline: none;
   border-color: var(--ff-primary);
@@ -728,7 +732,7 @@ button#ff-add-field {
       0 2px 6px rgba(16, 24, 40, 0.08),
       0 1px 2px rgba(16, 24, 40, 0.06)
     ),
-    0 0 0 2px rgba(29, 109, 246, 0.2);
+    0 0 0 2px rgba(54, 54, 55, 0.2);
 }
 
 .wrap.ff-admin.ff-list .ff-search-input {
@@ -835,6 +839,7 @@ button#ff-add-field {
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-global .ff-select-wrap select:hover,
+.wrap.ff-admin.ff-settings .ff-select-wrap select:hover,
 .wrap.ff-admin.ff-edit select#ff_location:hover {
   border-color: var(--ff-border-strong);
   box-shadow: var(
@@ -845,7 +850,8 @@ button#ff-add-field {
 }
 
 .wrap.ff-admin.ff-edit .ff-select-wrap select:disabled,
-.wrap.ff-admin.ff-global .ff-select-wrap select:disabled {
+.wrap.ff-admin.ff-global .ff-select-wrap select:disabled,
+.wrap.ff-admin.ff-settings .ff-select-wrap select:disabled {
   background: #f8fafc;
   border-color: #e5e7eb;
   box-shadow: none;
@@ -2402,4 +2408,398 @@ input#_ff_range_slider {
 
 .ff-settings-field select {
   width: 100%;
+}
+
+.ff-settings-field textarea {
+  width: 100%;
+  max-width: 700px;
+  min-height: 130px;
+  resize: vertical;
+}
+
+/* =========================================================
+   FORGE FIELDS — PAGE / POST METABOX
+   ========================================================= */
+
+#poststuff .postbox .inside .ff-mb {
+  --ff-metabox-label-w: 180px;
+  --ff-metabox-field-w: 720px;
+
+  margin: 0;
+  padding: 0;
+  font-family: var(--ff-f-ui);
+}
+
+/* ---------------------------------------------------------
+   REMOVE OLD WORDPRESS TABLE APPEARANCE
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .form-table {
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: initial;
+  border-spacing: 0;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table tbody {
+  display: block;
+}
+
+/* ---------------------------------------------------------
+   FIELD ROWS
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .form-table tr {
+  display: grid;
+  grid-template-columns: var(--ff-metabox-label-w) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 28px;
+
+  width: 100%;
+  padding: 16px 12px;
+
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+
+  transition: background-color 0.15s ease;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table tr:first-child {
+  padding-top: 14px;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table tr:last-child {
+  border-bottom: 0;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table tr:hover {
+  background: #f8fafc;
+}
+
+/* Undo WordPress table-cell behavior */
+#poststuff .postbox .inside .ff-mb .form-table th,
+#poststuff .postbox .inside .ff-mb .form-table td {
+  display: block;
+
+  width: auto;
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+  background: transparent !important;
+  vertical-align: middle;
+}
+
+/* ---------------------------------------------------------
+   LABELS
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .form-table th {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1f2937;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table th label {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------
+   FIELD COLUMN
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .form-table td {
+  width: 100%;
+  max-width: var(--ff-metabox-field-w);
+}
+
+/* ---------------------------------------------------------
+   TEXT INPUTS
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb input[type="text"],
+#poststuff .postbox .inside .ff-mb input[type="email"],
+#poststuff .postbox .inside .ff-mb input[type="url"],
+#poststuff .postbox .inside .ff-mb input[type="password"],
+#poststuff .postbox .inside .ff-mb input[type="number"] {
+  display: block;
+
+  width: 100% !important;
+  max-width: none !important;
+  height: 40px;
+
+  margin: 0;
+  padding: 0 12px;
+
+  border: 1px solid #c7ccd6;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #1f2937;
+
+  font-size: 13px;
+  line-height: 38px;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* ---------------------------------------------------------
+   TEXTAREA
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb textarea {
+  display: block;
+
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 110px;
+
+  margin: 0;
+  padding: 10px 12px;
+
+  border: 1px solid #c7ccd6;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #1f2937;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  resize: vertical;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* ---------------------------------------------------------
+   SELECT
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .ff-select-wrap {
+  position: relative;
+  display: inline-block;
+
+  width: 360px !important;
+  max-width: 100% !important;
+}
+
+#poststuff .postbox .inside .ff-mb .ff-select-wrap select {
+  display: block;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  width: 100% !important;
+  max-width: 360px !important;
+  height: 40px;
+
+  margin: 0;
+  padding: 0 40px 0 12px;
+
+  border: 1px solid #c7ccd6;
+  border-radius: 8px;
+
+  background: #fff !important;
+  background-image: none !important;
+
+  color: #1f2937;
+
+  font-size: 13px;
+  line-height: 38px;
+
+  cursor: pointer;
+
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+#poststuff .postbox .inside .ff-mb .ff-select-wrap::after {
+  content: "▾";
+
+  position: absolute;
+  z-index: 2;
+
+  top: 50%;
+  right: 12px;
+
+  transform: translateY(-50%);
+
+  color: #6b7280;
+  font-size: 10px;
+  line-height: 1;
+
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------
+   FOCUS / HOVER
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb input:hover,
+#poststuff .postbox .inside .ff-mb textarea:hover,
+#poststuff .postbox .inside .ff-mb .ff-select-wrap select:hover {
+  border-color: #aeb4bf;
+}
+
+#poststuff .postbox .inside .ff-mb input:focus,
+#poststuff .postbox .inside .ff-mb textarea:focus,
+#poststuff .postbox .inside .ff-mb .ff-select-wrap select:focus {
+  outline: none;
+
+  border-color: var(--ff-primary);
+
+  box-shadow:
+    0 1px 2px rgba(16, 24, 40, 0.05),
+    0 0 0 2px rgba(54, 54, 55, 0.18);
+}
+
+/* ---------------------------------------------------------
+   CHECKBOX / RADIO
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb {
+  --wp-admin-theme-color: #363637;
+  --wp-admin-theme-color-darker-10: #242425;
+  --wp-admin-theme-color-darker-20: #18181a;
+}
+
+#poststuff .postbox .inside .ff-mb input[type="checkbox"],
+#poststuff .postbox .inside .ff-mb input[type="radio"] {
+  width: 18px;
+  height: 18px;
+
+  margin: 0 8px 0 0;
+
+  border-color: #9ca3af;
+
+  box-shadow: none;
+
+  cursor: pointer;
+}
+
+#poststuff .postbox .inside .ff-mb input[type="checkbox"]:focus,
+#poststuff .postbox .inside .ff-mb input[type="radio"]:focus {
+  border-color: var(--ff-primary);
+
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
+}
+
+#poststuff .postbox .inside .ff-mb label:has(input[type="checkbox"]),
+#poststuff .postbox .inside .ff-mb label:has(input[type="radio"]) {
+  display: inline-flex !important;
+  align-items: center;
+
+  min-height: 32px;
+
+  margin: 0 18px 0 0 !important;
+
+  font-size: 13px;
+  line-height: 1.4;
+  color: #1f2937;
+
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------
+   MEDIA FIELDS
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .ff-media-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  width: 100%;
+}
+
+/* ---------------------------------------------------------
+   RANGE
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .ff-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+}
+
+/* ---------------------------------------------------------
+   WYSIWYG
+   --------------------------------------------------------- */
+
+#poststuff .postbox .inside .ff-mb .wp-editor-wrap {
+  width: 100%;
+  max-width: none;
+
+  margin: 0;
+
+  border: 1px solid #c7ccd6;
+  border-radius: 8px;
+
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 782px) {
+  #poststuff .postbox .inside .ff-mb .form-table tr {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+
+    padding: 14px 10px;
+  }
+
+  #poststuff .postbox .inside .ff-mb .form-table td {
+    max-width: none;
+  }
+}
+
+/* Prevent Forge metabox rows/fields from overflowing the postbox */
+#poststuff .postbox .inside .ff-mb,
+#poststuff .postbox .inside .ff-mb .form-table,
+#poststuff .postbox .inside .ff-mb .form-table tbody,
+#poststuff .postbox .inside .ff-mb .form-table tr,
+#poststuff .postbox .inside .ff-mb .form-table th,
+#poststuff .postbox .inside .ff-mb .form-table td {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table tr {
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+}
+
+#poststuff .postbox .inside .ff-mb .form-table td {
+  min-width: 0;
+  overflow: hidden;
+}
+
+#poststuff .postbox .inside .ff-mb input,
+#poststuff .postbox .inside .ff-mb textarea,
+#poststuff .postbox .inside .ff-mb select,
+#poststuff .postbox .inside .ff-mb .ff-select-wrap,
+#poststuff .postbox .inside .ff-mb .wp-editor-wrap,
+#poststuff .postbox .inside .ff-mb .ff-range-wrap,
+#poststuff .postbox .inside .ff-mb .ff-media-wrap {
+  max-width: 100%;
+  box-sizing: border-box;
 }

@@ -51,6 +51,24 @@ function ff_render_settings_page()
             </div>
         <?php endif; ?>
 
+        <?php if ($notice === 'feedback_sent') : ?>
+            <div class="notice notice-success inline is-dismissible">
+                <p>Your Forge Fields feedback was sent successfully.</p>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($notice === 'feedback_failed') : ?>
+            <div class="notice notice-error inline is-dismissible">
+                <p>Forge Fields could not send your feedback. Please try again later.</p>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($notice === 'feedback_empty') : ?>
+            <div class="notice notice-error inline is-dismissible">
+                <p>Please enter a feedback message before submitting.</p>
+            </div>
+        <?php endif; ?>
+
         <div class="ff-settings-grid">
 
             <div class="ff-settings-card">
@@ -147,6 +165,69 @@ function ff_render_settings_page()
                         value="1"
                         class="button button-primary">
                         Import JSON
+                    </button>
+
+                </form>
+
+            </div>
+
+            <div class="ff-settings-card">
+
+                <h2>Feedback</h2>
+
+                <p>
+                    Found a bug or have an idea for Forge Fields? Send feedback directly from WordPress.
+                    Your WordPress version, PHP version, Forge Fields version, site URL, and account email
+                    will be included to help diagnose issues.
+                </p>
+
+                <form method="post">
+
+                    <?php wp_nonce_field(
+                        'ff_submit_feedback',
+                        'ff_feedback_nonce'
+                    ); ?>
+
+                    <div class="ff-settings-field">
+
+                        <label for="ff_feedback_type">
+                            Feedback Type
+                        </label>
+
+                        <div class="ff-select-wrap">
+                            <select
+                                id="ff_feedback_type"
+                                name="ff_feedback_type">
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="general">General Feedback</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="ff-settings-field">
+
+                        <label for="ff_feedback_message">
+                            Message
+                        </label>
+
+                        <textarea
+                            id="ff_feedback_message"
+                            name="ff_feedback_message"
+                            rows="6"
+                            class="large-text"
+                            maxlength="3000"
+                            required></textarea>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        name="ff_submit_feedback"
+                        value="1"
+                        class="button button-primary">
+                        Submit Feedback
                     </button>
 
                 </form>
@@ -503,3 +584,125 @@ function ff_handle_field_group_import()
     wp_safe_redirect($redirect_url);
     exit;
 }
+
+/* SUBMIT FEEDBACK */
+add_action('admin_init', 'ff_handle_feedback_submission');
+
+function ff_handle_feedback_submission()
+{
+    if (! current_user_can('manage_options')) {
+        return;
+    }
+
+    if (! isset($_POST['ff_submit_feedback'])) {
+        return;
+    }
+
+    check_admin_referer(
+        'ff_submit_feedback',
+        'ff_feedback_nonce'
+    );
+
+    $settings_url = admin_url(
+        'admin.php?page=forge-fields-settings'
+    );
+
+    $type = isset($_POST['ff_feedback_type'])
+        ? sanitize_key(
+            wp_unslash($_POST['ff_feedback_type'])
+        )
+        : 'general';
+
+    $allowed_types = [
+        'bug',
+        'feature',
+        'general',
+    ];
+
+    if (! in_array($type, $allowed_types, true)) {
+        $type = 'general';
+    }
+
+    $message = isset($_POST['ff_feedback_message'])
+        ? sanitize_textarea_field(
+            wp_unslash($_POST['ff_feedback_message'])
+        )
+        : '';
+
+    if ($message === '') {
+        wp_safe_redirect(
+            add_query_arg(
+                'ff_notice',
+                'feedback_empty',
+                $settings_url
+            )
+        );
+
+        exit;
+    }
+
+    $current_user = wp_get_current_user();
+
+    $type_labels = [
+        'bug'     => 'Bug Report',
+        'feature' => 'Feature Request',
+        'general' => 'General Feedback',
+    ];
+
+    $type_label = $type_labels[$type];
+
+    $subject = sprintf(
+        '[Forge Fields] %s',
+        $type_label
+    );
+
+    $body = sprintf(
+        "Forge Fields Feedback\n\n" .
+            "Type: %s\n" .
+            "Plugin Version: %s\n" .
+            "WordPress Version: %s\n" .
+            "PHP Version: %s\n" .
+            "Site URL: %s\n" .
+            "User: %s <%s>\n\n" .
+            "Message:\n%s",
+        $type_label,
+        defined('FF_VERSION') ? FF_VERSION : 'Unknown',
+        get_bloginfo('version'),
+        PHP_VERSION,
+        home_url(),
+        $current_user->display_name,
+        $current_user->user_email,
+        $message
+    );
+
+    $to = 'useforgedev@gmail.com.com';
+
+    $sent = wp_mail(
+        $to,
+        $subject,
+        $body
+    );
+
+    if (! $sent) {
+        error_log('Forge Fields feedback email failed to send.');
+    }
+
+    wp_safe_redirect(
+        add_query_arg(
+            'ff_notice',
+            $sent
+                ? 'feedback_sent'
+                : 'feedback_failed',
+            $settings_url
+        )
+    );
+
+    exit;
+}
+
+add_action('wp_mail_failed', function ($error) {
+    error_log(
+        'Forge Fields wp_mail error: ' .
+            $error->get_error_message()
+    );
+});
