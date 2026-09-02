@@ -28,26 +28,6 @@ if (! function_exists('ff_parse_choices_string')) {
     }
 }
 
-/**
- * Normalize and validate a choices textarea.
- *
- * - Accepts lines in: "value : Label", "value|Label", or "value"
- * - Produces canonical lines: "value : Label"
- * - Soft-warns when it had to sanitize/clean inputs
- * - Hard-errors when result would be broken (no choices, empty value, duplicates)
- *
- * @return array { normalized: string, warnings: string[], errors: string[] }
- */
-/**
- * Normalize a choices textarea into a canonical format.
- *
- * Returns:
- * [
- *   'normalized' => string,
- *   'errors'     => array,
- *   'warnings'   => array,
- * ]
- */
 function ff_normalize_choices_string($raw)
 {
 
@@ -66,21 +46,15 @@ function ff_normalize_choices_string($raw)
         $value = '';
         $label = '';
 
-        // value | Label
         if (strpos($line, '|') !== false) {
             [$value, $label] = array_map('trim', explode('|', $line, 2));
-
-            // value : Label
         } elseif (strpos($line, ':') !== false) {
             [$value, $label] = array_map('trim', explode(':', $line, 2));
-
-            // value (single word)
         } else {
             $value = $line;
             $label = '';
         }
 
-        // Validate value
         $value = sanitize_key($value);
         if ($value === '') {
             $errors[] = sprintf(
@@ -90,9 +64,7 @@ function ff_normalize_choices_string($raw)
             continue;
         }
 
-        // Normalize output
         if ($label === '') {
-            // IMPORTANT: keep single-word format
             $normalized[] = $value;
         } else {
             $label = sanitize_text_field($label);
@@ -143,7 +115,6 @@ add_action('in_admin_header', function () {
         return trim($classes . ' ff-has-brandbar ff-has-subbar');
     });
 
-    // CSS: keep it simple & stronger
     add_action('admin_head', function () {
         $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
         if (!in_array($page, ['forge-fields', 'forge-fields-edit'], true)) {
@@ -157,14 +128,12 @@ add_action('in_admin_header', function () {
         </style>';
     });
 
-    // JS: init + on-change + handle new rows
     add_action('admin_footer', function () {
         $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
         if ($page !== 'forge-fields-edit') return;
 ?>
         <script>
             (function() {
-                // Only these types use the Choices textarea
                 const choiceTypes = ['select', 'checkbox', 'radio', 'button_group'];
 
                 function updateRow(row) {
@@ -176,10 +145,8 @@ add_action('in_admin_header', function () {
                     settings.classList.toggle('is-hidden', !shouldShow);
                 }
 
-                // Initial pass
                 document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
 
-                // Live changes
                 document.addEventListener('change', function(e) {
                     if (e.target && e.target.classList.contains('ff-field-type')) {
                         const row = e.target.closest('tr.ff-field-row');
@@ -212,10 +179,8 @@ add_action('in_admin_header', function () {
 
     ff_render_admin_brandbar($subtitle, '');
 
-    // Build right side content:
     $right_html = '';
     if ($page === 'forge-fields') {
-        // list page keeps the Add New link
         $cta_url   = admin_url('admin.php?page=forge-fields-edit');
         ff_render_admin_subbar($subtitle, $cta_url, 'Add New');
         return;
@@ -315,21 +280,12 @@ add_action('in_admin_header', function () {
     ff_render_admin_subbar($subtitle, '', 'Add New', $right_html);
 });
 
-/**
- * Forge Fields admin brand bar (ACF-style).
- *
- * @param string $subtitle  e.g. 'Field Groups', 'Edit Field Group', 'Global Fields'
- * @param string $add_url   optional CTA url (e.g. Add New). Pass '' to hide.
- * @param string $add_label CTA label (defaults to 'Add New')
- */
 function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'Add New')
 {
-    // are we already on the list page?
     $page       = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
     $list_page  = 'forge-fields';
     $is_current = ($page === $list_page);
 
-    // target URL for the brand title
     $home_url = admin_url('admin.php?page=' . $list_page);
     ?>
     <div class="ff-brandbar" role="banner" aria-label="Forge Fields">
@@ -362,14 +318,6 @@ function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'A
 <?php
 }
 
-
-/**
- * Forge Fields secondary page bar (under the brand bar).
- *
- * @param string $title
- * @param string $cta_url
- * @param string $cta_label
- */
 function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $right_html = '')
 { ?>
     <div class="ff-subbar" role="navigation" aria-label="Forge Fields secondary bar">
@@ -379,7 +327,7 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
             <div class="ff-subbar__actions">
                 <?php
                 if ($right_html) {
-                    echo $right_html; // already escaped below where we build it
+                    echo $right_html;
                 } elseif ($cta_url) { ?>
                     <a class="button button-primary ff-subbar__btn"
                         href="<?php echo esc_url($cta_url); ?>">
@@ -391,14 +339,10 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
     </div>
 <?php }
 
-/**
- * Register menu + submenus.
- */
 add_action('admin_menu', function () {
 
     $parent_slug = 'forge-fields';
 
-    // Top-level: list of groups
     add_menu_page(
         'Forge Fields',
         'Forge Fields',
@@ -409,7 +353,6 @@ add_action('admin_menu', function () {
         80
     );
 
-    // Explicit "Field Groups" submenu (same as parent)
     add_submenu_page(
         $parent_slug,
         'Field Groups',
@@ -419,7 +362,6 @@ add_action('admin_menu', function () {
         'ff_render_field_groups_list'
     );
 
-    // "Add New" / Edit screen
     add_submenu_page(
         null,
         'Add New Field Group',
@@ -429,7 +371,6 @@ add_action('admin_menu', function () {
         'ff_render_field_group_edit'
     );
 
-    // Global Options
     add_submenu_page(
         $parent_slug,
         'Global Fields',
@@ -439,7 +380,6 @@ add_action('admin_menu', function () {
         'ff_render_global_options_page'
     );
 
-    // Settings
     add_submenu_page(
         $parent_slug,
         'Settings',
@@ -459,7 +399,6 @@ add_action('admin_menu', function () {
     );
 });
 
-// Adds a body class only on Forge Fields admin screens so we can pad #wpcontent for the fixed brand bar.
 add_filter('admin_body_class', function ($classes) {
     $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
     if (
@@ -479,23 +418,6 @@ add_filter('admin_body_class', function ($classes) {
     return $classes;
 });
 
-
-/**
- * Handle Forge Fields field-group actions before admin output begins.
- *
- * Handles:
- * - trash
- * - restore
- * - delete
- * - activate
- * - deactivate
- * - duplicate
- * - clear cache
- * - bulk actions
- */
-/**
- * Handle Add/Edit Field Group saves before WordPress outputs admin HTML.
- */
 add_action('admin_init', 'ff_handle_field_group_save');
 
 function ff_handle_field_group_save()
@@ -581,16 +503,10 @@ function ff_handle_field_group_save()
             )
             : 'text';
 
-        /*
-         * Skip completely empty rows.
-         */
         if ($name === '' && $label === '') {
             continue;
         }
 
-        /*
-         * Tabs have labels but no field names.
-         */
         if ($type === 'tab') {
 
             if ($label === '') {
@@ -608,9 +524,6 @@ function ff_handle_field_group_save()
             continue;
         }
 
-        /*
-         * Normal fields require labels.
-         */
         if ($label === '') {
 
             $has_save_errors = true;
@@ -625,9 +538,6 @@ function ff_handle_field_group_save()
             continue;
         }
 
-        /*
-         * Generate field name from label when blank.
-         */
         if ($name === '') {
             $name = sanitize_key(
                 strtolower(
@@ -648,9 +558,6 @@ function ff_handle_field_group_save()
             continue;
         }
 
-        /*
-         * Prevent duplicate field names.
-         */
         if (isset($used_names[$name])) {
 
             $has_save_errors = true;
@@ -665,9 +572,6 @@ function ff_handle_field_group_save()
 
         $used_names[$name] = true;
 
-        /*
-         * Choice fields.
-         */
         $choice_types = [
             'select',
             'checkbox',
@@ -720,19 +624,47 @@ function ff_handle_field_group_save()
         $fields[] = $row;
     }
 
-    /*
-     * Group title required.
-     */
     if ($title === '') {
         $has_save_errors = true;
         $error_messages[] = 'Please enter a Field Group title.';
     }
 
-    /*
-     * If validation failed, return to the edit screen.
-     *
-     * We store the errors temporarily so the renderer can show them.
-     */
+    if ($title !== '') {
+
+        foreach ($groups as $existing_id => $existing_group) {
+
+            if ($existing_id === $posted_group_id) {
+                continue;
+            }
+
+            $existing_status = isset($existing_group['status'])
+                ? $existing_group['status']
+                : 'active';
+
+            if ($existing_status === 'trash') {
+                continue;
+            }
+
+            $existing_title = isset($existing_group['title'])
+                ? trim((string) $existing_group['title'])
+                : '';
+
+            if (
+                $existing_title !== ''
+                && strcasecmp($existing_title, trim($title)) === 0
+            ) {
+                $has_save_errors = true;
+
+                $error_messages[] = sprintf(
+                    'A field group named "%s" already exists.',
+                    $title
+                );
+
+                break;
+            }
+        }
+    }
+
     if ($has_save_errors) {
 
         $error_key = 'ff_save_errors_' . get_current_user_id();
@@ -765,9 +697,6 @@ function ff_handle_field_group_save()
         exit;
     }
 
-    /*
-     * Preserve status for existing groups.
-     */
     $current_status = 'active';
 
     if (
@@ -777,9 +706,6 @@ function ff_handle_field_group_save()
         $current_status = $groups[$posted_group_id]['status'];
     }
 
-    /*
-     * Generate an ID for a new group.
-     */
     if (
         $posted_group_id === ''
         || $posted_group_id === 'new'
@@ -787,9 +713,6 @@ function ff_handle_field_group_save()
         $posted_group_id = ff_generate_group_id();
     }
 
-    /*
-     * Save field group.
-     */
     $group = [
         'id'              => $posted_group_id,
         'title'           => $title,
@@ -806,9 +729,6 @@ function ff_handle_field_group_save()
 
     ff_save_all_groups($groups);
 
-    /*
-     * POST -> Redirect -> GET
-     */
     $redirect_url = add_query_arg(
         [
             'page'      => 'forge-fields-edit',
@@ -841,11 +761,6 @@ function ff_handle_field_group_actions()
 
     $groups = ff_get_all_groups();
 
-    /*
-     * ---------------------------------------------------------
-     * BULK ACTIONS
-     * ---------------------------------------------------------
-     */
     if (
         isset(
             $_POST['ff_bulk_action'],
@@ -967,12 +882,6 @@ function ff_handle_field_group_actions()
         exit;
     }
 
-    /*
-     * ---------------------------------------------------------
-     * SINGLE GROUP ACTIONS
-     * ---------------------------------------------------------
-     */
-
     $action = isset($_GET['ff_action'])
         ? sanitize_key(wp_unslash($_GET['ff_action']))
         : '';
@@ -1076,9 +985,6 @@ function ff_handle_field_group_actions()
             return;
     }
 
-    /*
-     * Redirect before WordPress renders the admin page.
-     */
     $redirect_url = admin_url(
         'admin.php?page=forge-fields'
     );
@@ -1105,11 +1011,6 @@ function ff_handle_field_group_actions()
     exit;
 }
 
-/**
- * LIST SCREEN
- * -------------------------------------------------------------------------
- * Shows all field groups with All / Active / Trash filters.
- */
 function ff_render_field_groups_list()
 {
 
@@ -1117,16 +1018,7 @@ function ff_render_field_groups_list()
         return;
     }
 
-    // ---------------------------------------------------------------------
-    // 1) Load groups
-    // ---------------------------------------------------------------------
     $groups = ff_get_all_groups();
-    // ---------------------------------------------------------------------
-    // 3) Determine current view: all | active | trash
-    //     - "All" = everything that is NOT in trash
-    //     - "Active" = status === active
-    //     - "Trash" = status === trash
-    // ---------------------------------------------------------------------
     $current_view = isset($_GET['ff_view'])
         ? sanitize_key(wp_unslash($_GET['ff_view']))
         : 'all';
@@ -1135,22 +1027,15 @@ function ff_render_field_groups_list()
         $current_view = 'all';
     }
 
-    // ---------------------------------------------------------------------
-    // Sorting params: orderby=title, order=asc|desc
-    // ---------------------------------------------------------------------
     $orderby = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'title';
     $order   = isset($_GET['order']) ? strtolower(sanitize_text_field($_GET['order'])) : 'asc';
     $order   = ($order === 'desc') ? 'desc' : 'asc';
 
-
-    // ---------------------------------------------------------------------
-    // Search term (similar to ACF "Search Field Groups")
-    // ---------------------------------------------------------------------
     $search_term = isset($_GET['ff_search'])
         ? trim(sanitize_text_field(wp_unslash($_GET['ff_search'])))
         : '';
 
-    $count_all    = 0; // non-trash
+    $count_all    = 0;
     $count_active = 0;
     $count_trash  = 0;
 
@@ -1167,12 +1052,8 @@ function ff_render_field_groups_list()
         }
     }
 
-    // Build base URL for views/actions.
     $list_base_url = admin_url('admin.php?page=forge-fields');
 
-    // ------------------------------------------------------------------
-    // 4) Turn ?ff_notice=code into a user-friendly message
-    // ------------------------------------------------------------------
     $notice = '';
 
     if (isset($_GET['ff_notice'])) {
@@ -1200,8 +1081,6 @@ function ff_render_field_groups_list()
             case 'cache_cleared':
                 $notice = 'Field group cache cleared.';
                 break;
-
-            // Bulk variants
             case 'bulk_trash':
                 $notice = 'Selected field groups moved to trash.';
                 break;
@@ -1223,13 +1102,10 @@ function ff_render_field_groups_list()
         }
     }
 
-
-
 ?>
     <div class="wrap ff-admin ff-list ff-has-brand">
 
         <?php
-        // Small "All | Active | Trash" filter links, ACF-style.
         $all_url    = remove_query_arg('ff_view', $list_base_url);
         $active_url = add_query_arg('ff_view', 'active', $list_base_url);
         $trash_url  = add_query_arg('ff_view', 'trash',  $list_base_url);
@@ -1242,10 +1118,6 @@ function ff_render_field_groups_list()
         <?php endif; ?>
 
         <?php
-        // ----------------------------------------------------
-        // Search Field Groups form (uses $search_term etc.)
-        // ----------------------------------------------------
-        // Build base URL for "clear" link (keeps view + sorting)
         $search_base_url = admin_url('admin.php?page=forge-fields');
         if ($current_view !== 'all') {
             $search_base_url = add_query_arg('ff_view', $current_view, $search_base_url);
@@ -1314,7 +1186,6 @@ function ff_render_field_groups_list()
         </div>
 
         <?php
-        // Filter groups according to current view.
         $display_groups = [];
 
         foreach ($groups as $group_id => $group) {
@@ -1325,7 +1196,6 @@ function ff_render_field_groups_list()
                     continue;
                 }
             } else {
-                // "all" or "active" views never show trashed items.
                 if ($status === 'trash') {
                     continue;
                 }
@@ -1334,7 +1204,6 @@ function ff_render_field_groups_list()
                 }
             }
 
-            // If a search term is provided, match against title + key
             if ($search_term !== '') {
                 $title     = isset($group['title']) ? $group['title'] : '';
                 $group_key = ! empty($group['id']) ? $group['id'] : $group_id;
@@ -1343,7 +1212,7 @@ function ff_render_field_groups_list()
                 $needle   = strtolower($search_term);
 
                 if (strpos($haystack, $needle) === false) {
-                    continue; // no match, skip this group
+                    continue;
                 }
             }
 
@@ -1375,7 +1244,6 @@ function ff_render_field_groups_list()
                     value="<?php echo esc_attr($current_view); ?>">
 
                 <?php
-                // Bulk actions depend on view.
                 $bulk_actions = [];
 
                 if ($current_view === 'trash') {
@@ -1392,7 +1260,6 @@ function ff_render_field_groups_list()
                     ];
                 }
 
-                // Helper to render the bulk action dropdown.
                 $render_bulk = function ($position) use ($bulk_actions, $visible_count) {
                     $id = $position === 'top'
                         ? 'ff-bulk-action-selector-top'
@@ -1422,7 +1289,6 @@ function ff_render_field_groups_list()
                             <div class="tablenav-pages one-page">
                                 <span class="displaying-num">
                                     <?php
-                                    // “1 item” vs “3 items”
                                     if ($visible_count === 1) {
                                         echo '1 item';
                                     } else {
@@ -1437,16 +1303,11 @@ function ff_render_field_groups_list()
                     </div>
                 <?php
                 };
-
-                // Top bulk actions bar.
-                // $render_bulk( 'top' );
                 ?>
 
                 <?php
-                // Helper: render the header row (used in thead and tfoot).
                 $render_header_row = function () use ($orderby, $order, $current_view) {
 
-                    // Sorting URL + classes for Title
                     $next_order = ($orderby === 'title' && $order === 'asc') ? 'desc' : 'asc';
 
                     $title_sort_url = add_query_arg(
@@ -1499,15 +1360,12 @@ function ff_render_field_groups_list()
                             $status = isset($group['status']) ? $group['status'] : 'active';
                             $status_label = ($status === 'active') ? 'Active' : 'Deactivated';
 
-                            // Safe key (prefer stored ID, fall back to array key)
                             $group_key = ! empty($group['id']) ? $group['id'] : $group_id;
 
                             $edit_base_url = admin_url('admin.php?page=forge-fields-edit');
                             $edit_url      = add_query_arg(['group' => $group_id], $edit_base_url);
 
-                            // Action URLs (all go back to list page).
                             if ($current_view === 'trash') {
-                                // Restore
                                 $restore_url = wp_nonce_url(
                                     add_query_arg(
                                         [
@@ -1520,7 +1378,6 @@ function ff_render_field_groups_list()
                                     'ff_group_action_restore_' . $group_id
                                 );
 
-                                // Delete permanently
                                 $delete_url = wp_nonce_url(
                                     add_query_arg(
                                         [
@@ -1533,7 +1390,6 @@ function ff_render_field_groups_list()
                                     'ff_group_action_delete_' . $group_id
                                 );
                             } else {
-                                // Trash from active/all views
                                 $trash_url = wp_nonce_url(
                                     add_query_arg(
                                         [
@@ -1546,7 +1402,6 @@ function ff_render_field_groups_list()
                                     'ff_group_action_trash_' . $group_id
                                 );
 
-                                // Duplicate with nonce
                                 $dup_url = wp_nonce_url(
                                     add_query_arg(
                                         [
@@ -1559,7 +1414,6 @@ function ff_render_field_groups_list()
                                     'ff_group_action_duplicate_' . $group_id
                                 );
 
-                                // Toggle active/inactive
                                 $toggle_action = ($status === 'active') ? 'deactivate' : 'activate';
 
                                 $toggle_url = wp_nonce_url(
@@ -1702,7 +1556,6 @@ function ff_render_field_groups_list()
 
                                 <td>
                                     <?php
-                                    // map status to pill class + label
                                     $status_key   = strtolower($status);
                                     $status_label = ($status_key === 'active') ? 'Active' : ($status_key === 'inactive' ? 'Inactive' : ucfirst($status_key));
                                     $status_class = 'ff-status ff-status--' . esc_attr($status_key);
@@ -1717,7 +1570,6 @@ function ff_render_field_groups_list()
                     </tfoot>
                 </table>
                 <?php
-                // Bottom bulk actions bar.
                 $render_bulk('bottom');
                 ?>
             </form>
@@ -1978,13 +1830,6 @@ function ff_render_global_field_row(array $field, array $stored)
 <?php
 }
 
-/**
- * GLOBAL OPTIONS SCREEN
- * -------------------------------------------------------------------------
- * Renders all field groups where location === 'global' and status !== 'trash'.
- * Values are stored in a single option: ff_global_fields ( [field_name => value] ).
- */
-
 function ff_render_global_options_page()
 {
 
@@ -1995,7 +1840,6 @@ function ff_render_global_options_page()
     $groups        = ff_get_all_groups();
     $global_groups = [];
 
-    // Collect only non-trashed global groups
     foreach ($groups as $group_id => $group) {
         $status   = isset($group['status']) ? $group['status'] : 'active';
         $location = isset($group['location']) ? $group['location'] : 'page';
@@ -2009,7 +1853,6 @@ function ff_render_global_options_page()
         }
     }
 
-    // Load stored values
     $stored = get_option('ff_global_fields', []);
     if (! is_array($stored)) {
         $stored = [];
@@ -2017,8 +1860,6 @@ function ff_render_global_options_page()
 
     $notices = [];
 
-    // Handle save
-    // Handle save
     if (isset($_POST['ff_save_global'])) {
 
         check_admin_referer('ff_save_global');
@@ -2027,7 +1868,6 @@ function ff_render_global_options_page()
             ? $_POST['ff_global']
             : [];
 
-        // Build a name => type map from the defined global fields
         $type_map = [];
         foreach ($global_groups as $group) {
             if (empty($group['fields']) || ! is_array($group['fields'])) {
@@ -2078,12 +1918,11 @@ function ff_render_global_options_page()
                         : sanitize_text_field(wp_unslash($value_raw));
                     break;
 
-                case 'image': // attachment ID
-                case 'file':  // attachment ID
+                case 'image':
+                case 'file':
                     $new_values[$name] = is_array($value_raw) ? 0 : absint($value_raw);
                     break;
 
-                // NEW: choice types (just sanitize, no HTML here)
                 case 'select':
                 case 'radio':
                 case 'button_group':
@@ -2117,7 +1956,7 @@ function ff_render_global_options_page()
             'ff_global_fields_last_saved',
             time()
         );
-        $stored  = $new_values; // use fresh values for display
+        $stored  = $new_values;
         $notices[] = [
             'type'    => 'updated',
             'message' => 'Global fields saved.',
@@ -2221,24 +2060,7 @@ function ff_render_global_options_page()
     </div>
 <?php
 }
-// echo ff_get_field( 'heading2', 'global' ); -- to read global on frontend
-// e.g. echo esc_attr( ff_get_field( 'meta_description', 'global' ) );
-// e.g.  $ga_id = ff_get_field( 'ga_measurement_id', 'global' );
-/** gut block function ff_global_shortcode( $atts ) {
-    return ff_get_field( $atts['name'] ?? '', 'global' );
-}
-add_shortcode( 'ff_global', 'ff_global_shortcode' ); **/
 
-/**
- * Normalize a choices textarea into a canonical stored string.
- *
- * Option A behavior:
- * - "value" stays "value" (one token line)
- * - "value|Label" becomes "value : Label"
- * - "value : Label" stays "value : Label"
- *
- * Returns: [ $normalized_string, $warnings_array, $errors_array ]
- */
 function ff_normalize_choices_textarea($raw_text)
 {
     $warnings = [];
@@ -2257,7 +2079,6 @@ function ff_normalize_choices_textarea($raw_text)
         $has_pipe  = (strpos($original, '|') !== false);
         $has_colon = (strpos($original, ':') !== false);
 
-        // Parse into $value_raw and $label_raw only if delimiter exists.
         if ($has_pipe) {
             list($value_raw, $label_raw) = array_map('trim', explode('|', $original, 2));
         } elseif ($has_colon) {
@@ -2269,7 +2090,6 @@ function ff_normalize_choices_textarea($raw_text)
 
         $value_sanitized = sanitize_key($value_raw);
 
-        // If they used a delimiter but value becomes empty after sanitizing, that's invalid.
         if (($has_pipe || $has_colon) && $value_sanitized === '') {
             $errors[] = sprintf(
                 'Line %d: Invalid choice value "%s". Use letters/numbers/underscores/dashes before the ":" or "|".',
@@ -2279,7 +2099,6 @@ function ff_normalize_choices_textarea($raw_text)
             continue;
         }
 
-        // If it was a "bare" line (no delimiter), still require a usable value.
         if (! $has_pipe && ! $has_colon && $value_sanitized === '') {
             $errors[] = sprintf(
                 'Line %d: Invalid choice "%s". Use at least one letter or number.',
@@ -2289,7 +2108,6 @@ function ff_normalize_choices_textarea($raw_text)
             continue;
         }
 
-        // Warn if we had to clean the value.
         if ($value_raw !== $value_sanitized) {
             $warnings[] = sprintf(
                 'Line %d: Value "%s" was cleaned to "%s".',
@@ -2299,13 +2117,11 @@ function ff_normalize_choices_textarea($raw_text)
             );
         }
 
-        // Default label if delimiter used but label is empty.
         $label_clean = sanitize_text_field((string) $label_raw);
         if (($has_pipe || $has_colon) && $label_clean === '') {
             $label_clean = $value_sanitized;
         }
 
-        // Duplicate values are ambiguous; treat as error.
         if (isset($seen_values[$value_sanitized])) {
             $errors[] = sprintf(
                 'Line %d: Duplicate choice value "%s". Each choice value must be unique.',
@@ -2316,7 +2132,6 @@ function ff_normalize_choices_textarea($raw_text)
         }
         $seen_values[$value_sanitized] = true;
 
-        // OPTION A: bare lines stay bare.
         if (! $has_pipe && ! $has_colon) {
             $out_lines[] = $value_sanitized;
         } else {
@@ -2327,10 +2142,6 @@ function ff_normalize_choices_textarea($raw_text)
     return [implode("\n", $out_lines), $warnings, $errors];
 }
 
-/**
- * Replace Forge Fields' normal plugin Delete link with our own
- * uninstall confirmation screen.
- */
 add_filter(
     'plugin_action_links_forge-fields/forge-fields.php',
     'ff_plugin_action_links'
@@ -2356,9 +2167,6 @@ function ff_plugin_action_links($actions)
     return $actions;
 }
 
-/**
- * Forge Fields uninstall confirmation screen.
- */
 function ff_render_uninstall_page()
 {
 
@@ -2421,9 +2229,6 @@ function ff_render_uninstall_page()
 <?php
 }
 
-/**
- * Process Forge Fields uninstall confirmation.
- */
 add_action('admin_init', 'ff_handle_plugin_uninstall');
 
 function ff_handle_plugin_uninstall()
@@ -2450,10 +2255,6 @@ function ff_handle_plugin_uninstall()
         'ff_uninstall_nonce'
     );
 
-    /*
-     * uninstall.php will read this immediately before WordPress
-     * removes the plugin.
-     */
     update_option(
         'ff_delete_data_on_uninstall',
         isset($_POST['ff_delete_plugin_data']) ? 1 : 0
@@ -2463,9 +2264,6 @@ function ff_handle_plugin_uninstall()
 
     $plugin = 'forge-fields/forge-fields.php';
 
-    /*
-     * Plugin must be inactive before WordPress can delete it.
-     */
     if (is_plugin_active($plugin)) {
         deactivate_plugins($plugin, false, false);
     }
@@ -2485,13 +2283,6 @@ function ff_handle_plugin_uninstall()
     exit;
 }
 
-/**
- * EDIT / ADD-NEW SCREEN
- * -------------------------------------------------------------------------
- * - If ?group=<id> is present and found: edit that group.
- * - Otherwise: "Add New" (blank group).
- * - Title is REQUIRED.
- */
 function ff_render_field_group_edit()
 {
 
@@ -2537,7 +2328,6 @@ function ff_render_field_group_edit()
         }
     }
 
-    // Base empty group for "Add New"
     $group = [
         'id'       => '',
         'title'    => '',
@@ -2547,15 +2337,11 @@ function ff_render_field_group_edit()
         'status'   => 'active',
     ];
 
-    // If editing existing and it exists, load it as the starting point
     if ($group_id && isset($groups[$group_id]) && is_array($groups[$group_id])) {
         $group   = $groups[$group_id];
         $is_new  = false;
     }
 
-
-
-    // Final values for the form
     $title           = isset($group['title']) ? $group['title'] : '';
     $location        = isset($group['location']) ? $group['location'] : 'page';
     $location_target = isset($group['location_target']) ? (string) $group['location_target'] : '';
@@ -2577,7 +2363,6 @@ function ff_render_field_group_edit()
         'order'          => 'DESC',
     ]);
 
-    // --- NEW: grouped type list (future-proof if you add more groups) ---
     $type_groups = [
         'Basic' => ['text', 'textarea', 'number', 'email', 'url', 'range', 'password'],
         'Content' => ['image', 'file', 'wysiwyg'],
@@ -2693,7 +2478,6 @@ function ff_render_field_group_edit()
 
                 <tbody id="ff-fields-body">
                     <?php
-                    // Ensure at least one row.
                     if (empty($fields)) {
                         $fields = [
                             [
@@ -2797,8 +2581,6 @@ function ff_render_field_group_edit()
                 </tbody>
             </table>
 
-
-            <!-- Template for new rows -->
             <script type="text/html" id="ff-field-row-template">
                 <tr class="ff-field-row" data-index="__INDEX__">
                     <td class="ff-field-handle" aria-label="Drag" title="Drag"></td>
@@ -2878,7 +2660,6 @@ function ff_render_field_group_edit()
 
 
         </form>
-        <!-- FF confirm modal -->
         <div id="ff-confirm" class="ff-confirm is-hidden" role="dialog" aria-modal="true" aria-labelledby="ff-confirm-title" aria-describedby="ff-confirm-desc">
             <div class="ff-confirm__overlay" data-ff-close></div>
             <div class="ff-confirm__dialog" role="document" tabindex="-1">

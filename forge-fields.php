@@ -16,21 +16,14 @@ define('FF_VERSION', '0.1.2');
 define('FF_PATH', plugin_dir_path(__FILE__));
 define('FF_URL',  plugin_dir_url(__FILE__));
 
-// Core field-group & metabox logic.
 require_once FF_PATH . 'includes/core.php';
 
-// Admin UI (only in dashboard).
 if (is_admin()) {
     require_once FF_PATH . 'includes/admin-page.php';
     require_once FF_PATH . 'includes/admin-ui.php';
     require_once FF_PATH . 'includes/import-export.php';
 }
 
-/**
- * Enqueue admin JS/CSS for Forge Fields.
- * - On Forge Fields screens
- * - On post/page editors where Forge Fields meta boxes appear
- */
 function ff_enqueue_admin_assets($hook)
 {
     $page         = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
@@ -79,9 +72,5 @@ function ff_enqueue_admin_assets($hook)
     }
 }
 
-/**
- * On init, load all field groups from the database
- * and register them with Forge Fields.
- */
 add_action('init', 'ff_boot_field_groups');
 add_action('admin_enqueue_scripts', 'ff_enqueue_admin_assets');

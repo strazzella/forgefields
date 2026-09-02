@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // -------------------------------
-  // Helpers
-  // -------------------------------
   function labelToSlug(text) {
     return text
       .trim()
@@ -14,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const addBtn = document.querySelector("#ff-add-field");
   const rowTemplate = document.getElementById("ff-field-row-template");
 
-  // Build select HTML with a non-selectable “Basic” group for brand-new rows
   function buildTypeSelectHTML(nameAttr) {
     return (
       '<div class="ff-select-wrap">' +
@@ -50,13 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
   }
 
-  // -------------------------------
-  // FIELD BUILDER (only on edit screen)
-  // -------------------------------
   if (tbody) {
-    // -------------------------------
-    // Re-index rows (names + data-index)
-    // -------------------------------
     function renumberRows() {
       const rows = Array.from(tbody.querySelectorAll(".ff-field-row"));
       const canDrag = rows.length > 1;
@@ -80,8 +70,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (typeSelect) {
           typeSelect.name = "ff_fields[" + index + "][type]";
         }
-
-        // Handle becomes the draggable element
         if (handle) {
           handle.draggable = canDrag;
 
@@ -94,9 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // -------------------------------
-    // Per-row setup
-    // -------------------------------
     function attachRowEvents(row) {
       const labelInput = row.querySelector(".ff-field-label");
       const nameInput = row.querySelector(".ff-field-name");
@@ -108,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
           syncTabRowState(row);
         });
       }
-      // Auto label → slug
+
       if (labelInput) {
         labelInput.addEventListener("blur", function () {
           if (!nameInput) return;
@@ -129,22 +114,16 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // Attach to any existing rows
     tbody.querySelectorAll(".ff-field-row").forEach(function (row) {
       attachRowEvents(row);
       syncTabRowState(row);
     });
     renumberRows();
 
-    // Create a brand-new, empty field row when there are none to clone
-    // -------------------------------
-    // Add new field (uses PHP template)
-    // -------------------------------
     function addFieldRow() {
       const index = tbody.querySelectorAll(".ff-field-row").length;
 
       if (rowTemplate) {
-        // Use the template from admin-page.php so markup + groups stay in sync.
         const html = rowTemplate.innerHTML.replace(/__INDEX__/g, index);
         const tmp = document.createElement("tbody");
         tmp.innerHTML = html;
@@ -157,7 +136,6 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
       } else {
-        // Fallback: clone last existing field row only (should rarely be used).
         const rows = tbody.querySelectorAll(".ff-field-row");
         const lastRow = rows[rows.length - 1] || null;
         if (!lastRow) return;
@@ -203,9 +181,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    // -------------------------------
-    // Drag & drop ordering (HTML5)
-    // -------------------------------
     let draggingRow = null;
 
     tbody.addEventListener("dragstart", function (e) {
@@ -220,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
       draggingRow = row;
       row.classList.add("ff-row-dragging");
       e.dataTransfer.effectAllowed = "move";
-      // Required for Firefox
+
       e.dataTransfer.setData("text/plain", "");
     });
 
@@ -263,12 +238,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       return closest.element;
     }
-  } // end if (tbody)
+  }
 
-  // -------------------------------
-  // Copy group key button (runs on any screen)
-  // -------------------------------
-  // Copy group key button (runs on any screen)
   document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
     btn.addEventListener("click", function (e) {
       e.preventDefault();
@@ -277,18 +248,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const self = this;
       const done = () => {
-        self.classList.add("is-copied"); // show check icon
+        self.classList.add("is-copied");
         const oldTitle = self.getAttribute("title") || "";
         self.setAttribute("title", "Copied!");
         setTimeout(() => {
-          self.classList.remove("is-copied"); // revert icon
+          self.classList.remove("is-copied");
           self.setAttribute("title", oldTitle || "Copy to clipboard");
         }, 1500);
       };
 
-      // -------------------------------
-      // Copy group key button
-      // -------------------------------
       document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
         btn.addEventListener("click", async function (e) {
           e.preventDefault();
@@ -346,9 +314,7 @@ document.addEventListener("DOMContentLoaded", function () {
               showCopiedState();
               return;
             }
-          } catch (error) {
-            // Fall through to legacy copy method.
-          }
+          } catch (error) {}
 
           if (fallbackCopy(key)) {
             showCopiedState();
@@ -358,9 +324,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // -------------------------------
-  // Keep row-actions visible when keyboard focuses title cell
-  // -------------------------------
   document.addEventListener("focusin", function (e) {
     const td = e.target.closest("td.column-primary");
     if (td) {
@@ -377,27 +340,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// -------------------------------
-// Password show/hide toggle (meta boxes)
-// -------------------------------
 document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
   const btn = wrap.querySelector(".ff-password-toggle");
   const input = wrap.querySelector(".ff-password-input");
   const icon = btn ? btn.querySelector(".dashicons") : null;
   if (!btn || !input || !icon) return;
 
-  // Mirror the current input type (password by default) to the icon/label
   function sync() {
     const isVisible = input.type === "text";
     btn.setAttribute(
       "aria-label",
       isVisible ? "Hide password" : "Show password",
     );
-    icon.classList.toggle("dashicons-visibility", isVisible); // open eye when visible
-    icon.classList.toggle("dashicons-hidden", !isVisible); // slashed eye when masked
+    icon.classList.toggle("dashicons-visibility", isVisible);
+    icon.classList.toggle("dashicons-hidden", !isVisible);
   }
 
-  sync(); // defaults to slashed eye because inputs start as type="password"
+  sync();
 
   btn.addEventListener("click", function () {
     input.type = input.type === "text" ? "password" : "text";
@@ -405,42 +364,32 @@ document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
   });
 });
 
-// -------------------------------
-// Range slider <-> number sync
-// -------------------------------
 document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
   const slider = wrap.querySelector(".ff-range-slider");
   const number = wrap.querySelector(".ff-range-number");
 
   if (!slider || !number) return;
 
-  // slider -> number
   slider.addEventListener("input", function () {
     number.value = slider.value;
   });
 
-  // number -> slider
   number.addEventListener("input", function () {
     slider.value = number.value;
   });
 });
 
-// Forge Fields: only adjust the SUBBAR position.
-// Brandbar is untouched.
 (function () {
   const sub = document.querySelector(".ff-subbar");
   if (!sub) return;
 
   function placeSubbar() {
-    // keep it fixed and just calculate offsets
     const adminBar = document.getElementById("wpadminbar");
     const brand = document.querySelector(".ff-brandbar");
 
     const top =
       (adminBar ? adminBar.offsetHeight : 0) + (brand ? brand.offsetHeight : 0);
 
-    // match WP left gutter; user wanted 180px when menu is expanded
-    // use the "folded" class to handle collapsed admin menu automatically
     const left = document.body.classList.contains("folded") ? 56 : 180;
 
     sub.style.position = "fixed";
@@ -450,7 +399,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     sub.style.width = "auto";
     sub.style.zIndex = 10;
 
-    // keep content from sliding under the bars (optional – only touches top padding)
     const wpcontent = document.getElementById("wpcontent");
     if (wpcontent && brand) {
       wpcontent.style.paddingTop = brand.offsetHeight + sub.offsetHeight + "px";
@@ -459,7 +407,7 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
 
   window.addEventListener("load", placeSubbar);
   window.addEventListener("resize", placeSubbar);
-  // recalc when the admin menu is collapsed/expanded
+
   document.body.addEventListener("click", (e) => {
     if (e.target.closest("#collapse-menu")) {
       setTimeout(placeSubbar, 200);
@@ -469,7 +417,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
   placeSubbar();
 })();
 
-// MODAL
 (function () {
   const modal = document.getElementById("ff-confirm");
   if (!modal) return;
@@ -482,17 +429,14 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
   let pendingRow = null;
   let lastFocus = null;
 
-  // Open modal for given row
   function openConfirm(row) {
     pendingRow = row;
     lastFocus = document.activeElement;
-    // Try to show label/name in the message
     const labelInput = row.querySelector('input[name*="[label]"]');
     const label = (labelInput && labelInput.value.trim()) || "this field";
     nameEl.textContent = label;
 
     modal.classList.remove("is-hidden");
-    // focus trap starts on dialog
     dlg.focus();
 
     document.addEventListener("keydown", onKeydown, true);
@@ -512,7 +456,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
       e.preventDefault();
       closeConfirm();
     }
-    // Basic focus trap
     if (e.key === "Tab") {
       const focusable = dlg.querySelectorAll(
         'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',
@@ -533,12 +476,10 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     }
   }
 
-  // Reindex names after a delete so PHP receives a clean array
   function reindexFieldRows() {
     const rows = document.querySelectorAll("#ff-fields-body tr.ff-field-row");
     rows.forEach((row, index) => {
       row.dataset.index = index;
-      // rename inputs: ff_fields[<n>][label|name|type]
       const inputs = row.querySelectorAll(
         'input[name^="ff_fields["], select[name^="ff_fields["], textarea[name^="ff_fields["]',
       );
@@ -551,7 +492,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     });
   }
 
-  // Confirm delete
   btnYes.addEventListener("click", function () {
     if (!pendingRow) {
       closeConfirm();
@@ -562,21 +502,17 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     const rows = tbody ? tbody.querySelectorAll(".ff-field-row") : [];
 
     if (rows.length === 1) {
-      // last row: clear inputs + reset select
       pendingRow.querySelectorAll("input").forEach((input) => {
         input.value = "";
       });
       const typeSelect = pendingRow.querySelector(".ff-field-type");
       if (typeSelect) typeSelect.selectedIndex = 0;
     } else {
-      // remove the row
       pendingRow.parentNode.removeChild(pendingRow);
     }
 
-    // reindex names
     reindexFieldRows();
 
-    // auto-save (mirrors your old behavior)
     const form = document.getElementById("ff-edit-form");
     if (form) {
       let saveInput = form.querySelector('input[name="ff_save_field_group"]');
@@ -593,7 +529,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     closeConfirm();
   });
 
-  // Close handlers
   modal.addEventListener("click", function (e) {
     if (e.target.hasAttribute("data-ff-close")) {
       e.preventDefault();
@@ -601,7 +536,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
     }
   });
 
-  // Delegate click from any Remove link in the table
   document.addEventListener(
     "click",
     function (e) {
@@ -611,7 +545,6 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
       const row = removeBtn.closest("tr.ff-field-row");
       if (!row) return;
 
-      // prevent any legacy listeners from firing
       e.preventDefault();
       e.stopPropagation();
       if (e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -619,10 +552,9 @@ document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
       openConfirm(row);
     },
     true,
-  ); // <= capture phase
+  );
 })();
 
-// Keep Quicktags (Code) textarea from shrinking on toggle
 document.addEventListener("click", function (e) {
   const btn = e.target.closest(
     ".ff-options-card .wp-switch-editor.switch-html",
@@ -638,13 +570,11 @@ document.addEventListener("click", function (e) {
 });
 
 jQuery(function ($) {
-  // range -> number
   $(document).on("input change", ".ff-range-slider", function () {
     var $num = $($(this).data("target"));
     if ($num.length) $num.val(this.value);
   });
 
-  // number -> range (and clamp within min/max)
   $(document).on("input change", ".ff-range-number", function () {
     var $rng = $($(this).data("target"));
     if ($rng.length) {
@@ -660,14 +590,13 @@ jQuery(function ($) {
 });
 
 (function ($) {
-  // Guard: ensure we bind only once across all admin screens
   if (window.ffMediaBound) {
     return;
   }
   window.ffMediaBound = true;
 
   function openFFFrame($wrap, $input) {
-    var type = $wrap.data("type"); // "image" or "file"
+    var type = $wrap.data("type");
     var frame = wp.media({
       title: type === "image" ? "Select Image" : "Select File",
       button: {
@@ -680,7 +609,6 @@ jQuery(function ($) {
     frame.on("select", function () {
       var att = frame.state().get("selection").first().toJSON();
 
-      // Save the ID in the hidden input
       $input.val(att.id).trigger("change");
 
       if (type === "image") {
@@ -701,7 +629,6 @@ jQuery(function ($) {
     frame.open();
   }
 
-  // Namespaced delegated bindings (works on both edit + global)
   $(document)
     .off("click.ffMedia", ".ff-media-select")
     .on("click.ffMedia", ".ff-media-select", function (e) {
@@ -760,7 +687,6 @@ document.addEventListener("DOMContentLoaded", function () {
   syncLocationTargets();
 });
 
-// Tabs
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("[data-ff-tabs]").forEach(function (tabsWrap) {
     const buttons = tabsWrap.querySelectorAll(".ff-tab-button");

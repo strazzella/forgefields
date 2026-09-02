@@ -4,11 +4,6 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-/**
- * SETTINGS PAGE
- * -------------------------------------------------------------------------
- * Manual Forge Fields field-group import/export.
- */
 function ff_render_settings_page()
 {
     if (! current_user_can('manage_options')) {
@@ -165,10 +160,7 @@ function ff_render_settings_page()
 }
 
 
-/**
- * EXPORT FIELD GROUPS
- * -------------------------------------------------------------------------
- */
+/* EXPORT */
 add_action('admin_init', 'ff_handle_field_group_export');
 
 function ff_handle_field_group_export()
@@ -188,9 +180,6 @@ function ff_handle_field_group_export()
 
     $groups = ff_get_all_groups();
 
-    /*
-     * Remove environment-specific metadata from the export.
-     */
     foreach ($groups as &$group) {
         unset($group['last_saved']);
     }
@@ -251,10 +240,7 @@ function ff_handle_field_group_export()
 }
 
 
-/**
- * IMPORT FIELD GROUPS
- * -------------------------------------------------------------------------
- */
+/* IMPORT */
 add_action('admin_init', 'ff_handle_field_group_import');
 
 function ff_handle_field_group_import()
@@ -276,9 +262,6 @@ function ff_handle_field_group_import()
         'admin.php?page=forge-fields-settings'
     );
 
-    /*
-     * Validate upload.
-     */
     if (
         empty($_FILES['ff_import_file'])
         || ! isset($_FILES['ff_import_file']['error'])
@@ -340,9 +323,6 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    /*
-     * Keep imports reasonably small.
-     */
     if (
         ! empty($file['size'])
         && (int) $file['size'] > 2 * MB_IN_BYTES
@@ -393,9 +373,6 @@ function ff_handle_field_group_import()
 
     $data = json_decode($json, true);
 
-    /*
-     * Validate Forge Fields export structure.
-     */
     if (
         ! is_array($data)
         || ($data['format'] ?? '') !== 'forge-fields'
@@ -450,9 +427,6 @@ function ff_handle_field_group_import()
             continue;
         }
 
-        /*
-         * Basic structure validation.
-         */
         $group['id'] = $import_id;
 
         $group['title'] = isset($group['title'])
@@ -480,18 +454,12 @@ function ff_handle_field_group_import()
             ? $group['fields']
             : [];
 
-        /*
-         * Imported timestamp becomes the current site import time.
-         */
         $group['last_saved'] = time();
 
         $already_exists = isset(
             $existing_groups[$import_id]
         );
 
-        /*
-         * SKIP
-         */
         if (
             $already_exists
             && $conflict_mode === 'skip'
@@ -500,9 +468,6 @@ function ff_handle_field_group_import()
             continue;
         }
 
-        /*
-         * DUPLICATE
-         */
         if (
             $already_exists
             && $conflict_mode === 'duplicate'
@@ -519,9 +484,6 @@ function ff_handle_field_group_import()
             continue;
         }
 
-        /*
-         * OVERWRITE or new group.
-         */
         $existing_groups[$import_id] = $group;
 
         $imported++;
