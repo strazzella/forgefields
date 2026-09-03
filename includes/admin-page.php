@@ -515,6 +515,21 @@ function ff_handle_field_group_save()
         ? sanitize_text_field(wp_unslash($_POST['ff_group_id']))
         : '';
 
+    /**
+     * Preserve the existing field definitions before the group is
+     * overwritten so removed fields can be detected after validation.
+     */
+    $existing_fields = [];
+
+    if (
+        $posted_group_id !== ''
+        && $posted_group_id !== 'new'
+        && isset($groups[$posted_group_id]['fields'])
+        && is_array($groups[$posted_group_id]['fields'])
+    ) {
+        $existing_fields = $groups[$posted_group_id]['fields'];
+    }
+
     $title = isset($_POST['ff_group_title'])
         ? substr(
             sanitize_text_field(
@@ -886,6 +901,43 @@ function ff_handle_field_group_save()
         $posted_group_id = ff_generate_group_id();
     }
 
+    /**
+     * Determine which previously saved fields have been removed
+     * from this Field Group.
+     */
+    $existing_field_names = [];
+
+    foreach ($existing_fields as $existing_field) {
+
+        $existing_name = isset($existing_field['name'])
+            ? sanitize_key((string) $existing_field['name'])
+            : '';
+
+        if ($existing_name !== '') {
+            $existing_field_names[] = $existing_name;
+        }
+    }
+
+    $new_field_names = [];
+
+    foreach ($fields as $new_field) {
+
+        $new_name = isset($new_field['name'])
+            ? sanitize_key((string) $new_field['name'])
+            : '';
+
+        if ($new_name !== '') {
+            $new_field_names[] = $new_name;
+        }
+    }
+
+    $removed_field_names = array_values(
+        array_diff(
+            $existing_field_names,
+            $new_field_names
+        )
+    );
+
     $group = [
         'id'              => $posted_group_id,
         'title'           => $title,
@@ -901,6 +953,17 @@ function ff_handle_field_group_save()
     $groups[$posted_group_id] = $group;
 
     ff_save_all_groups($groups);
+
+    /**
+     * A removed field no longer belongs to this Field Group.
+     * Delete only this group's namespaced values for that field.
+     */
+    foreach ($removed_field_names as $removed_field_name) {
+        ff_delete_group_field_values(
+            $posted_group_id,
+            $removed_field_name
+        );
+    }
 
     $redirect_url = add_query_arg(
         [
