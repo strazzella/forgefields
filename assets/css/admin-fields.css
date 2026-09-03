@@ -5274,11 +5274,12 @@ input#_ff_range_slider {
   border-left: 4px solid #363637 !important;
 }
 
-/* Prevent the field row and its options row from looking disconnected. */
-.wrap.ff-admin.ff-edit .ff-field-row.ff-options-open > td {
-  background: #ffffff !important;
-}
-
-.wrap.ff-admin.ff-edit .ff-field-settings.ff-options-open > td {
-  background: #f8f9fb !important;
+/* Match the normal row hover state while Options is open. */
+.wrap.ff-admin.ff-edit table.widefat tbody tr.ff-field-row.ff-options-open > td,
+.wrap.ff-admin.ff-edit
+  table.widefat
+  tbody
+  tr.ff-field-settings.ff-options-open
+  > td {
+  background: #f7f9fc !important;
 }
