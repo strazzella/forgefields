@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
           message.textContent =
             'Field name "' +
             name +
-            '" is already used in another Field Group. Choose a unique name or specify a Forge Key when using ff_get_field().';
+            '" is already used in another Field Group. To avoid ambiguous output, choose a unique name or specify this Field Group Key as the third argument to ff_get_field().';
 
           message.classList.add("is-warning");
           nameInput.classList.add("ff-field-name-warning");
