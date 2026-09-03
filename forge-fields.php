@@ -4,9 +4,8 @@
  * Plugin Name:       Forge Fields
  * Plugin URI:        https://your-future-plugin-site.com/
  * Description:       Lightweight custom fields framework for WordPress with support for field groups, global fields, media fields, choice fields, and developer-friendly template functions.
- * Version:           0.1.5
+ * Version:           0.1.6
  * Author:            Forge Tools
- * Author URI:        https://your-future-site.com/
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Requires at least: 6.8.2
@@ -30,7 +29,7 @@ if (! defined('ABSPATH')) {
  * FF_PATH provides the absolute filesystem path to the plugin.
  * FF_URL provides the public URL to the plugin directory.
  */
-define('FF_VERSION', '0.1.5');
+define('FF_VERSION', '0.1.6');
 
 define('FF_PATH', plugin_dir_path(__FILE__));
 
