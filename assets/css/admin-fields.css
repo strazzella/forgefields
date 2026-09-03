@@ -4884,6 +4884,13 @@ input#_ff_range_slider {
   background: #f8fafc;
 }
 
+/* Remove the seam between an open field row and its options panel. */
+.wrap.ff-admin.ff-edit
+  tr.ff-field-settings.ff-options-open
+  .ff-field-options-panel {
+  border-top: 0;
+}
+
 .wrap.ff-admin.ff-edit .ff-field-options-header {
   margin-bottom: 14px;
   color: #1f2937;
@@ -5269,9 +5276,37 @@ input#_ff_range_slider {
    OPEN FIELD OPTIONS — VISUAL CONNECTION
    --------------------------------------------------------- */
 
+/* Remove the full-height cell border. */
 .wrap.ff-admin.ff-edit .ff-field-row.ff-options-open > td:first-child,
 .wrap.ff-admin.ff-edit .ff-field-settings.ff-options-open > td:first-child {
-  border-left: 4px solid #363637 !important;
+  border-left: 0 !important;
+  position: relative;
+}
+
+/* Top half of the connected pair. */
+.wrap.ff-admin.ff-edit .ff-field-row.ff-options-open > td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: -1px;
+  width: 4px;
+  background: #363637;
+  border-radius: 999px 999px 0 0;
+}
+
+/* Bottom half of the connected pair. */
+.wrap.ff-admin.ff-edit
+  .ff-field-settings.ff-options-open
+  > td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  bottom: 10px;
+  width: 4px;
+  background: #363637;
+  border-radius: 0 0 999px 999px;
 }
 
 /* Match the normal row hover state while Options is open. */
