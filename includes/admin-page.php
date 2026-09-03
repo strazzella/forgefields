@@ -2171,8 +2171,7 @@ function ff_render_global_options_page()
         <?php endforeach; ?>
 
         <?php if (empty($global_groups)) : ?>
-            <p>No global field groups found. Create a field group with
-                <strong>Location = Global</strong> first.
+            <p>No global fields have been created yet. Create a field group and set its location to Global to get started.
             </p>
         <?php else : ?>
             <form method="post" action="" id="ff-global-form">
