@@ -177,15 +177,6 @@ add_action('in_admin_header', function () {
             (function() {
                 const choiceTypes = ['select', 'checkbox', 'radio', 'button_group'];
 
-                function updateRow(row) {
-                    const select = row.querySelector('.ff-field-type');
-                    const settings = row.nextElementSibling;
-                    if (!select || !settings || !settings.matches('[data-ff-settings]')) return;
-                    const shouldShow = choiceTypes.indexOf(select.value) !== -1;
-                    settings.style.display = shouldShow ? '' : 'none';
-                    settings.classList.toggle('is-hidden', !shouldShow);
-                }
-
                 document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
 
                 document.addEventListener('change', function(e) {
@@ -722,12 +713,55 @@ function ff_handle_field_group_save()
             }
         }
 
-        $row = [
-            'name'  => $name,
-            'label' => $label,
-            'type'  => $type,
+        /**
+         * Sanitize optional field settings.
+         */
+        $default_value = isset($field_raw['default_value'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['default_value']
+                )
+            )
+            : '';
+
+        $required = ! empty($field_raw['required'])
+            ? 1
+            : 0;
+
+        $character_limit = isset($field_raw['character_limit'])
+            ? absint($field_raw['character_limit'])
+            : 0;
+
+        /**
+         * Character limits only apply to compatible text-based fields.
+         */
+        $character_limit_types = [
+            'text',
+            'textarea',
+            'email',
+            'url',
+            'password',
         ];
 
+        if (! in_array($type, $character_limit_types, true)) {
+            $character_limit = 0;
+        }
+
+        /**
+         * Build the sanitized field definition.
+         */
+        $row = [
+            'name'            => $name,
+            'label'           => $label,
+            'type'            => $type,
+            'default_value'   => $default_value,
+            'required'        => $required,
+            'character_limit' => $character_limit,
+        ];
+
+        /**
+         * Choice-based fields also store their normalized choices.
+         */
         if (in_array($type, $choice_types, true)) {
             $row['choices'] = $choices_to_save;
         }
@@ -2685,7 +2719,7 @@ function ff_render_field_group_edit()
                         <th class="ff-bar-title">Label</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th style="width:80px;"></th>
+                        <th style="width:150px;"></th>
                     </tr>
                 </thead>
 
@@ -2705,6 +2739,16 @@ function ff_render_field_group_edit()
                         $label = isset($field['label']) ? $field['label'] : '';
                         $name  = isset($field['name'])  ? $field['name']  : '';
                         $type  = isset($field['type'])  ? $field['type']  : 'text';
+
+                        $default_value = isset($field['default_value'])
+                            ? (string) $field['default_value']
+                            : '';
+
+                        $required = ! empty($field['required']);
+
+                        $character_limit = isset($field['character_limit'])
+                            ? absint($field['character_limit'])
+                            : 0;
                     ?>
                         <?php
                         $choice_types = ['select', 'checkbox', 'radio', 'button_group'];
@@ -2777,24 +2821,128 @@ function ff_render_field_group_edit()
                                 </div>
                             </td>
 
-                            <td>
-                                <a href="#" class="ff-field-remove">Remove</a>
+                            <td class="ff-field-actions">
+                                <button
+                                    type="button"
+                                    class="button-link ff-field-options-toggle"
+                                    aria-expanded="false">
+                                    Options
+                                </button>
+
+                                <span class="ff-field-action-separator">|</span>
+
+                                <a href="#" class="ff-field-remove">
+                                    Remove
+                                </a>
                             </td>
                         </tr>
                         <tr
-                            class="ff-field-settings<?php echo $is_choice ? '' : ' is-hidden'; ?>"
+                            class="ff-field-settings is-hidden"
                             data-index="<?php echo esc_attr($index); ?>"
                             data-ff-settings
-                            <?php echo $is_choice ? '' : 'style="display:none"'; ?>>
+                            style="display:none;">
 
                             <td colspan="6">
-                                <div class="ff-field-setting ff-setting-choices">
-                                    <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
-                                    <textarea name="ff_fields[<?php echo $index; ?>][choices]" rows="3" class="large-text" placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea($choices_raw); ?></textarea>
-                                    <p class="description" style="margin-top:6px;">
-                                        Supported formats: <code>value : Label</code> or <code>value</code>.
-                                    </p>
+
+                                <div class="ff-field-options-panel">
+
+                                    <div class="ff-field-options-header">
+                                        <strong>Field Options</strong>
+                                    </div>
+
+                                    <div class="ff-field-options-grid">
+
+                                        <div
+                                            class="ff-field-option ff-option-default"
+                                            data-ff-option="default">
+
+                                            <label
+                                                for="ff-default-value-<?php echo esc_attr($index); ?>">
+                                                Default Value
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ff-default-value-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][default_value]"
+                                                value="<?php echo esc_attr($default_value); ?>"
+                                                class="regular-text">
+
+                                            <p class="description">
+                                                Used when no value has been saved yet.
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-character-limit"
+                                            data-ff-option="character-limit">
+
+                                            <label
+                                                for="ff-character-limit-<?php echo esc_attr($index); ?>">
+                                                Character Limit
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                id="ff-character-limit-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][character_limit]"
+                                                value="<?php echo esc_attr($character_limit); ?>"
+                                                min="0"
+                                                step="1">
+
+                                            <p class="description">
+                                                Leave at 0 for no limit.
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-required"
+                                            data-ff-option="required">
+
+                                            <label>
+                                                Required
+                                            </label>
+
+                                            <label class="ff-option-toggle">
+                                                <input
+                                                    type="checkbox"
+                                                    name="ff_fields[<?php echo esc_attr($index); ?>][required]"
+                                                    value="1"
+                                                    <?php checked($required); ?>>
+
+                                                <span>Field must contain a value</span>
+                                            </label>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div
+                                        class="ff-field-setting ff-setting-choices"
+                                        data-ff-option="choices">
+
+                                        <label>
+                                            Choices <span class="ff-required-indicator">*</span>
+                                        </label>
+
+                                        <textarea
+                                            name="ff_fields[<?php echo esc_attr($index); ?>][choices]"
+                                            rows="4"
+                                            class="large-text"
+                                            placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea($choices_raw); ?></textarea>
+
+                                        <p class="description">
+                                            <strong>Required.</strong> Add at least one choice, one per line. Use
+                                            <code>value : Label</code> or
+                                            <code>value|Label</code>. If only <code>value</code> is entered, Forge Fields will still generate a safe stored value automatically.
+                                        </p>
+
+                                    </div>
+
                                 </div>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -2814,7 +2962,7 @@ function ff_render_field_group_edit()
                         <th class="ff-bar-title">Label</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th style="width:80px;"></th>
+                        <th style="width:150px;"></th>
                     </tr>
                 </tfoot>
             </table>
@@ -2901,22 +3049,126 @@ function ff_render_field_group_edit()
                     </td>
 
                     <td class="ff-field-actions">
-                        <a href="#" class="ff-field-remove">Remove</a>
+                        <button
+                            type="button"
+                            class="button-link ff-field-options-toggle"
+                            aria-expanded="false">
+                            Options
+                        </button>
+
+                        <span class="ff-field-action-separator">|</span>
+
+                        <a href="#" class="ff-field-remove">
+                            Remove
+                        </a>
                     </td>
                 </tr>
 
-                <tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
+                <tr
+                    class="ff-field-settings is-hidden"
+                    data-index="__INDEX__"
+                    data-ff-settings
+                    style="display:none">
+
                     <td colspan="6">
-                        <div class="ff-field-setting ff-setting-choices">
-                            <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
-                            <textarea name="ff_fields[__INDEX__][choices]"
-                                rows="3"
-                                class="large-text"
-                                placeholder="value : Label&#10;"></textarea>
-                            <p class="description" style="margin-top:6px;">
-                                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
-                            </p>
+
+                        <div class="ff-field-options-panel">
+
+                            <div class="ff-field-options-header">
+                                <strong>Field Options</strong>
+                            </div>
+
+                            <div class="ff-field-options-grid">
+
+                                <div
+                                    class="ff-field-option ff-option-default"
+                                    data-ff-option="default">
+
+                                    <label for="ff-default-value-__INDEX__">
+                                        Default Value
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="ff-default-value-__INDEX__"
+                                        name="ff_fields[__INDEX__][default_value]"
+                                        value=""
+                                        class="regular-text">
+
+                                    <p class="description">
+                                        Used when no value has been saved yet.
+                                    </p>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-character-limit"
+                                    data-ff-option="character-limit">
+
+                                    <label for="ff-character-limit-__INDEX__">
+                                        Character Limit
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        id="ff-character-limit-__INDEX__"
+                                        name="ff_fields[__INDEX__][character_limit]"
+                                        value="0"
+                                        min="0"
+                                        step="1">
+
+                                    <p class="description">
+                                        Leave at 0 for no limit.
+                                    </p>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-required"
+                                    data-ff-option="required">
+
+                                    <label>
+                                        Required
+                                    </label>
+
+                                    <label class="ff-option-toggle">
+                                        <input
+                                            type="checkbox"
+                                            name="ff_fields[__INDEX__][required]"
+                                            value="1">
+
+                                        <span>Field must contain a value</span>
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="ff-field-setting ff-setting-choices"
+                                data-ff-option="choices">
+
+                                <label>
+                                    Choices
+                                </label>
+
+                                <textarea
+                                    name="ff_fields[__INDEX__][choices]"
+                                    rows="4"
+                                    class="large-text"
+                                    placeholder="value : Label&#10;"></textarea>
+
+                                <p class="description">
+                                    One choice per line. Supported formats:
+                                    <code>value : Label</code>,
+                                    <code>value|Label</code>,
+                                    or <code>value</code>.
+                                </p>
+
+                            </div>
+
                         </div>
+
                     </td>
                 </tr>
             </script>

@@ -596,14 +596,55 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
         return;
     }
 
-    $label    = $field['label'] ?? $name;
-    $type     = $field['type']  ?? 'text';
-    $meta_key = '_ff_' . $name;
-    $value    = get_post_meta($post->ID, $meta_key, true);
+    $label         = $field['label'] ?? $name;
+    $type          = $field['type'] ?? 'text';
+    $required = ! empty($field['required']);
+    $meta_key      = '_ff_' . $name;
+    $default_value = isset($field['default_value'])
+        ? $field['default_value']
+        : '';
 
-    echo '<tr>';
-    echo '<th scope="row"><label for="' . esc_attr($meta_key) . '">' . esc_html($label) . '</label></th>';
+    $character_limit = isset($field['character_limit'])
+        ? absint($field['character_limit'])
+        : 0;
+
+    $maxlength_attr = $character_limit > 0
+        ? ' maxlength="' . esc_attr($character_limit) . '"'
+        : '';
+    /**
+     * Use the saved post-meta value when it exists.
+     * Otherwise, fall back to the field's configured default value.
+     */
+    if (metadata_exists('post', $post->ID, $meta_key)) {
+        $value = get_post_meta(
+            $post->ID,
+            $meta_key,
+            true
+        );
+    } else {
+        $value = $default_value;
+    }
+
+    $row_class = $required
+        ? ' class="ff-required-field"'
+        : '';
+
+    echo '<tr' . $row_class . ' data-ff-field-type="' . esc_attr($type) . '">';
+    echo '<th scope="row">';
+    echo '<label for="' . esc_attr($meta_key) . '">';
+    echo esc_html($label);
+
+    if ($required) {
+        echo ' <span class="ff-required-indicator" aria-hidden="true">*</span>';
+    }
+
+    echo '</label>';
+    echo '</th>';
     echo '<td>';
+
+    $required_attr = $required
+        ? ' required aria-required="true"'
+        : '';
 
     switch ($type) {
         case 'wysiwyg':
@@ -634,7 +675,9 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
                 '<textarea name="%1$s" id="%2$s" rows="6" class="large-text">%3$s</textarea>',
                 esc_attr($meta_key),
                 esc_attr($meta_key),
-                esc_textarea((string) $value)
+                esc_textarea((string) $value),
+                $required_attr,
+                $maxlength_attr
             );
             break;
 
@@ -643,7 +686,8 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
                 '<input type="number" class="small-text" name="%1$s" id="%2$s" value="%3$s">',
                 esc_attr($meta_key),
                 esc_attr($meta_key),
-                esc_attr((string) $value)
+                esc_attr((string) $value),
+                $required_attr
             );
             break;
 
@@ -651,12 +695,12 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
         case 'url':
         case 'text':
             $input = in_array($type, ['email', 'url'], true) ? $type : 'text';
-            echo '<input type="' . esc_attr($input) . '" class="regular-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '">';
+            echo '<input type="' . esc_attr($input) . '" class="regular-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . $maxlength_attr . '>';
             break;
 
         case 'password':
             echo '<div class="ff-password-wrap">';
-            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" maxlength="45" autocomplete="off">';
+            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" autocomplete="off"' . $required_attr . $maxlength_attr . '>';
             echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($meta_key) . '" aria-label="Show password" aria-controls="' . esc_attr($meta_key) . '">';
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
@@ -718,7 +762,7 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
             $current     = is_scalar($value) ? (string) $value : '';
 
             echo '<div class="ff-select-wrap">';
-            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '">';
+            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '"' . $required_attr . '>';
             foreach ($choices_map as $v => $lbl) {
                 printf(
                     '<option value="%1$s"%3$s>%2$s</option>',
@@ -1046,10 +1090,13 @@ add_action('save_post', function ($post_id) {
                     break;
             }
 
+            /**
+             * Save or remove the actual field value.
+             */
             if ($val === '' || $val === [] || $val === null) {
-                delete_post_meta($post_id, '_ff_' . $name);
+                delete_post_meta($post_id, $key);
             } else {
-                update_post_meta($post_id, '_ff_' . $name, $val);
+                update_post_meta($post_id, $key, $val);
             }
         }
     }
@@ -1073,11 +1120,20 @@ function ff_get_field($field_name, $post_id = null)
         return '';
     }
 
+    /**
+     * Global/options lookup.
+     */
     if ($post_id === 'global' || $post_id === 'option') {
         $global = get_option('ff_global_fields', []);
-        return isset($global[$field_name]) ? $global[$field_name] : '';
+
+        return isset($global[$field_name])
+            ? $global[$field_name]
+            : '';
     }
 
+    /**
+     * Current post fallback.
+     */
     if ($post_id === null) {
         $post_id = get_the_ID();
     }
@@ -1086,9 +1142,15 @@ function ff_get_field($field_name, $post_id = null)
         return '';
     }
 
-    $value = get_post_meta($post_id, '_ff_' . $field_name, true);
-
-    return $value;
+    /**
+     * Front-end retrieval only returns values that have actually
+     * been saved to the Page/Post.
+     */
+    return get_post_meta(
+        $post_id,
+        '_ff_' . $field_name,
+        true
+    );
 }
 
 /**

@@ -4796,3 +4796,161 @@ input#_ff_range_slider {
 #poststuff .postbox .inside .ff-mb .ff-tab-panel.is-active {
   display: block;
 }
+
+/* ---------------------------------------------------------
+   FIELD OPTIONS
+   --------------------------------------------------------- */
+
+/**
+ * Keep row actions compact and aligned.
+ */
+.wrap.ff-admin.ff-edit .ff-field-actions {
+  white-space: nowrap;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-options-toggle {
+  color: #475569;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-options-toggle:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-action-separator {
+  margin: 0 7px;
+  color: #c7ccd6;
+}
+
+/**
+ * Options row.
+ */
+.wrap.ff-admin.ff-edit tr.ff-field-settings > td {
+  padding: 0 !important;
+  background: #f8fafc !important;
+}
+
+.wrap.ff-admin.ff-edit tr.ff-field-settings.is-hidden {
+  display: none !important;
+}
+
+/**
+ * Field Options panel.
+ */
+.wrap.ff-admin.ff-edit .ff-field-options-panel {
+  padding: 18px 20px 20px 94px;
+  border-top: 1px solid #e9edf3;
+  border-bottom: 1px solid #e9edf3;
+  background: #f8fafc;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-options-header {
+  margin-bottom: 14px;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+/**
+ * Primary options grid.
+ */
+.wrap.ff-admin.ff-edit .ff-field-options-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    minmax(160px, 220px)
+    minmax(220px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-option > label,
+.wrap.ff-admin.ff-edit .ff-setting-choices > label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-option input[type="text"] {
+  width: 100%;
+  max-width: none;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-option input[type="number"] {
+  width: 120px;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  font-weight: 400 !important;
+  cursor: pointer;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-toggle input {
+  margin: 0;
+}
+
+/**
+ * Choices occupy the full width underneath the basic options.
+ */
+.wrap.ff-admin.ff-edit .ff-setting-choices {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.wrap.ff-admin.ff-edit .ff-setting-choices textarea {
+  width: 100%;
+  max-width: 720px;
+}
+
+@media (max-width: 960px) {
+  .wrap.ff-admin.ff-edit .ff-field-options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wrap.ff-admin.ff-edit .ff-field-options-panel {
+    padding-left: 20px;
+  }
+}
+
+.wrap.ff-admin.ff-edit .ff-field-actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/**
+ * Required field indicator.
+ */
+.ff-mb .ff-required-indicator {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/**
+ * Highlight a Forge Field when required validation fails.
+ */
+.ff-mb .ff-required-field.ff-required-error > th,
+.ff-mb .ff-required-field.ff-required-error > td {
+  background: #fff7f7;
+}
+
+.ff-mb .ff-required-field.ff-required-error input,
+.ff-mb .ff-required-field.ff-required-error textarea,
+.ff-mb .ff-required-field.ff-required-error select {
+  border-color: #b91c1c !important;
+}
+
+/**
+ * Required
+ */
+.ff-required-indicator {
+  color: #b91c1c !important;
+  font-weight: 600 !important;
+}

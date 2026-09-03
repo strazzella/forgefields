@@ -121,13 +121,13 @@ document.addEventListener("DOMContentLoaded", function () {
      * - Updates field-type select names.
      * - Enables dragging only when more than one field exists.
      */
+    /**
+     * Reindex all editable field rows and their associated options rows.
+     */
     function renumberRows() {
       const rows = Array.from(tbody.querySelectorAll(".ff-field-row"));
       const canDrag = rows.length > 1;
 
-      /**
-       * Update every row using its current position in the table.
-       */
       rows.forEach(function (row, index) {
         row.dataset.index = index;
 
@@ -136,35 +136,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const typeSelect = row.querySelector(".ff-field-type");
         const handle = row.querySelector(".ff-field-handle");
 
-        /**
-         * Update the field-label input so it submits under the correct index.
-         */
         if (labelInput) {
           labelInput.name = "ff_fields[" + index + "][label]";
           labelInput.dataset.index = index;
         }
 
-        /**
-         * Update the field-name input so it submits under the correct index.
-         */
         if (nameInput) {
           nameInput.name = "ff_fields[" + index + "][name]";
           nameInput.dataset.index = index;
         }
 
-        /**
-         * Update the field-type select so it submits under the correct index.
-         */
         if (typeSelect) {
           typeSelect.name = "ff_fields[" + index + "][type]";
         }
 
-        /**
-         * A drag handle is only useful when more than one field exists.
-         *
-         * Enable dragging when multiple rows are present and visually disable
-         * the handle when only one field remains.
-         */
         if (handle) {
           handle.draggable = canDrag;
 
@@ -173,6 +158,34 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             handle.classList.add("ff-handle-disabled");
           }
+        }
+
+        /**
+         * Keep the settings row attached to the same field index.
+         */
+        const settingsRow = row.nextElementSibling;
+
+        if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+          settingsRow.dataset.index = index;
+
+          settingsRow
+            .querySelectorAll("input, textarea, select")
+            .forEach(function (control) {
+              if (!control.name) return;
+
+              control.name = control.name.replace(
+                /ff_fields\[\d+\]/,
+                "ff_fields[" + index + "]",
+              );
+            });
+
+          settingsRow.querySelectorAll("[id]").forEach(function (element) {
+            element.id = element.id.replace(/-\d+$/, "-" + index);
+          });
+
+          settingsRow.querySelectorAll("label[for]").forEach(function (label) {
+            label.htmlFor = label.htmlFor.replace(/-\d+$/, "-" + index);
+          });
         }
       });
     }
@@ -195,6 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const nameInput = row.querySelector(".ff-field-name");
       const removeLink = row.querySelector(".ff-field-remove");
       const typeSelect = row.querySelector(".ff-field-type");
+      const optionsToggle = row.querySelector(".ff-field-options-toggle");
 
       /**
        * Whenever the field type changes, synchronize any special behavior
@@ -205,6 +219,62 @@ document.addEventListener("DOMContentLoaded", function () {
       if (typeSelect) {
         typeSelect.addEventListener("change", function () {
           syncTabRowState(row);
+          syncFieldOptions(row);
+
+          /**
+           * Choice-based fields require configured choices.
+           * Automatically open Field Options when one is selected.
+           */
+          const choiceTypes = ["select", "checkbox", "radio", "button_group"];
+
+          if (choiceTypes.includes(typeSelect.value)) {
+            const settingsRow = row.nextElementSibling;
+
+            if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+              settingsRow.classList.remove("is-hidden");
+              settingsRow.style.display = "";
+
+              if (optionsToggle) {
+                optionsToggle.setAttribute("aria-expanded", "true");
+              }
+
+              const choicesInput = settingsRow.querySelector(
+                '[data-ff-option="choices"] textarea',
+              );
+
+              if (choicesInput) {
+                setTimeout(function () {
+                  choicesInput.focus();
+                }, 50);
+              }
+            }
+          }
+        });
+      }
+
+      if (optionsToggle) {
+        optionsToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const settingsRow = row.nextElementSibling;
+
+          if (!settingsRow || !settingsRow.matches("[data-ff-settings]")) {
+            return;
+          }
+
+          const isOpen = !settingsRow.classList.contains("is-hidden");
+
+          if (isOpen) {
+            settingsRow.classList.add("is-hidden");
+            settingsRow.style.display = "none";
+            optionsToggle.setAttribute("aria-expanded", "false");
+          } else {
+            settingsRow.classList.remove("is-hidden");
+            settingsRow.style.display = "";
+            optionsToggle.setAttribute("aria-expanded", "true");
+
+            syncFieldOptions(row);
+          }
         });
       }
 
@@ -259,6 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
     tbody.querySelectorAll(".ff-field-row").forEach(function (row) {
       attachRowEvents(row);
       syncTabRowState(row);
+      syncFieldOptions(row);
     });
 
     /**
@@ -308,6 +379,8 @@ document.addEventListener("DOMContentLoaded", function () {
           tbody.appendChild(r);
           if (r.classList.contains("ff-field-row")) {
             attachRowEvents(r);
+            syncTabRowState(r);
+            syncFieldOptions(r);
           }
         });
       } else {
@@ -396,11 +469,75 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
+     * Show or hide individual options based on the selected field type.
+     */
+    function syncFieldOptions(row) {
+      const typeSelect = row.querySelector(".ff-field-type");
+
+      if (!typeSelect) {
+        return;
+      }
+
+      const settingsRow = row.nextElementSibling;
+
+      if (!settingsRow || !settingsRow.matches("[data-ff-settings]")) {
+        return;
+      }
+
+      const type = typeSelect.value;
+
+      const choiceTypes = ["select", "checkbox", "radio", "button_group"];
+
+      const characterLimitTypes = [
+        "text",
+        "textarea",
+        "email",
+        "url",
+        "password",
+      ];
+
+      const choicesOption = settingsRow.querySelector(
+        '[data-ff-option="choices"]',
+      );
+
+      const defaultOption = settingsRow.querySelector(
+        '[data-ff-option="default"]',
+      );
+
+      const characterLimitOption = settingsRow.querySelector(
+        '[data-ff-option="character-limit"]',
+      );
+
+      const requiredOption = settingsRow.querySelector(
+        '[data-ff-option="required"]',
+      );
+
+      if (choicesOption) {
+        choicesOption.style.display = choiceTypes.includes(type) ? "" : "none";
+      }
+
+      if (defaultOption) {
+        defaultOption.style.display = type === "tab" ? "none" : "";
+      }
+
+      if (characterLimitOption) {
+        characterLimitOption.style.display = characterLimitTypes.includes(type)
+          ? ""
+          : "none";
+      }
+
+      if (requiredOption) {
+        requiredOption.style.display = type === "tab" ? "none" : "";
+      }
+    }
+
+    /**
      * Stores the field row currently being dragged.
      *
      * A null value means no row is actively being reordered.
      */
     let draggingRow = null;
+    let draggingSettingsRow = null;
 
     /**
      * Starts field-row drag-and-drop reordering.
@@ -419,6 +556,14 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!row) return;
 
       draggingRow = row;
+      draggingSettingsRow = row.nextElementSibling;
+
+      if (
+        !draggingSettingsRow ||
+        !draggingSettingsRow.matches("[data-ff-settings]")
+      ) {
+        draggingSettingsRow = null;
+      }
       row.classList.add("ff-row-dragging");
       e.dataTransfer.effectAllowed = "move";
 
@@ -438,9 +583,12 @@ document.addEventListener("DOMContentLoaded", function () {
     tbody.addEventListener("dragend", function () {
       if (draggingRow) {
         draggingRow.classList.remove("ff-row-dragging");
-        draggingRow = null;
-        renumberRows();
       }
+
+      draggingRow = null;
+      draggingSettingsRow = null;
+
+      renumberRows();
     });
 
     /**
@@ -458,8 +606,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const afterElement = getDragAfterElement(tbody, e.clientY);
       if (!afterElement) {
         tbody.appendChild(draggingRow);
+
+        if (draggingSettingsRow) {
+          tbody.appendChild(draggingSettingsRow);
+        }
       } else if (afterElement !== draggingRow) {
         tbody.insertBefore(draggingRow, afterElement);
+
+        if (draggingSettingsRow) {
+          tbody.insertBefore(draggingSettingsRow, draggingRow.nextSibling);
+        }
       }
     });
 
@@ -2035,4 +2191,122 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   });
+  /**
+   * Prevent Page/Post updates when a required Forge Field is empty.
+   */
+  const postForm = document.getElementById("post");
+
+  if (postForm) {
+    postForm.addEventListener("submit", function (event) {
+      const requiredRows = document.querySelectorAll(
+        ".ff-mb .ff-required-field",
+      );
+
+      let firstInvalid = null;
+
+      requiredRows.forEach(function (row) {
+        const type = row.dataset.ffFieldType || "";
+        let isValid = true;
+
+        switch (type) {
+          case "checkbox": {
+            isValid =
+              row.querySelectorAll('input[type="checkbox"]:checked').length > 0;
+            break;
+          }
+
+          case "radio":
+          case "button_group": {
+            isValid = row.querySelector('input[type="radio"]:checked') !== null;
+            break;
+          }
+
+          case "true_false": {
+            isValid =
+              row.querySelector('input[type="checkbox"]:checked') !== null;
+            break;
+          }
+
+          case "image":
+          case "file": {
+            const hidden = row.querySelector(
+              'input[type="hidden"][name^="_ff_"]',
+            );
+
+            isValid =
+              hidden !== null &&
+              hidden.value.trim() !== "" &&
+              hidden.value !== "0";
+
+            break;
+          }
+
+          case "wysiwyg": {
+            const textarea = row.querySelector("textarea");
+
+            if (!textarea) {
+              isValid = false;
+              break;
+            }
+
+            /**
+             * When TinyMCE is active, read the content directly from
+             * the editor because it may not yet be synchronized with
+             * the underlying textarea.
+             */
+            if (
+              window.tinymce &&
+              textarea.id &&
+              window.tinymce.get(textarea.id)
+            ) {
+              const editor = window.tinymce.get(textarea.id);
+
+              isValid = editor.getContent({ format: "text" }).trim() !== "";
+            } else {
+              isValid = textarea.value.trim() !== "";
+            }
+
+            break;
+          }
+
+          default: {
+            const control = row.querySelector(
+              "input:not([type='hidden']), textarea, select",
+            );
+
+            isValid = control !== null && String(control.value).trim() !== "";
+
+            break;
+          }
+        }
+
+        row.classList.toggle("ff-required-error", !isValid);
+
+        if (!isValid && !firstInvalid) {
+          firstInvalid = row;
+        }
+      });
+
+      if (firstInvalid) {
+        event.preventDefault();
+
+        firstInvalid.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        const control = firstInvalid.querySelector(
+          "input, textarea, select, button",
+        );
+
+        if (control) {
+          control.focus();
+        }
+
+        window.alert(
+          "Please complete all required Forge Fields before updating this page.",
+        );
+      }
+    });
+  }
 });
