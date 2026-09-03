@@ -608,8 +608,24 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
         ? absint($field['character_limit'])
         : 0;
 
+    $prepend = isset($field['prepend'])
+        ? (string) $field['prepend']
+        : '';
+
+    $append = isset($field['append'])
+        ? (string) $field['append']
+        : '';
+
     $maxlength_attr = $character_limit > 0
         ? ' maxlength="' . esc_attr($character_limit) . '"'
+        : '';
+
+    $prepend_html = $prepend !== ''
+        ? '<span class="ff-input-affix ff-input-prepend">' . esc_html($prepend) . '</span>'
+        : '';
+
+    $append_html = $append !== ''
+        ? '<span class="ff-input-affix ff-input-append">' . esc_html($append) . '</span>'
         : '';
     /**
      * Use the saved post-meta value when it exists.
@@ -682,29 +698,84 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
             break;
 
         case 'number':
-            printf(
-                '<input type="number" class="small-text" name="%1$s" id="%2$s" value="%3$s">',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                esc_attr((string) $value),
-                $required_attr
-            );
+
+            if ($prepend !== '' || $append !== '') {
+                echo '<div class="ff-input-affix-wrap">';
+                echo $prepend_html;
+            }
+
+            echo '<input type="number" class="small-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . '>';
+
+            if ($prepend !== '' || $append !== '') {
+                echo $append_html;
+                echo '</div>';
+            }
+
             break;
 
         case 'email':
         case 'url':
         case 'text':
-            $input = in_array($type, ['email', 'url'], true) ? $type : 'text';
-            echo '<input type="' . esc_attr($input) . '" class="regular-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . $maxlength_attr . '>';
+            $input = in_array($type, ['email', 'url'], true)
+                ? $type
+                : 'text';
+
+            $supports_affixes = in_array(
+                $type,
+                ['text', 'email'],
+                true
+            );
+
+            if ($supports_affixes && ($prepend !== '' || $append !== '')) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
+            }
+
+            echo '<input type="' . esc_attr($input) . '"'
+                . ' class="' . ($supports_affixes && ($prepend !== '' || $append !== '') ? 'ff-affix-input__field' : 'regular-text') . '"'
+                . ' name="' . esc_attr($meta_key) . '"'
+                . ' id="' . esc_attr($meta_key) . '"'
+                . ' value="' . esc_attr((string) $value) . '"'
+                . $required_attr
+                . $maxlength_attr
+                . '>';
+
+            if ($supports_affixes && ($prepend !== '' || $append !== '')) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
+                echo '</div>';
+            }
+
             break;
 
         case 'password':
+
+            if ($prepend !== '' || $append !== '') {
+                echo '<div class="ff-input-affix-wrap">';
+                echo $prepend_html;
+            }
+
             echo '<div class="ff-password-wrap">';
             echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" autocomplete="off"' . $required_attr . $maxlength_attr . '>';
             echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($meta_key) . '" aria-label="Show password" aria-controls="' . esc_attr($meta_key) . '">';
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
             echo '</div>';
+
+            if ($prepend !== '' || $append !== '') {
+                echo $append_html;
+                echo '</div>';
+            }
+
             break;
 
         case 'range':

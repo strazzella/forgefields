@@ -5014,3 +5014,112 @@ input#_ff_range_slider {
   font-weight: 500;
   color: var(--ff-text);
 }
+
+/* ---------------------------------------------
+   AFFIX INPUTS
+   Modern prepend / append input styling
+--------------------------------------------- */
+
+.ff-mb .ff-affix-input {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  min-height: 46px;
+  background: #fff;
+  border: 1px solid #c3cad5;
+  border-radius: 10px;
+  overflow: hidden;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.ff-mb .ff-affix-input:focus-within {
+  border-color: #8fb4ff;
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.14),
+    0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.ff-mb .ff-affix-input__addon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  white-space: nowrap;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5b6472;
+  background: #f8fafc;
+  border: 0;
+}
+
+.ff-mb .ff-affix-input__addon--prepend {
+  border-right: 1px solid #e2e8f0;
+}
+
+.ff-mb .ff-affix-input__addon--append {
+  border-left: 1px solid #e2e8f0;
+}
+
+.ff-mb .ff-affix-input__field {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  margin: 0 !important;
+  padding: 0 14px;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #1f2937;
+  border-radius: 0 !important;
+}
+
+.ff-mb .ff-affix-input__field:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ff-mb .ff-affix-input__field::placeholder {
+  color: #94a3b8;
+}
+
+/* ---------------------------------------------
+   GRID
+--------------------------------------------- */
+
+.wrap.ff-admin.ff-edit .ff-field-options-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    minmax(280px, 1fr);
+  gap: 22px 18px;
+  align-items: start;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-default {
+  grid-column: 1;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-character-limit {
+  grid-column: 2;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-prepend {
+  grid-column: 1;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-append {
+  grid-column: 2;
+}
+
+.wrap.ff-admin.ff-edit .ff-option-required {
+  grid-column: 1 / 3;
+}

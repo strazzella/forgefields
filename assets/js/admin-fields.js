@@ -496,6 +496,8 @@ document.addEventListener("DOMContentLoaded", function () {
         "password",
       ];
 
+      const prependAppendTypes = ["text", "number", "email", "password"];
+
       const choicesOption = settingsRow.querySelector(
         '[data-ff-option="choices"]',
       );
@@ -510,6 +512,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const requiredOption = settingsRow.querySelector(
         '[data-ff-option="required"]',
+      );
+
+      const prependOption = settingsRow.querySelector(
+        '[data-ff-option="prepend"]',
+      );
+
+      const appendOption = settingsRow.querySelector(
+        '[data-ff-option="append"]',
       );
 
       if (choicesOption) {
@@ -528,6 +538,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (requiredOption) {
         requiredOption.style.display = type === "tab" ? "none" : "";
+      }
+
+      if (prependOption) {
+        prependOption.style.display = prependAppendTypes.includes(type)
+          ? ""
+          : "none";
+      }
+
+      if (appendOption) {
+        appendOption.style.display = prependAppendTypes.includes(type)
+          ? ""
+          : "none";
       }
     }
 

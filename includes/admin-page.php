@@ -732,6 +732,33 @@ function ff_handle_field_group_save()
             ? absint($field_raw['character_limit'])
             : 0;
 
+        $prepend = isset($field_raw['prepend'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['prepend']
+                )
+            )
+            : '';
+
+        $append = isset($field_raw['append'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['append']
+                )
+            )
+            : '';
+
+        $prepend_append_types = [
+            'text',
+            'number',
+            'email',
+            'password',
+        ];
+
+        if (! in_array($type, $prepend_append_types, true)) {
+            $prepend = '';
+            $append  = '';
+        }
         /**
          * Character limits only apply to compatible text-based fields.
          */
@@ -757,8 +784,9 @@ function ff_handle_field_group_save()
             'default_value'   => $default_value,
             'required'        => $required,
             'character_limit' => $character_limit,
+            'prepend'         => $prepend,
+            'append'          => $append,
         ];
-
         /**
          * Choice-based fields also store their normalized choices.
          */
@@ -2749,6 +2777,14 @@ function ff_render_field_group_edit()
                         $character_limit = isset($field['character_limit'])
                             ? absint($field['character_limit'])
                             : 0;
+
+                        $prepend = isset($field['prepend'])
+                            ? (string) $field['prepend']
+                            : '';
+
+                        $append = isset($field['append'])
+                            ? (string) $field['append']
+                            : '';
                     ?>
                         <?php
                         $choice_types = ['select', 'checkbox', 'radio', 'button_group'];
@@ -2917,6 +2953,50 @@ function ff_render_field_group_edit()
 
                                             <p class="description">
                                                 Is this field required?
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-prepend"
+                                            data-ff-option="prepend">
+
+                                            <label
+                                                for="ff-prepend-<?php echo esc_attr($index); ?>">
+                                                Prepend
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ff-prepend-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][prepend]"
+                                                value="<?php echo esc_attr($prepend); ?>"
+                                                class="regular-text">
+
+                                            <p class="description">
+                                                Appears before the input.
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-append"
+                                            data-ff-option="append">
+
+                                            <label
+                                                for="ff-append-<?php echo esc_attr($index); ?>">
+                                                Append
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ff-append-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][append]"
+                                                value="<?php echo esc_attr($append); ?>"
+                                                class="regular-text">
+
+                                            <p class="description">
+                                                Appears after the input.
                                             </p>
 
                                         </div>
