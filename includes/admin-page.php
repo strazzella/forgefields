@@ -2829,10 +2829,42 @@ function ff_render_field_group_edit()
                         </p>
                     </td>
                 </tr>
+
+                <?php if (! empty($group_id)) : ?>
+                    <tr class="ff-group-key-row">
+                        <th scope="row">
+                            Field Group Key
+                        </th>
+
+                        <td>
+                            <div class="ff-edit-group-key">
+                                <code
+                                    class="ff-group-key"
+                                    data-key="<?php echo esc_attr($group_id); ?>">
+                                    <?php echo esc_html($group_id); ?>
+                                </code>
+
+                                <button
+                                    type="button"
+                                    class="button-link ff-copy-key"
+                                    data-key="<?php echo esc_attr($group_id); ?>"
+                                    aria-label="Copy Forge Key"
+                                    title="Copy to clipboard">
+                                    <span class="screen-reader-text">Copy</span>
+                                </button>
+
+                                <span class="ff-edit-group-key__help">
+                                    Use with <code>ff_get_field()</code> when field names exist in multiple Field Groups.
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endif; ?>
             </table>
 
             <h2>Fields</h2>
             <p>Define your fields (label, name, type). Add or remove rows as needed.</p>
+
 
             <table class="widefat fixed striped">
                 <thead>
@@ -2847,9 +2879,9 @@ function ff_render_field_group_edit()
                                 aria-label="Select all fields">
                         </th>
 
-                        <th class="ff-bar-title">Label</th>
-                        <th>Name</th>
-                        <th>Type</th>
+                        <th class="ff-bar-title">Field Label</th>
+                        <th>Field Name</th>
+                        <th>Field Type</th>
                         <th style="width:150px;"></th>
                     </tr>
                 </thead>

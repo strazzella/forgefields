@@ -5217,3 +5217,68 @@ input#_ff_range_slider {
   > td {
   vertical-align: top;
 }
+
+/* ---------------------------------------------------------
+   EDIT FIELD GROUP — FORGE KEY
+   --------------------------------------------------------- */
+
+.wrap.ff-admin.ff-edit .ff-group-key-row > th,
+.wrap.ff-admin.ff-edit .ff-group-key-row > td {
+  padding-top: 10px;
+  padding-bottom: 14px;
+}
+
+.wrap.ff-admin.ff-edit .ff-edit-group-key {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.wrap.ff-admin.ff-edit .ff-edit-group-key .ff-group-key {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #fff;
+  color: #111827;
+  font-family: var(--ff-f-mono);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wrap.ff-admin.ff-edit .ff-edit-group-key .ff-copy-key {
+  margin-left: 0;
+}
+
+.wrap.ff-admin.ff-edit .ff-edit-group-key__help {
+  flex-basis: 100%;
+  margin-top: 2px;
+  color: var(--ff-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.wrap.ff-admin.ff-edit .ff-edit-group-key__help code {
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------
+   OPEN FIELD OPTIONS — VISUAL CONNECTION
+   --------------------------------------------------------- */
+
+.wrap.ff-admin.ff-edit .ff-field-row.ff-options-open > td:first-child,
+.wrap.ff-admin.ff-edit .ff-field-settings.ff-options-open > td:first-child {
+  border-left: 4px solid #363637 !important;
+}
+
+/* Prevent the field row and its options row from looking disconnected. */
+.wrap.ff-admin.ff-edit .ff-field-row.ff-options-open > td {
+  background: #ffffff !important;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-settings.ff-options-open > td {
+  background: #f8f9fb !important;
+}

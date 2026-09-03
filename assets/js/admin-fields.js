@@ -383,12 +383,19 @@ document.addEventListener("DOMContentLoaded", function () {
           if (isOpen) {
             settingsRow.classList.add("is-hidden");
             settingsRow.style.display = "none";
+
+            row.classList.remove("ff-options-open");
+            settingsRow.classList.remove("ff-options-open");
+
             optionsToggle.setAttribute("aria-expanded", "false");
           } else {
             settingsRow.classList.remove("is-hidden");
             settingsRow.style.display = "";
-            optionsToggle.setAttribute("aria-expanded", "true");
 
+            row.classList.add("ff-options-open");
+            settingsRow.classList.add("ff-options-open");
+
+            optionsToggle.setAttribute("aria-expanded", "true");
             syncFieldOptions(row);
           }
         });
@@ -447,6 +454,17 @@ document.addEventListener("DOMContentLoaded", function () {
       attachRowEvents(row);
       syncTabRowState(row);
       syncFieldOptions(row);
+
+      const settingsRow = row.nextElementSibling;
+
+      if (
+        settingsRow &&
+        settingsRow.matches("[data-ff-settings]") &&
+        !settingsRow.classList.contains("is-hidden")
+      ) {
+        row.classList.add("ff-options-open");
+        settingsRow.classList.add("ff-options-open");
+      }
     });
 
     /**

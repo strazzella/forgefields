@@ -216,3 +216,28 @@ if ($show_banner) {
     echo '<p>Enabled</p>';
 }
 ?>
+
+/*
+|--------------------------------------------------------------------------
+| Duplicate Field Key - Use Group Key
+|--------------------------------------------------------------------------
+*/
+
+<?php
+$show_banner = ff_get_field(
+    'show_banner',
+    null,
+    'ff_group_6a997bba1fdae'
+);
+
+if ($show_banner) {
+    echo '<div class="banner">Banner is enabled.</div>';
+}
+?>
+
+
+<?php if (ff_get_field('show_banner', null, 'ff_group_6a997bba1fdae')) : ?>
+    <div class="banner">
+        Banner is enabled.
+    </div>
+<?php endif; ?>
