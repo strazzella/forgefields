@@ -2905,15 +2905,19 @@ function ff_render_field_group_edit()
                                                 Required
                                             </label>
 
-                                            <label class="ff-option-toggle">
+                                            <label class="ff-toggle-field">
                                                 <input
                                                     type="checkbox"
                                                     name="ff_fields[<?php echo esc_attr($index); ?>][required]"
                                                     value="1"
                                                     <?php checked($required); ?>>
 
-                                                <span>Field must contain a value</span>
+                                                <span class="ff-toggle" aria-hidden="true"></span>
                                             </label>
+
+                                            <p class="description">
+                                                Is this field required?
+                                            </p>
 
                                         </div>
 
@@ -3131,15 +3135,18 @@ function ff_render_field_group_edit()
                                         Required
                                     </label>
 
-                                    <label class="ff-option-toggle">
+                                    <label class="ff-toggle-field">
                                         <input
                                             type="checkbox"
-                                            name="ff_fields[__INDEX__][required]"
-                                            value="1">
+                                            name="ff_fields[<?php echo esc_attr($index); ?>][required]"
+                                            value="1"
+                                            <?php checked($required); ?>>
 
-                                        <span>Field must contain a value</span>
+                                        <span class="ff-toggle" aria-hidden="true"></span>
                                     </label>
-
+                                    <p class="description">
+                                        Is this field required?
+                                    </p>
                                 </div>
 
                             </div>
@@ -3149,7 +3156,7 @@ function ff_render_field_group_edit()
                                 data-ff-option="choices">
 
                                 <label>
-                                    Choices
+                                    Choices <span class="ff-required-indicator">*</span>
                                 </label>
 
                                 <textarea
@@ -3159,7 +3166,8 @@ function ff_render_field_group_edit()
                                     placeholder="value : Label&#10;"></textarea>
 
                                 <p class="description">
-                                    One choice per line. Supported formats:
+                                    <strong>Required.</strong> Add at least one choice, one per line.
+                                    Supported formats:
                                     <code>value : Label</code>,
                                     <code>value|Label</code>,
                                     or <code>value</code>.
