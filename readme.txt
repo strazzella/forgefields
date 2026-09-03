@@ -8,12 +8,12 @@
 
 /*
 |--------------------------------------------------------------------------
-| Get a field from the current post/page
+| Get a field from the current post/page or global field
 |--------------------------------------------------------------------------
 */
 
 $value = ff_get_field('field_name');
-
+$value = ff_get_global('field_name');
 
 /*
 |--------------------------------------------------------------------------

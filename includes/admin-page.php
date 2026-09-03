@@ -1600,7 +1600,7 @@ function ff_render_field_groups_list()
                             </a>
                         </th>
 
-                        <th scope="col" class="manage-column ff-bar-title">Forge Key</th>
+                        <th scope="col" class="manage-column ff-bar-title">Forge Group Key</th>
                         <th scope="col" class="manage-column ff-bar-title">Location</th>
                         <th scope="col" class="manage-column ff-bar-title">Fields</th>
                         <th scope="col" class="manage-column ff-bar-title">Status</th>
@@ -2085,16 +2085,29 @@ function ff_render_global_field_row(array $field, array $stored)
 
                 case 'true_false':
                     $checked = ! empty($value);
-                    printf(
-                        '<label>
-                            <input type="checkbox" name="ff_global[%1$s]" id="%2$s" value="1" %3$s>
-                            %4$s
-                        </label>',
-                        esc_attr($name),
-                        esc_attr($id),
-                        checked($checked, true, false),
-                        esc_html__('Enabled', 'forge-fields')
-                    );
+
+                    echo '<div class="ff-true-false-control">';
+
+                    echo '<span class="ff-true-false-label">False</span>';
+
+                    echo '<label class="ff-toggle-field">';
+
+                    echo '<input
+        type="checkbox"
+        name="ff_global[' . esc_attr($name) . ']"
+        id="' . esc_attr($id) . '"
+        value="1"'
+                        . checked($checked, true, false)
+                        . '>';
+
+                    echo '<span class="ff-toggle" aria-hidden="true"></span>';
+
+                    echo '</label>';
+
+                    echo '<span class="ff-true-false-label">True</span>';
+
+                    echo '</div>';
+
                     break;
             }
             ?>
@@ -2624,11 +2637,29 @@ function ff_render_field_group_edit()
     $is_new   = true;
     $notices  = [];
 
-    $ff_other_group_field_names = [];
+    $ff_other_group_field_names = [
+        'global'     => [],
+        'non_global' => [],
+    ];
 
     foreach ($groups as $existing_group_id => $existing_group) {
 
         if ((string) $existing_group_id === (string) $group_id) {
+            continue;
+        }
+
+        if (! is_array($existing_group)) {
+            continue;
+        }
+
+        $existing_status = isset($existing_group['status'])
+            ? (string) $existing_group['status']
+            : 'active';
+
+        /**
+         * Trashed groups are not active naming conflicts.
+         */
+        if ($existing_status === 'trash') {
             continue;
         }
 
@@ -2638,6 +2669,14 @@ function ff_render_field_group_edit()
         ) {
             continue;
         }
+
+        $existing_location = isset($existing_group['location'])
+            ? sanitize_key((string) $existing_group['location'])
+            : 'page';
+
+        $scope = $existing_location === 'global'
+            ? 'global'
+            : 'non_global';
 
         foreach ($existing_group['fields'] as $existing_field) {
 
@@ -2649,12 +2688,16 @@ function ff_render_field_group_edit()
                 continue;
             }
 
-            $ff_other_group_field_names[$existing_name] = true;
+            $ff_other_group_field_names[$scope][$existing_name] = true;
         }
     }
 
-    $ff_other_group_field_names = array_keys(
-        $ff_other_group_field_names
+    $ff_other_group_field_names['global'] = array_keys(
+        $ff_other_group_field_names['global']
+    );
+
+    $ff_other_group_field_names['non_global'] = array_keys(
+        $ff_other_group_field_names['non_global']
     );
 
     if (isset($_GET['ff_notice'])) {

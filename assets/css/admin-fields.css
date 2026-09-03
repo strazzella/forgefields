@@ -3226,20 +3226,23 @@ input#_ff_range_slider {
    BUTTON GROUP
    --------------------------------------------------------- */
 
-.ff-mb .ff-button-group {
+.ff-mb .ff-button-group,
+.wrap.ff-admin.ff-global .ff-button-group {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.ff-mb .ff-button-group__input {
+.ff-mb .ff-button-group__input,
+.wrap.ff-admin.ff-global .ff-button-group__input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-.ff-mb .ff-button-group__btn {
+.ff-mb .ff-button-group__btn,
+.wrap.ff-admin.ff-global .ff-button-group__btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -3265,7 +3268,8 @@ input#_ff_range_slider {
     transform 0.05s ease;
 }
 
-.ff-mb .ff-button-group__btn:hover {
+.ff-mb .ff-button-group__btn:hover,
+.wrap.ff-admin.ff-global .ff-button-group__btn:hover {
   background: #f8fafc;
   border-color: #b8c0cc;
   color: #1f2937;
@@ -3274,11 +3278,14 @@ input#_ff_range_slider {
     0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
-.ff-mb .ff-button-group__btn:active {
+.ff-mb .ff-button-group__btn:active,
+.wrap.ff-admin.ff-global .ff-button-group__btn:active {
   transform: translateY(1px);
 }
 
-.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked) {
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked),
+.wrap.ff-admin.ff-global
+  .ff-button-group__btn:has(.ff-button-group__input:checked) {
   background: #363637;
   border-color: #363637;
   color: #ffffff;
@@ -3287,27 +3294,38 @@ input#_ff_range_slider {
 
 .ff-mb
   .ff-button-group__btn:has(.ff-button-group__input:checked)
+  .ff-button-group__label,
+.wrap.ff-admin.ff-global
+  .ff-button-group__btn:has(.ff-button-group__input:checked)
   .ff-button-group__label {
   color: #ffffff !important;
 }
 
-.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked):hover {
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked):hover,
+.wrap.ff-admin.ff-global
+  .ff-button-group__btn:has(.ff-button-group__input:checked):hover {
   background: #242425;
   border-color: #242425;
   color: #ffffff;
 }
 
-.ff-mb .ff-button-group__input:focus-visible + .ff-button-group__label {
+.ff-mb .ff-button-group__input:focus-visible + .ff-button-group__label,
+.wrap.ff-admin.ff-global
+  .ff-button-group__input:focus-visible
+  + .ff-button-group__label {
   outline: none;
 }
 
-.ff-mb .ff-button-group__btn:has(.ff-button-group__input:focus-visible) {
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:focus-visible),
+.wrap.ff-admin.ff-global
+  .ff-button-group__btn:has(.ff-button-group__input:focus-visible) {
   box-shadow:
     0 0 0 3px rgba(54, 54, 55, 0.18),
     0 1px 2px rgba(16, 24, 40, 0.05);
 }
 
-.ff-mb .ff-button-group__label {
+.ff-mb .ff-button-group__label,
+.wrap.ff-admin.ff-global .ff-button-group__label {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5152,13 +5170,15 @@ input#_ff_range_slider {
    TRUE / FALSE TOGGLE
    --------------------------------------------------------- */
 
-.ff-mb .ff-true-false-control {
+.ff-mb .ff-true-false-control,
+.wrap.ff-admin.ff-global .ff-true-false-control {
   display: inline-flex;
   align-items: center;
   gap: 10px;
 }
 
-.ff-mb .ff-true-false-label {
+.ff-mb .ff-true-false-label,
+.wrap.ff-admin.ff-global .ff-true-false-label {
   color: #6b7280;
   font-size: 13px;
   line-height: 1;
@@ -5635,4 +5655,390 @@ input#_ff_range_slider {
   border-color: #d0d5dd !important;
   background: #fff !important;
   color: #111827 !important;
+}
+
+/* ---------------------------------------------------------
+   PAGE / POST FILE FIELD
+   --------------------------------------------------------- */
+
+/**
+ * Compact file-field container.
+ */
+#poststuff .postbox .inside .ff-mb .ff-media-wrap[data-type="file"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+/**
+ * File name / empty-state pill.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0 !important;
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475467;
+  box-sizing: border-box;
+}
+
+/**
+ * File icon.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileline
+  .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  color: #667085;
+}
+
+/**
+ * Empty state.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-nofile {
+  color: #667085;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/**
+ * Selected file name.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileurl {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileurl:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/**
+ * File action buttons.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-select,
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="file"]
+  .ff-media-clear {
+  margin: 0 !important;
+}
+
+/* ---------------------------------------------------------
+   PAGE / POST IMAGE FIELD
+   --------------------------------------------------------- */
+
+/**
+ * Compact image-field container.
+ */
+#poststuff .postbox .inside .ff-mb .ff-media-wrap[data-type="image"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+/**
+ * Image preview container.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="image"]
+  .ff-media-preview-wrap {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 !important;
+}
+
+/**
+ * Selected image preview.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="image"]
+  .ff-media-preview {
+  width: 64px;
+  height: 64px;
+  max-width: 64px;
+  max-height: 64px;
+  margin: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  object-fit: cover;
+}
+
+/**
+ * Image action buttons.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="image"]
+  .ff-media-select,
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  .ff-media-wrap[data-type="image"]
+  .ff-media-clear {
+  margin: 0 !important;
+}
+
+/* ---------------------------------------------------------
+   PAGE / POST RANGE FIELD
+   --------------------------------------------------------- */
+
+/**
+ * Keep the range slider and numeric value together as one compact control.
+ */
+#poststuff .postbox .inside .ff-mb .ff-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+
+/**
+ * Range slider.
+ */
+#poststuff .postbox .inside .ff-mb .ff-range-slider {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 180px;
+  height: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #e5e7eb;
+  box-shadow: none;
+  cursor: pointer;
+  accent-color: #363637;
+}
+
+/**
+ * Numeric value.
+ *
+ * The !important width overrides the generic Forge Fields
+ * input[type="number"] width: 100% rule.
+ */
+#poststuff .postbox .inside .ff-mb .ff-range-number {
+  flex: 0 0 80px;
+  width: 80px !important;
+  min-width: 80px;
+  max-width: 80px !important;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+/**
+ * Numeric value focus state.
+ */
+#poststuff .postbox .inside .ff-mb .ff-range-number:focus {
+  outline: none;
+  border-color: #363637;
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.15);
+}
+
+/* ---------------------------------------------------------
+   GLOBAL RANGE FIELD
+   --------------------------------------------------------- */
+
+/**
+ * Keep the range slider and numeric value together as one compact control.
+ */
+.wrap.ff-admin.ff-global .ff-range-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 520px;
+}
+
+/**
+ * Range slider.
+ */
+.wrap.ff-admin.ff-global .ff-range-slider {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 180px;
+  height: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #e5e7eb;
+  box-shadow: none;
+  cursor: pointer;
+  accent-color: #363637;
+}
+
+/**
+ * Numeric value.
+ */
+.wrap.ff-admin.ff-global .ff-range-number {
+  flex: 0 0 80px;
+  width: 80px !important;
+  min-width: 80px;
+  max-width: 80px !important;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+/**
+ * Numeric value focus state.
+ */
+.wrap.ff-admin.ff-global .ff-range-number:focus {
+  outline: none;
+  border-color: #363637;
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.15);
+}
+
+/* ---------------------------------------------------------
+   GLOBAL FILE FIELD
+   --------------------------------------------------------- */
+
+/**
+ * Compact Global file-field container.
+ */
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+/**
+ * File name / empty-state pill.
+ */
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-fileline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0 !important;
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475467;
+  box-sizing: border-box;
+}
+
+/**
+ * File icon.
+ */
+.wrap.ff-admin.ff-global
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileline
+  .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  color: #667085;
+}
+
+/**
+ * Empty state.
+ */
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-nofile {
+  color: #667085;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/**
+ * Selected file name.
+ */
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-fileurl {
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.wrap.ff-admin.ff-global
+  .ff-media-wrap[data-type="file"]
+  .ff-media-fileurl:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/**
+ * File action buttons.
+ */
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-select,
+.wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-clear {
+  margin: 0 !important;
 }

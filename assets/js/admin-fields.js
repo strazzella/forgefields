@@ -293,20 +293,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         /*
-         * Another saved Field Group.
+         * Another saved Field Group in the same retrieval scope.
          *
-         * This is allowed, but developers may need to specify
-         * the Forge Key when calling ff_get_field().
+         * Global and Page/Post fields use separate retrieval namespaces,
+         * so the same field name may safely exist once globally and once
+         * within normal Page/Post Field Groups.
          */
-        const otherGroupNames = Array.isArray(window.ffFieldNameRegistry)
-          ? window.ffFieldNameRegistry
+        const registry =
+          window.ffFieldNameRegistry &&
+          typeof window.ffFieldNameRegistry === "object"
+            ? window.ffFieldNameRegistry
+            : {
+                global: [],
+                non_global: [],
+              };
+
+        const locationSelect = document.querySelector("#ff_location");
+
+        const currentScope =
+          locationSelect && locationSelect.value === "global"
+            ? "global"
+            : "non_global";
+
+        const otherGroupNames = Array.isArray(registry[currentScope])
+          ? registry[currentScope]
           : [];
 
         if (otherGroupNames.includes(name)) {
           message.textContent =
             'Field name "' +
             name +
-            '" is already used in another Field Group. To avoid ambiguous output, choose a unique name or specify this Field Group Key as the third argument to ff_get_field().';
+            '" is already used in another ' +
+            (currentScope === "global" ? "Global " : "") +
+            "Field Group. To avoid ambiguous output, choose a unique name or specify this Field Group Key as the third argument to ff_get_field().";
 
           message.classList.add("is-warning");
           nameInput.classList.add("ff-field-name-warning");
@@ -473,6 +492,14 @@ document.addEventListener("DOMContentLoaded", function () {
      */
     renumberRows();
     validateFieldNames();
+
+    const locationSelect = document.querySelector("#ff_location");
+
+    if (locationSelect) {
+      locationSelect.addEventListener("change", function () {
+        validateFieldNames();
+      });
+    }
 
     /**
      * Adds a new editable field row to the field table.
