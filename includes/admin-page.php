@@ -2624,6 +2624,39 @@ function ff_render_field_group_edit()
     $is_new   = true;
     $notices  = [];
 
+    $ff_other_group_field_names = [];
+
+    foreach ($groups as $existing_group_id => $existing_group) {
+
+        if ((string) $existing_group_id === (string) $group_id) {
+            continue;
+        }
+
+        if (
+            empty($existing_group['fields'])
+            || ! is_array($existing_group['fields'])
+        ) {
+            continue;
+        }
+
+        foreach ($existing_group['fields'] as $existing_field) {
+
+            $existing_name = isset($existing_field['name'])
+                ? sanitize_key((string) $existing_field['name'])
+                : '';
+
+            if ($existing_name === '') {
+                continue;
+            }
+
+            $ff_other_group_field_names[$existing_name] = true;
+        }
+    }
+
+    $ff_other_group_field_names = array_keys(
+        $ff_other_group_field_names
+    );
+
     if (isset($_GET['ff_notice'])) {
 
         $notice_code = sanitize_key(
@@ -2727,6 +2760,13 @@ function ff_render_field_group_edit()
 
 
         <form method="post" action="" id="ff-edit-form">
+            <script>
+                window.ffFieldNameRegistry = <?php
+                                                echo wp_json_encode(
+                                                    $ff_other_group_field_names
+                                                );
+                                                ?>;
+            </script>
             <?php wp_nonce_field('ff_save_field_group'); ?>
             <input type="hidden" name="ff_group_id"
                 value="<?php echo esc_attr(isset($group['id']) ? $group['id'] : ''); ?>">

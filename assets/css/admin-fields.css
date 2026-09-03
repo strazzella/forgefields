@@ -5177,3 +5177,43 @@ input#_ff_range_slider {
   font-size: 13px;
   line-height: 1;
 }
+
+/* ---------------------------------------------------------
+   FIELD NAME VALIDATION
+   --------------------------------------------------------- */
+
+.wrap.ff-admin.ff-edit .ff-field-name-message {
+  display: block;
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 520px;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-name-message[hidden] {
+  display: none;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-name-message.is-error {
+  color: #b91c1c;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-name-message.is-warning {
+  color: #b45309;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-name.ff-field-name-error {
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 1px #b91c1c;
+}
+
+.wrap.ff-admin.ff-edit .ff-field-name.ff-field-name-warning {
+  border-color: #b45309;
+}
+
+/* Keep field controls top-aligned when a validation message expands the row. */
+.wrap.ff-admin.ff-edit
+  .ff-field-row:has(.ff-field-name-message:not([hidden]))
+  > td {
+  vertical-align: top;
+}

@@ -1546,6 +1546,17 @@ function ff_get_field($field_name, $post_id = null, $group_id = null)
      * They must supply the Forge Key as the third argument.
      */
     if (count($matching_group_ids) > 1) {
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            trigger_error(
+                sprintf(
+                    'Forge Fields: Field "%s" exists in multiple applicable Field Groups. Choose a unique name or specify a Forge Key as the third argument to ff_get_field().',
+                    $field_name
+                ),
+                E_USER_WARNING
+            );
+        }
+
         return '';
     }
 

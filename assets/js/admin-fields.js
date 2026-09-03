@@ -203,6 +203,122 @@ document.addEventListener("DOMContentLoaded", function () {
      *
      * @param {HTMLElement} row The field row receiving the event handlers.
      */
+
+    function normalizeFieldName(value) {
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, "");
+    }
+
+    function getFieldNameMessageElement(nameInput) {
+      let message = nameInput.parentElement.querySelector(
+        ".ff-field-name-message",
+      );
+
+      if (!message) {
+        message = document.createElement("p");
+        message.className = "ff-field-name-message";
+        nameInput.insertAdjacentElement("afterend", message);
+      }
+
+      return message;
+    }
+
+    function validateFieldNames() {
+      const rows = Array.from(tbody.querySelectorAll(".ff-field-row"));
+
+      const currentNames = {};
+
+      rows.forEach(function (row) {
+        const nameInput = row.querySelector(".ff-field-name");
+
+        if (!nameInput || nameInput.readOnly) {
+          return;
+        }
+
+        const name = normalizeFieldName(nameInput.value);
+
+        if (!name) {
+          return;
+        }
+
+        if (!currentNames[name]) {
+          currentNames[name] = [];
+        }
+
+        currentNames[name].push(nameInput);
+      });
+
+      rows.forEach(function (row) {
+        const nameInput = row.querySelector(".ff-field-name");
+
+        if (!nameInput) {
+          return;
+        }
+
+        const message = getFieldNameMessageElement(nameInput);
+        const name = normalizeFieldName(nameInput.value);
+
+        message.textContent = "";
+        message.classList.remove("is-error", "is-warning");
+
+        nameInput.classList.remove(
+          "ff-field-name-error",
+          "ff-field-name-warning",
+        );
+
+        if (!name || nameInput.readOnly) {
+          message.hidden = true;
+          return;
+        }
+
+        /*
+         * Same Field Group.
+         *
+         * This is an error because two fields in the same group
+         * would use the same group-scoped post-meta key.
+         */
+        if (currentNames[name] && currentNames[name].length > 1) {
+          message.textContent =
+            'Field name "' +
+            name +
+            '" is already used in this Field Group. Choose a unique name.';
+
+          message.classList.add("is-error");
+          nameInput.classList.add("ff-field-name-error");
+          message.hidden = false;
+
+          return;
+        }
+
+        /*
+         * Another saved Field Group.
+         *
+         * This is allowed, but developers may need to specify
+         * the Forge Key when calling ff_get_field().
+         */
+        const otherGroupNames = Array.isArray(window.ffFieldNameRegistry)
+          ? window.ffFieldNameRegistry
+          : [];
+
+        if (otherGroupNames.includes(name)) {
+          message.textContent =
+            'Field name "' +
+            name +
+            '" is already used in another Field Group. Choose a unique name or specify a Forge Key when using ff_get_field().';
+
+          message.classList.add("is-warning");
+          nameInput.classList.add("ff-field-name-warning");
+          message.hidden = false;
+
+          return;
+        }
+
+        message.hidden = true;
+      });
+    }
+
     function attachRowEvents(row) {
       const labelInput = row.querySelector(".ff-field-label");
       const nameInput = row.querySelector(".ff-field-name");
@@ -294,28 +410,29 @@ document.addEventListener("DOMContentLoaded", function () {
           const typeSelect = row.querySelector(".ff-field-type");
           const isTab = typeSelect && typeSelect.value === "tab";
 
-          /**
-           * Tab fields do not use a field name, so ensure the name remains empty.
-           */
           if (isTab) {
             nameInput.value = "";
+            validateFieldNames();
             return;
           }
 
-          /**
-           * Preserve manually entered field names.
-           */
           if (nameInput.value.trim() !== "") return;
 
-          /**
-           * Do nothing when the field label is empty.
-           */
           if (this.value.trim() === "") return;
 
-          /**
-           * Generate the field name from the entered label.
-           */
           nameInput.value = labelToSlug(this.value);
+
+          validateFieldNames();
+        });
+      }
+
+      if (nameInput) {
+        nameInput.addEventListener("input", function () {
+          validateFieldNames();
+        });
+
+        nameInput.addEventListener("blur", function () {
+          validateFieldNames();
         });
       }
     }
@@ -333,9 +450,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /**
-     * Ensure all initially rendered rows have correct sequential indexes.
+     * Ensure all initially rendered rows have correct sequential indexes,
+     * then validate field names for duplicates.
      */
     renumberRows();
+    validateFieldNames();
 
     /**
      * Adds a new editable field row to the field table.
