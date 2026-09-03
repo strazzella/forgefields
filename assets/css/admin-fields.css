@@ -3222,58 +3222,96 @@ input#_ff_range_slider {
   width: 300px;
 }
 
-/**
- * Button-group layout.
- *
- * Displays grouped choice controls inline while allowing them to wrap
- * when horizontal space becomes limited.
- */
-.ff-button-group {
+/* ---------------------------------------------------------
+   BUTTON GROUP
+   --------------------------------------------------------- */
+
+.ff-mb .ff-button-group {
   display: inline-flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
-/**
- * Visually hide the underlying radio/checkbox input used by a
- * Forge Fields button-group option.
- *
- * The actual input remains present in the DOM and can still provide
- * its checked state to the styled label/button control.
- */
-.ff-button-group__input {
+.ff-mb .ff-button-group__input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-/**
- * Visual button used for each button-group option.
- *
- * Provides the bordered, rounded, clickable surface that represents
- * the hidden form input.
- */
-.ff-button-group__btn {
+.ff-mb .ff-button-group__btn {
   position: relative;
   display: inline-flex;
   align-items: center;
-  border: 1px solid #c3c4c7;
-  border-radius: 6px;
-  padding: 6px 10px;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  margin: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
   cursor: pointer;
   user-select: none;
-  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
 }
 
-/**
- * Selected button-group state.
- *
- * When the hidden input inside a button-group button is checked,
- * strengthen the border and add an inset outline using the primary color.
- */
-.ff-button-group__btn:has(.ff-button-group__input:checked) {
-  border-color: var(--ff-primary);
-  box-shadow: 0 0 0 1px var(--ff-primary) inset;
+.ff-mb .ff-button-group__btn:hover {
+  background: #f8fafc;
+  border-color: #b8c0cc;
+  color: #1f2937;
+  box-shadow:
+    0 2px 5px rgba(16, 24, 40, 0.07),
+    0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.ff-mb .ff-button-group__btn:active {
+  transform: translateY(1px);
+}
+
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked) {
+  background: #363637;
+  border-color: #363637;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.14);
+}
+
+.ff-mb
+  .ff-button-group__btn:has(.ff-button-group__input:checked)
+  .ff-button-group__label {
+  color: #ffffff !important;
+}
+
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:checked):hover {
+  background: #242425;
+  border-color: #242425;
+  color: #ffffff;
+}
+
+.ff-mb .ff-button-group__input:focus-visible + .ff-button-group__label {
+  outline: none;
+}
+
+.ff-mb .ff-button-group__btn:has(.ff-button-group__input:focus-visible) {
+  box-shadow:
+    0 0 0 3px rgba(54, 54, 55, 0.18),
+    0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.ff-mb .ff-button-group__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 /**
@@ -4999,7 +5037,7 @@ input#_ff_range_slider {
 }
 
 .ff-toggle-field input[type="checkbox"]:checked + .ff-toggle {
-  background: var(--ff-primary);
+  background: var(--ff-primary, #363637);
 }
 
 .ff-toggle-field input[type="checkbox"]:checked + .ff-toggle::after {
@@ -5122,4 +5160,20 @@ input#_ff_range_slider {
 
 .wrap.ff-admin.ff-edit .ff-option-required {
   grid-column: 1 / 3;
+}
+
+/* ---------------------------------------------------------
+   TRUE / FALSE TOGGLE
+   --------------------------------------------------------- */
+
+.ff-mb .ff-true-false-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ff-mb .ff-true-false-label {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1;
 }

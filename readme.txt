@@ -195,3 +195,24 @@ if ($image_id) {
 | absint()
 |
 */
+
+/*
+|--------------------------------------------------------------------------
+| True or False
+|--------------------------------------------------------------------------
+*/
+
+<?php if (ff_get_field('show_banner')) : ?>
+    <div class="banner">
+        Banner content here
+    </div>
+<?php endif; ?>
+
+
+<?php
+$show_banner = ff_get_field('show_banner');
+
+if ($show_banner) {
+    echo '<p>Enabled</p>';
+}
+?>

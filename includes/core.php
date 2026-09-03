@@ -1065,16 +1065,29 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 
         case 'true_false':
             $checked = ! empty($value);
-            printf(
-                '<label>
-                    <input type="checkbox" name="%1$s" id="%2$s" value="1" %3$s>
-                    %4$s
-                </label>',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                checked($checked, true, false),
-                esc_html__('Enabled', 'forge-fields')
-            );
+
+            echo '<div class="ff-true-false-control">';
+
+            echo '<span class="ff-true-false-label">False</span>';
+
+            echo '<label class="ff-toggle-field">';
+
+            echo '<input
+        type="checkbox"
+        name="' . esc_attr($meta_key) . '"
+        id="' . esc_attr($meta_key) . '"
+        value="1"'
+                . checked($checked, true, false)
+                . '>';
+
+            echo '<span class="ff-toggle" aria-hidden="true"></span>';
+
+            echo '</label>';
+
+            echo '<span class="ff-true-false-label">True</span>';
+
+            echo '</div>';
+
             break;
     }
 
