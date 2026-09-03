@@ -4512,27 +4512,6 @@ input#_ff_range_slider {
 }
 
 /* ---------------------------------------------------------
-   WYSIWYG
-   --------------------------------------------------------- */
-
-/**
- * WordPress WYSIWYG editor wrapper inside Forge Fields metaboxes.
- *
- * Allows the editor to use the full field-column width while applying
- * the same border, radius, clipping, and background treatment as
- * other Forge Fields controls.
- */
-#poststuff .postbox .inside .ff-mb .wp-editor-wrap {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  border: 1px solid #c7ccd6;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #fff;
-}
-
-/* ---------------------------------------------------------
    MOBILE
    --------------------------------------------------------- */
 
@@ -5317,4 +5296,343 @@ input#_ff_range_slider {
   tr.ff-field-settings.ff-options-open
   > td {
   background: #f7f9fc !important;
+}
+
+/* ---------------------------------------------------------
+   WYSIWYG
+   --------------------------------------------------------- */
+
+/**
+ * Main editor shell.
+ */
+#poststuff .postbox .inside .ff-mb .wp-editor-wrap {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+/**
+ * Top media / mode area.
+ */
+#poststuff .postbox .inside .ff-mb .wp-editor-tools {
+  min-height: 54px;
+  /* padding: 10px 12px 8px; */
+  padding: 14px 12px 0px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/**
+ * Add Media button.
+ */
+#poststuff .postbox .inside .ff-mb .wp-media-buttons {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  margin: 0;
+}
+
+#poststuff .postbox .inside .ff-mb .wp-media-buttons .button {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px;
+  background: #fff;
+  color: #1f2937;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  font-weight: 500;
+}
+
+#poststuff .postbox .inside .ff-mb .wp-media-buttons .button:hover {
+  background: #f3f4f6;
+  border-color: #c7ccd6;
+  color: #111827;
+}
+
+/**
+ * Visual / Code tabs.
+ */
+#poststuff .postbox .inside .ff-mb .wp-editor-tabs {
+  margin-top: 5px;
+}
+
+#poststuff .postbox .inside .ff-mb .wp-switch-editor {
+  height: 30px;
+  padding: 5px 11px;
+  margin-left: 5px;
+  border: 1px solid #d0d5dd;
+  border-radius: 7px 7px 0 0;
+  background: #f3f4f6;
+  color: #667085;
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 7px;
+}
+
+#poststuff .postbox .inside .ff-mb .tmce-active .switch-tmce,
+#poststuff .postbox .inside .ff-mb .html-active .switch-html {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#poststuff .postbox .inside .ff-mb .html-active .switch-html,
+#poststuff .postbox .inside .ff-mb .tmce-active .switch-tmce {
+  background: #fff;
+  color: #111827;
+  font-weight: 600;
+  border-bottom-color: #fff;
+}
+
+/**
+ * TinyMCE toolbar surface.
+ */
+#poststuff .postbox .inside .ff-mb .mce-top-part {
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+#poststuff .postbox .inside .ff-mb .mce-toolbar-grp {
+  padding: 5px 8px;
+  background: #f8fafc;
+  border: 0;
+  box-shadow: none;
+}
+
+/**
+ * TinyMCE buttons.
+ */
+#poststuff .postbox .inside .ff-mb .mce-btn {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+}
+
+#poststuff .postbox .inside .ff-mb .mce-btn:hover,
+#poststuff .postbox .inside .ff-mb .mce-btn.mce-active {
+  border-color: #d0d5dd;
+  background: #fff;
+}
+
+/**
+ * Editor content container.
+ */
+#poststuff .postbox .inside .ff-mb .wp-editor-container {
+  border: 0;
+  background: #fff;
+}
+
+/**
+ * Text / HTML mode.
+ */
+#poststuff .postbox .inside .ff-mb textarea.wp-editor-area {
+  min-height: 240px;
+  padding: 16px !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: #fff;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.6;
+  box-shadow: none !important;
+}
+
+/**
+ * Quicktags toolbar used in Code mode.
+ */
+#poststuff .postbox .inside .ff-mb .quicktags-toolbar {
+  padding: 7px 8px;
+  border: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+#poststuff .postbox .inside .ff-mb .quicktags-toolbar input.button {
+  min-height: 28px;
+  height: 28px;
+  padding: 0 8px;
+  margin: 2px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #475467;
+  box-shadow: none;
+}
+
+#poststuff .postbox .inside .ff-mb .quicktags-toolbar input.button:hover {
+  border-color: #d0d5dd;
+  background: #fff;
+  color: #111827;
+}
+
+/* ---------------------------------------------------------
+   GLOBAL WYSIWYG — MATCH PAGE / POST EDITOR
+   --------------------------------------------------------- */
+
+/* Remove the extra Global editor-card chrome. */
+.wrap.ff-admin.ff-global .ff-editor-card {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Main editor shell. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+}
+
+/* Top media / mode area. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-tools {
+  min-height: 54px;
+  /* padding: 10px 12px 8px; */
+  padding: 6px 12px 0px !important;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Media buttons. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button {
+  height: 34px !important;
+  padding: 0 12px !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 7px !important;
+  background: #fff !important;
+  color: #1f2937 !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+  font-weight: 500;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .wp-media-buttons .button:hover {
+  background: #f3f4f6 !important;
+  border-color: #c7ccd6 !important;
+  color: #111827 !important;
+}
+
+/* Visual / Code tabs. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-tabs {
+  margin-top: 5px;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor {
+  /* height: 30px !important; */
+  height: 42px !important;
+  padding: 5px 11px !important;
+  margin-left: 5px !important;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 7px 7px 0 0 !important;
+  background: #f3f4f6 !important;
+  color: #667085 !important;
+  font-size: 12px;
+  line-height: 18px;
+  box-shadow: none !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .html-active .switch-html,
+.wrap.ff-admin.ff-global .ff-editor-card .tmce-active .switch-tmce {
+  background: #fff !important;
+  color: #111827 !important;
+  font-weight: 600;
+  border-bottom-color: #fff !important;
+}
+
+/* Override the old blue active-tab treatment. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-switch-editor.active {
+  background: #fff !important;
+  color: #111827 !important;
+}
+
+/* TinyMCE toolbar. */
+.wrap.ff-admin.ff-global .ff-editor-card .mce-top-part {
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .mce-toolbar-grp {
+  padding: 5px 8px !important;
+  background: #f8fafc !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* TinyMCE toolbar buttons. */
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn {
+  border: 1px solid transparent !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn:hover,
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn.mce-active {
+  border-color: #d0d5dd !important;
+  background: #fff !important;
+}
+
+/* Editor content. */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-container {
+  width: 100% !important;
+  max-width: none !important;
+  border: 0 !important;
+  background: #fff !important;
+}
+
+/* HTML / Code editor. */
+.wrap.ff-admin.ff-global .ff-editor-card textarea.wp-editor-area {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 240px !important;
+  padding: 16px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #1f2937 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  box-shadow: none !important;
+}
+
+/* Quicktags toolbar used in Code mode. */
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar {
+  width: 100% !important;
+  padding: 7px 8px !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  background: #f8fafc !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar input.button {
+  min-height: 28px;
+  height: 28px;
+  padding: 0 8px;
+  margin: 2px;
+  border: 1px solid transparent !important;
+  border-radius: 6px;
+  background: transparent !important;
+  color: #475467 !important;
+  box-shadow: none !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .quicktags-toolbar input.button:hover {
+  border-color: #d0d5dd !important;
+  background: #fff !important;
+  color: #111827 !important;
 }
