@@ -2876,7 +2876,7 @@ function ff_render_field_group_edit()
                 <?php if (! empty($group_id)) : ?>
                     <tr class="ff-group-key-row">
                         <th scope="row">
-                            Field Group Key
+                            Forge Group Key
                         </th>
 
                         <td>
@@ -2922,9 +2922,9 @@ function ff_render_field_group_edit()
                                 aria-label="Select all fields">
                         </th>
 
-                        <th class="ff-bar-title">Field Label</th>
-                        <th>Field Name</th>
-                        <th>Field Type</th>
+                        <th class="ff-bar-title">Label</th>
+                        <th>Name</th>
+                        <th>Type</th>
                         <th style="width:150px;"></th>
                     </tr>
                 </thead>

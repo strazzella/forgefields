@@ -4623,64 +4623,77 @@ input#_ff_range_slider {
 }
 
 /**
- * Remove default checkbox margin inside the field-selection column.
+ * Forge Fields row-selection checkboxes.
+ *
+ * Uses a clean white surface with rounded corners and a dark
+ * checkmark while remaining visually distinct from WordPress'
+ * default blue checkbox treatment.
  */
-.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"] {
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"],
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+
+  position: relative;
   width: 18px;
   height: 18px;
+  min-width: 18px;
   margin: 0;
-  border: 1px solid #9ca3af;
-  border-radius: 4px;
-  background: #fff;
+
+  border: 1px solid #aeb6c2;
+  border-radius: 5px;
+  background: #ffffff !important;
+
   box-shadow: none;
   cursor: pointer;
-  accent-color: #363637;
-}
-
-.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:checked,
-.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked {
-  border-color: #363637;
-  background-color: #363637;
 }
 
 /**
- * Force the WordPress-native checkbox checkmark to use white
- * against the Forge Fields dark checked background.
+ * Checked state.
+ *
+ * Keep the checkbox surface white and strengthen the border.
+ */
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:checked,
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked {
+  border-color: #363637;
+  background: #ffffff !important;
+}
+
+/**
+ * Replace WordPress' native blue SVG checkmark with a
+ * custom Forge Fields dark checkmark.
  */
 .wrap.ff-admin.ff-edit
   .ff-field-check-column
   input[type="checkbox"]:checked::before,
 .wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked::before {
-  color: #ffffff;
-}
+  content: "" !important;
 
-/**
- * Match Field Groups list-table checkboxes to the Forge Fields
- * checkbox styling used in the Field Group editor.
- */
-.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  top: 3px;
+  left: 5px;
+
+  width: 4px;
+  height: 7px;
   margin: 0;
-  border: 1px solid #9ca3af;
-  border-radius: 4px;
-  box-shadow: none;
-  cursor: pointer;
-  accent-color: #363637;
-}
 
+  border: solid #363637ad;
+  border-width: 0 2px 2px 0;
+
+  transform: rotate(45deg);
+
+  float: none;
+  background: none;
+}
+/**
+ * Forge Fields checkbox focus state.
+ */
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:focus,
 .wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:focus {
   border-color: #363637;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.14);
 }
-
-.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:focus {
-  border-color: #363637;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
-}
-/* Bulk field actions */
 
 /**
  * Bulk field-action toolbar.
