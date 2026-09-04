@@ -4,7 +4,7 @@
  * Plugin Name:       Forge Fields
  * Plugin URI:        https://your-future-plugin-site.com/
  * Description:       Lightweight custom fields framework for WordPress with support for field groups, global fields, media fields, choice fields, and developer-friendly template functions.
- * Version:           0.1.7
+ * Version:           0.1.10
  * Author:            Forge Tools
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -29,7 +29,7 @@ if (! defined('ABSPATH')) {
  * FF_PATH provides the absolute filesystem path to the plugin.
  * FF_URL provides the public URL to the plugin directory.
  */
-define('FF_VERSION', '0.1.7');
+define('FF_VERSION', '0.1.10');
 
 define('FF_PATH', plugin_dir_path(__FILE__));
 
@@ -79,77 +79,283 @@ function ff_enqueue_admin_assets($hook)
     /**
      * Determine whether the current request is a Forge Fields screen.
      */
-    $page         = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
+    $page = isset($_GET['page'])
+        ? sanitize_key($_GET['page'])
+        : '';
 
-    $is_ff_screen = (strpos($hook, 'forge-fields') !== false)
-        || in_array($page, ['forge-fields', 'forge-fields-edit', 'forge-fields-global'], true);
+    $is_ff_screen = (
+        strpos($hook, 'forge-fields') !== false
+        || in_array(
+            $page,
+            [
+                'forge-fields',
+                'forge-fields-edit',
+                'forge-fields-global',
+                'forge-fields-settings',
+                'forge-fields-import-export',
+                'forge-fields-uninstall',
+            ],
+            true
+        )
+    );
 
     /**
-     * Determine whether the current screen is the WordPress
-     * post/page editor.
+     * Determine whether this is a WordPress post/page editor.
      */
-    $is_editor_screen = in_array($hook, ['post.php', 'post-new.php'], true);
+    $is_editor_screen = in_array(
+        $hook,
+        ['post.php', 'post-new.php'],
+        true
+    );
 
     /**
-     * Do not load Forge Fields assets on unrelated admin screens.
+     * Forge Fields does not need any assets on unrelated admin screens.
      */
     if (! $is_ff_screen && ! $is_editor_screen) {
         return;
     }
 
     /**
-     * Load the WordPress media library used by Image and File fields.
+     * Track which heavier WordPress dependencies are actually required.
      */
-    wp_enqueue_media();
+    $needs_media  = false;
+    $needs_editor = false;
 
     /**
-     * Load the WordPress editor API when available for WYSIWYG fields.
+     * On normal post/page editor screens, only load Forge Fields assets
+     * when at least one active Field Group actually applies.
      */
-    if (function_exists('wp_enqueue_editor')) {
+    if ($is_editor_screen) {
+
+        $screen = get_current_screen();
+
+        $post_type = ($screen && ! empty($screen->post_type))
+            ? (string) $screen->post_type
+            : '';
+
+        /**
+         * Forge Fields currently supports Page and Post locations.
+         */
+        if (! in_array($post_type, ['page', 'post'], true)) {
+            return;
+        }
+
+        $post_id = 0;
+
+        if (isset($_GET['post'])) {
+            $post_id = absint($_GET['post']);
+        } elseif (isset($_POST['post_ID'])) {
+            $post_id = absint($_POST['post_ID']);
+        }
+
+        $groups = ff_get_all_groups();
+
+        $has_applicable_group = false;
+
+        foreach ($groups as $group) {
+
+            if (! is_array($group)) {
+                continue;
+            }
+
+            $status = isset($group['status'])
+                ? (string) $group['status']
+                : 'active';
+
+            if ($status !== 'active') {
+                continue;
+            }
+
+            $location = isset($group['location'])
+                ? (string) $group['location']
+                : 'page';
+
+            if ($location !== $post_type) {
+                continue;
+            }
+
+            $target = isset($group['location_target'])
+                ? (string) $group['location_target']
+                : '';
+
+            /**
+             * A specifically targeted group cannot apply to a brand-new
+             * unsaved post because it does not have a post ID yet.
+             */
+            if ($target !== '') {
+
+                if (! $post_id || (string) $post_id !== $target) {
+                    continue;
+                }
+            }
+
+            $has_applicable_group = true;
+
+            foreach ((array) ($group['fields'] ?? []) as $field) {
+
+                if (! is_array($field)) {
+                    continue;
+                }
+
+                $type = isset($field['type'])
+                    ? sanitize_key((string) $field['type'])
+                    : 'text';
+
+                if (in_array($type, ['image', 'file'], true)) {
+                    $needs_media = true;
+                }
+
+                if ($type === 'wysiwyg') {
+                    $needs_editor = true;
+                }
+            }
+        }
+
+        /**
+         * Nothing from Forge Fields will appear on this editor screen.
+         */
+        if (! $has_applicable_group) {
+            return;
+        }
+    }
+
+    /**
+     * The Global Fields page renders actual field controls, so inspect
+     * Global groups to determine whether Media or WYSIWYG assets are needed.
+     */
+    if ($page === 'forge-fields-global') {
+
+        $groups = ff_get_all_groups();
+
+        foreach ($groups as $group) {
+
+            if (! is_array($group)) {
+                continue;
+            }
+
+            $status = isset($group['status'])
+                ? (string) $group['status']
+                : 'active';
+
+            $location = isset($group['location'])
+                ? (string) $group['location']
+                : 'page';
+
+            if ($status !== 'active' || $location !== 'global') {
+                continue;
+            }
+
+            foreach ((array) ($group['fields'] ?? []) as $field) {
+
+                if (! is_array($field)) {
+                    continue;
+                }
+
+                $type = isset($field['type'])
+                    ? sanitize_key((string) $field['type'])
+                    : 'text';
+
+                if (in_array($type, ['image', 'file'], true)) {
+                    $needs_media = true;
+                }
+
+                if ($type === 'wysiwyg') {
+                    $needs_editor = true;
+                }
+            }
+        }
+    }
+
+    /**
+     * Only load WordPress Media Library when Image or File fields exist
+     * on the current screen.
+     */
+    if ($needs_media) {
+        wp_enqueue_media();
+    }
+
+    /**
+     * Only load the WordPress editor API when a WYSIWYG field exists.
+     */
+    if (
+        $needs_editor
+        && function_exists('wp_enqueue_editor')
+    ) {
         wp_enqueue_editor();
     }
 
     /**
-     * Load WordPress-provided admin styles used by Forge Fields.
+     * Dashicons are used throughout Forge Fields.
      */
     wp_enqueue_style('dashicons');
 
-    wp_enqueue_style('editor-buttons');
-
     /**
-     * Load the Inter font used by the Forge Fields admin interface.
+     * Editor button styles are only required when WYSIWYG exists.
      */
-    wp_enqueue_style(
-        'ff-font-inter',
-        'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-        [],
-        null
-    );
+    if ($needs_editor) {
+        wp_enqueue_style('editor-buttons');
+    }
 
     /**
-     * Load Forge Fields admin styles.
+     * Forge Fields admin stylesheet.
      */
     wp_enqueue_style(
         'ff-admin-fields',
-        FF_URL . 'assets/css/admin-fields.css',
+        FF_URL . 'assets/css/admin-fields.min.css',
         [],
         FF_VERSION
     );
 
     /**
-     * Load Forge Fields admin JavaScript and its WordPress dependencies.
+     * Only attach WordPress media dependencies when media fields
+     * actually exist on the current screen.
      */
-    wp_enqueue_script(
-        'ff-admin-fields',
-        FF_URL . 'assets/js/admin-fields.js',
-        ['jquery', 'media-editor', 'media-views', 'wp-util'],
-        FF_VERSION,
-        true
-    );
+    $script_dependencies = ['jquery'];
+
+    if ($needs_media) {
+        $script_dependencies[] = 'media-editor';
+        $script_dependencies[] = 'media-views';
+        $script_dependencies[] = 'wp-util';
+    }
 
     /**
-     * Load the WordPress common admin stylesheet on Forge Fields
-     * screens where native WordPress admin components are used.
+     * Forge Fields admin JavaScript.
+     */
+    /**
+     * Forge Fields admin/builder behavior.
+     *
+     * This script is only required on Forge Fields' own admin screens.
+     * Normal Page/Post editors do not need the Field Group builder,
+     * drag-and-drop, bulk actions, location controls, or other admin UI.
+     */
+    if ($is_ff_screen) {
+        wp_enqueue_script(
+            'ff-admin-fields',
+            FF_URL . 'assets/js/admin-fields.min.js',
+            $script_dependencies,
+            FF_VERSION,
+            true
+        );
+    }
+
+    /**
+     * Rendered field-control behavior.
+     *
+     * Page/Post editors and Global Fields need interactive controls
+     * such as Password, Range, Media, and Required validation.
+     */
+    if ($is_editor_screen || $page === 'forge-fields-global') {
+        wp_enqueue_script(
+            'ff-admin-controls',
+            FF_URL . 'assets/js/admin-controls.min.js',
+            $script_dependencies,
+            FF_VERSION,
+            true
+        );
+    }
+
+    /**
+     * Forge Fields plugin screens use some native WordPress components.
      */
     if ($is_ff_screen) {
         wp_enqueue_style('common');

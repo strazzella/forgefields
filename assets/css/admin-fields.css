@@ -4626,9 +4626,60 @@ input#_ff_range_slider {
  * Remove default checkbox margin inside the field-selection column.
  */
 .wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
   margin: 0;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+  cursor: pointer;
+  accent-color: #363637;
 }
 
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:checked,
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked {
+  border-color: #363637;
+  background-color: #363637;
+}
+
+/**
+ * Force the WordPress-native checkbox checkmark to use white
+ * against the Forge Fields dark checked background.
+ */
+.wrap.ff-admin.ff-edit
+  .ff-field-check-column
+  input[type="checkbox"]:checked::before,
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked::before {
+  color: #ffffff;
+}
+
+/**
+ * Match Field Groups list-table checkboxes to the Forge Fields
+ * checkbox styling used in the Field Group editor.
+ */
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1px solid #9ca3af;
+  border-radius: 4px;
+  box-shadow: none;
+  cursor: pointer;
+  accent-color: #363637;
+}
+
+.wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:focus {
+  border-color: #363637;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
+}
+
+.wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:focus {
+  border-color: #363637;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
+}
 /* Bulk field actions */
 
 /**
@@ -5289,8 +5340,8 @@ input#_ff_range_slider {
   left: 0;
   top: 10px;
   bottom: -1px;
-  width: 4px;
-  background: #363637;
+  width: 2px;
+  background: #8f8f8f;
   border-radius: 999px 999px 0 0;
 }
 
@@ -5303,8 +5354,8 @@ input#_ff_range_slider {
   left: 0;
   top: -1px;
   bottom: 10px;
-  width: 4px;
-  background: #363637;
+  width: 2px;
+  background: #8f8f8f;
   border-radius: 0 0 999px 999px;
 }
 

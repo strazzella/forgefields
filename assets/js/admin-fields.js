@@ -369,6 +369,13 @@ document.addEventListener("DOMContentLoaded", function () {
               settingsRow.classList.remove("is-hidden");
               settingsRow.style.display = "";
 
+              /**
+               * Apply the same connected open-state styling used when
+               * Field Options is opened manually.
+               */
+              row.classList.add("ff-options-open");
+              settingsRow.classList.add("ff-options-open");
+
               if (optionsToggle) {
                 optionsToggle.setAttribute("aria-expanded", "true");
               }
@@ -845,136 +852,94 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Initializes field-key copy controls.
+   * Initializes Forge Key copy controls.
    *
-   * Each .ff-copy-key element reads the value stored in its data-key
-   * attribute and prepares clipboard-related behavior when clicked.
+   * Uses the modern Clipboard API when available and falls back
+   * to document.execCommand("copy") for older environments.
    */
   document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
-    btn.addEventListener("click", function (e) {
+    btn.addEventListener("click", async function (e) {
       e.preventDefault();
 
-      /**
-       * Retrieve the key associated with the clicked copy control.
-       */
       const key = this.dataset.key;
-      if (!key) return;
 
-      const self = this;
+      if (!key) {
+        return;
+      }
 
-      /**
-       * Defines a temporary visual success state for this copy button.
-       *
-       * The button receives the is-copied class and its tooltip changes
-       * to "Copied!" before being restored after 1.5 seconds.
-       */
-      const done = () => {
-        self.classList.add("is-copied");
-        const oldTitle = self.getAttribute("title") || "";
-        self.setAttribute("title", "Copied!");
-        setTimeout(() => {
-          self.classList.remove("is-copied");
-          self.setAttribute("title", oldTitle || "Copy to clipboard");
-        }, 1500);
-      };
+      const button = this;
 
       /**
-       * Attach the clipboard-copy implementation to all field-key controls.
-       *
-       * This handler first attempts to use the modern Clipboard API.
-       * If that is unavailable or fails, it falls back to the older
-       * document.execCommand("copy") approach.
+       * Display temporary copied feedback.
        */
-      document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
-        btn.addEventListener("click", async function (e) {
-          e.preventDefault();
+      function showCopiedState() {
+        button.classList.add("is-copied");
 
-          const key = this.dataset.key;
-          if (!key) return;
+        const oldTitle = button.getAttribute("title") || "";
 
-          const self = this;
+        button.setAttribute("title", "Copied!");
 
-          /**
-           * Displays temporary success feedback after a key is copied.
-           *
-           * The copied-state CSS class is applied and the title is changed
-           * to "Copied!" before the previous tooltip is restored.
-           */
-          function showCopiedState() {
-            self.classList.add("is-copied");
+        setTimeout(function () {
+          button.classList.remove("is-copied");
+          button.setAttribute("title", oldTitle || "Copy to clipboard");
+        }, 1000);
+      }
 
-            const oldTitle = self.getAttribute("title") || "";
-            self.setAttribute("title", "Copied!");
+      /**
+       * Legacy clipboard fallback.
+       *
+       * @param {string} text Text to copy.
+       * @returns {boolean} Whether the copy operation succeeded.
+       */
+      function fallbackCopy(text) {
+        const textarea = document.createElement("textarea");
 
-            setTimeout(function () {
-              self.classList.remove("is-copied");
-              self.setAttribute("title", oldTitle || "Copy to clipboard");
-            }, 1000);
-          }
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        textarea.style.pointerEvents = "none";
 
-          /**
-           * Provides a legacy clipboard fallback for environments where
-           * navigator.clipboard.writeText is unavailable or fails.
-           *
-           * A temporary invisible textarea is created, populated with the
-           * requested text, selected, copied, and then removed from the DOM.
-           *
-           * @param {string} text The text to copy to the clipboard.
-           * @returns {boolean} Whether document.execCommand reported success.
-           */
-          function fallbackCopy(text) {
-            const textarea = document.createElement("textarea");
+        document.body.appendChild(textarea);
 
-            textarea.value = text;
-            textarea.setAttribute("readonly", "");
-            textarea.style.position = "fixed";
-            textarea.style.opacity = "0";
-            textarea.style.pointerEvents = "none";
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
 
-            document.body.appendChild(textarea);
+        let copied = false;
 
-            textarea.select();
-            textarea.setSelectionRange(0, textarea.value.length);
+        try {
+          copied = document.execCommand("copy");
+        } catch (error) {
+          copied = false;
+        }
 
-            let copied = false;
+        document.body.removeChild(textarea);
 
-            /**
-             * Attempt the legacy copy operation and safely handle browsers
-             * that reject or do not support the command.
-             */
-            try {
-              copied = document.execCommand("copy");
-            } catch (error) {
-              copied = false;
-            }
+        return copied;
+      }
 
-            document.body.removeChild(textarea);
+      /**
+       * Prefer the modern Clipboard API.
+       */
+      try {
+        if (
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText === "function"
+        ) {
+          await navigator.clipboard.writeText(key);
+          showCopiedState();
+          return;
+        }
+      } catch (error) {
+        // Fall through to the legacy copy method.
+      }
 
-            return copied;
-          }
-
-          /**
-           * Prefer the modern asynchronous Clipboard API when available.
-           */
-          try {
-            if (
-              navigator.clipboard &&
-              typeof navigator.clipboard.writeText === "function"
-            ) {
-              await navigator.clipboard.writeText(key);
-              showCopiedState();
-              return;
-            }
-          } catch (error) {}
-
-          /**
-           * Fall back to the legacy textarea-based copy approach.
-           */
-          if (fallbackCopy(key)) {
-            showCopiedState();
-          }
-        });
-      });
+      /**
+       * Legacy fallback.
+       */
+      if (fallbackCopy(key)) {
+        showCopiedState();
+      }
     });
   });
 
@@ -1003,91 +968,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const tr = td.closest("tr");
       if (tr) tr.classList.remove("ff-row-focus");
     }
-  });
-});
-
-/**
- * Initializes all password-field visibility controls.
- *
- * Each password wrapper contains:
- * - A toggle button.
- * - A password input.
- * - A Dashicons visibility icon.
- *
- * The control keeps the input type, icon, and accessible label synchronized.
- */
-document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
-  const btn = wrap.querySelector(".ff-password-toggle");
-  const input = wrap.querySelector(".ff-password-input");
-  const icon = btn ? btn.querySelector(".dashicons") : null;
-
-  /**
-   * Skip incomplete password controls.
-   */
-  if (!btn || !input || !icon) return;
-
-  /**
-   * Synchronizes the toggle button with the password input's visibility.
-   *
-   * When the password is visible:
-   * - The button announces "Hide password".
-   * - The visibility icon is shown.
-   *
-   * When the password is hidden:
-   * - The button announces "Show password".
-   * - The hidden icon is shown.
-   */
-  function sync() {
-    const isVisible = input.type === "text";
-    btn.setAttribute(
-      "aria-label",
-      isVisible ? "Hide password" : "Show password",
-    );
-    icon.classList.toggle("dashicons-visibility", isVisible);
-    icon.classList.toggle("dashicons-hidden", !isVisible);
-  }
-
-  /**
-   * Apply the correct icon and accessibility state on initial load.
-   */
-  sync();
-
-  /**
-   * Toggle between visible text and obscured password input modes.
-   */
-  btn.addEventListener("click", function () {
-    input.type = input.type === "text" ? "password" : "text";
-    sync();
-  });
-});
-
-/**
- * Initializes paired range-slider and number-input controls.
- *
- * Changes to either control are immediately mirrored to the other
- * so both interfaces always display the same value.
- */
-document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
-  const slider = wrap.querySelector(".ff-range-slider");
-  const number = wrap.querySelector(".ff-range-number");
-
-  /**
-   * Skip wrappers that do not contain both required controls.
-   */
-  if (!slider || !number) return;
-
-  /**
-   * Copy range-slider changes into the number input.
-   */
-  slider.addEventListener("input", function () {
-    number.value = slider.value;
-  });
-
-  /**
-   * Copy number-input changes back into the range slider.
-   */
-  number.addEventListener("input", function () {
-    slider.value = number.value;
   });
 });
 
@@ -1960,275 +1840,6 @@ document.addEventListener("click", function (e) {
 });
 
 /**
- * Initializes delegated jQuery synchronization for Forge Fields
- * range sliders and their associated numeric inputs.
- *
- * data-target attributes are used to locate the paired control.
- */
-jQuery(function ($) {
-  /**
-   * Synchronize a range slider with its linked numeric input.
-   *
-   * Whenever the slider receives an input or change event, its current
-   * value is copied into the element referenced by data-target.
-   */
-  $(document).on("input change", ".ff-range-slider", function () {
-    var $num = $($(this).data("target"));
-
-    if ($num.length) $num.val(this.value);
-  });
-
-  /**
-   * Synchronize a numeric range input with its linked slider.
-   *
-   * The entered value is constrained to the slider's configured
-   * minimum and maximum before both controls are updated.
-   */
-  $(document).on("input change", ".ff-range-number", function () {
-    var $rng = $($(this).data("target"));
-
-    if ($rng.length) {
-      /**
-       * Read the linked slider's minimum and maximum values.
-       *
-       * Defaults are used when those attributes cannot be parsed.
-       */
-      var min = parseFloat($rng.attr("min")) || 0;
-      var max = parseFloat($rng.attr("max")) || 100;
-
-      /**
-       * Parse the numeric value entered by the user.
-       */
-      var val = parseFloat(this.value);
-
-      /**
-       * Invalid numeric input falls back to the slider's minimum value.
-       */
-      if (isNaN(val)) val = min;
-
-      /**
-       * Clamp the value so it cannot fall outside the slider's
-       * configured minimum and maximum.
-       */
-      val = Math.min(max, Math.max(min, val));
-
-      /**
-       * Apply the normalized value to both controls.
-       */
-      this.value = val;
-      $rng.val(val);
-    }
-  });
-});
-
-/**
- * Self-contained WordPress Media Library integration for Forge Fields
- * image and file controls.
- *
- * This section:
- * - Prevents duplicate event binding.
- * - Opens the WordPress media frame.
- * - Stores selected attachment IDs.
- * - Updates image previews.
- * - Updates selected file links.
- */
-(function ($) {
-  /**
-   * Prevent the media handlers from being bound more than once.
-   *
-   * The flag is stored globally so repeated script execution does not
-   * create duplicate WordPress Media Library event handlers.
-   */
-  if (window.ffMediaBound) {
-    return;
-  }
-
-  window.ffMediaBound = true;
-
-  /**
-   * Opens the WordPress Media Library for a Forge Fields media control.
-   *
-   * The field wrapper's data-type determines whether the frame is configured
-   * for image selection or general file selection.
-   *
-   * Once an attachment is selected:
-   * - Its attachment ID is stored in the field input.
-   * - Image fields display the selected image preview.
-   * - File fields display the selected filename and link.
-   * - The media-clear control becomes visible.
-   *
-   * @param {jQuery} $wrap The Forge Fields media wrapper.
-   * @param {jQuery} $input The input used to store the attachment ID.
-   */
-  function openFFFrame($wrap, $input) {
-    /**
-     * Determine whether this media control represents an image or file field.
-     */
-    var type = $wrap.data("type");
-
-    /**
-     * Create the WordPress media-selection frame.
-     */
-    var frame = wp.media({
-      title: type === "image" ? "Select Image" : "Select File",
-      button: {
-        text: "Use this " + (type === "image" ? "image" : "file"),
-      },
-      multiple: false,
-      library: type === "image" ? { type: "image" } : {},
-    });
-
-    /**
-     * Handle the attachment selected from the WordPress Media Library.
-     */
-    frame.on("select", function () {
-      /**
-       * Retrieve the first selected attachment as a plain object.
-       */
-      var att = frame.state().get("selection").first().toJSON();
-
-      /**
-       * Store the WordPress attachment ID and trigger the input's
-       * change event so any dependent behavior is notified.
-       */
-      $input.val(att.id).trigger("change");
-
-      /**
-       * Image fields display an image preview.
-       */
-      if (type === "image") {
-        /**
-         * Prefer the generated thumbnail size when available,
-         * otherwise fall back to the attachment's original URL.
-         */
-        var url =
-          att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url;
-
-        $wrap.find(".ff-media-preview").attr("src", url).show();
-      } else {
-        /**
-         * File fields display a clickable link containing the selected filename.
-         */
-        $wrap
-          .find(".ff-media-fileurl")
-          .attr("href", att.url)
-          .text(att.filename)
-          .show();
-
-        /**
-         * Hide the empty-state message now that a file has been selected.
-         */
-        $wrap.find(".ff-media-nofile").hide();
-      }
-
-      /**
-       * Show the control that allows the selected media item to be cleared.
-       */
-      $wrap.find(".ff-media-clear").show();
-    });
-
-    /**
-     * Display the configured WordPress Media Library frame.
-     */
-    frame.open();
-  }
-
-  /**
-   * Bind the media-selection control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia click handler is removed first to prevent
-   * duplicate bindings, then the current handler is attached.
-   */
-  $(document)
-    .off("click.ffMedia", ".ff-media-select")
-    .on("click.ffMedia", ".ff-media-select", function (e) {
-      e.preventDefault();
-
-      /**
-       * Read the target input ID stored on the clicked media-select control.
-       */
-      var id = $(this).data("target");
-
-      /**
-       * Locate the input that stores the selected attachment ID.
-       */
-      var $input = $("#" + id);
-
-      if (!$input.length) return;
-
-      /**
-       * Find the surrounding Forge Fields media wrapper.
-       */
-      var $wrap = $input.closest(".ff-media-wrap");
-
-      /**
-       * Open the WordPress Media Library for this media field.
-       */
-      openFFFrame($wrap, $input);
-    });
-
-  /**
-   * Bind the media-clear control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia handler is removed first so the clear action
-   * cannot be bound multiple times.
-   */
-  $(document)
-    .off("click.ffMedia", ".ff-media-clear")
-    .on("click.ffMedia", ".ff-media-clear", function (e) {
-      e.preventDefault();
-
-      /**
-       * Read the target input ID stored on the clicked clear control.
-       */
-      var id = $(this).data("target");
-
-      /**
-       * Locate the input currently storing the attachment ID.
-       */
-      var $input = $("#" + id);
-
-      if (!$input.length) return;
-
-      /**
-       * Find the surrounding media wrapper so its preview state
-       * can also be reset.
-       */
-      var $wrap = $input.closest(".ff-media-wrap");
-
-      /**
-       * Clear the stored attachment ID and trigger its change event.
-       */
-      $input.val("").trigger("change");
-
-      /**
-       * Reset the visual state differently depending on whether this
-       * media field represents an image or a general file.
-       */
-      if ($wrap.data("type") === "image") {
-        /**
-         * Image fields clear and hide the image preview.
-         */
-        $wrap.find(".ff-media-preview").attr("src", "").hide();
-      } else {
-        /**
-         * File fields clear and hide the selected file link,
-         * then restore the no-file-selected message.
-         */
-        $wrap.find(".ff-media-fileurl").attr("href", "").text("").hide();
-        $wrap.find(".ff-media-nofile").show();
-      }
-
-      /**
-       * Hide the Clear control after the selected media has been removed.
-       */
-      $(this).hide();
-    });
-})(jQuery);
-
-/**
  * Initializes conditional field-group location controls after the DOM loads.
  *
  * The target selectors shown to the user depend on the selected location:
@@ -2377,122 +1988,4 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   });
-  /**
-   * Prevent Page/Post updates when a required Forge Field is empty.
-   */
-  const postForm = document.getElementById("post");
-
-  if (postForm) {
-    postForm.addEventListener("submit", function (event) {
-      const requiredRows = document.querySelectorAll(
-        ".ff-mb .ff-required-field",
-      );
-
-      let firstInvalid = null;
-
-      requiredRows.forEach(function (row) {
-        const type = row.dataset.ffFieldType || "";
-        let isValid = true;
-
-        switch (type) {
-          case "checkbox": {
-            isValid =
-              row.querySelectorAll('input[type="checkbox"]:checked').length > 0;
-            break;
-          }
-
-          case "radio":
-          case "button_group": {
-            isValid = row.querySelector('input[type="radio"]:checked') !== null;
-            break;
-          }
-
-          case "true_false": {
-            isValid =
-              row.querySelector('input[type="checkbox"]:checked') !== null;
-            break;
-          }
-
-          case "image":
-          case "file": {
-            const hidden = row.querySelector(
-              'input[type="hidden"][name^="_ff_"]',
-            );
-
-            isValid =
-              hidden !== null &&
-              hidden.value.trim() !== "" &&
-              hidden.value !== "0";
-
-            break;
-          }
-
-          case "wysiwyg": {
-            const textarea = row.querySelector("textarea");
-
-            if (!textarea) {
-              isValid = false;
-              break;
-            }
-
-            /**
-             * When TinyMCE is active, read the content directly from
-             * the editor because it may not yet be synchronized with
-             * the underlying textarea.
-             */
-            if (
-              window.tinymce &&
-              textarea.id &&
-              window.tinymce.get(textarea.id)
-            ) {
-              const editor = window.tinymce.get(textarea.id);
-
-              isValid = editor.getContent({ format: "text" }).trim() !== "";
-            } else {
-              isValid = textarea.value.trim() !== "";
-            }
-
-            break;
-          }
-
-          default: {
-            const control = row.querySelector(
-              "input:not([type='hidden']), textarea, select",
-            );
-
-            isValid = control !== null && String(control.value).trim() !== "";
-
-            break;
-          }
-        }
-
-        row.classList.toggle("ff-required-error", !isValid);
-
-        if (!isValid && !firstInvalid) {
-          firstInvalid = row;
-        }
-      });
-
-      if (firstInvalid) {
-        event.preventDefault();
-
-        firstInvalid.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-
-        const control = firstInvalid.querySelector(
-          "input, textarea, select, button",
-        );
-
-        if (control) {
-          control.focus();
-        }
-
-        window.alert(
-          "Please complete all required Forge Fields before updating this page.",
-        );
-      }
-    });
-  }
 });

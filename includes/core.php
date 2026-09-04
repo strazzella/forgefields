@@ -93,11 +93,34 @@ function ff_delete_group_field_values($group_id, $field_name)
  *
  * @return array Saved field groups, or an empty array when none exist.
  */
-function ff_get_all_groups()
+function ff_get_all_groups($refresh = false)
 {
-    $groups = get_option('ff_field_groups', []);
+    static $groups = null;
 
-    return is_array($groups) ? $groups : [];
+    /**
+     * Return the request-level cache unless a fresh read
+     * has explicitly been requested.
+     */
+    if (! $refresh && $groups !== null) {
+        return $groups;
+    }
+
+    /**
+     * Load the latest Field Groups from WordPress.
+     */
+    $stored_groups = get_option(
+        'ff_field_groups',
+        []
+    );
+
+    /**
+     * Normalize invalid or missing data to an empty array.
+     */
+    $groups = is_array($stored_groups)
+        ? $stored_groups
+        : [];
+
+    return $groups;
 }
 
 /**
@@ -1747,5 +1770,14 @@ function ff_group_fields_into_tab_sections(array $fields)
  */
 function ff_save_all_groups(array $groups)
 {
-    update_option('ff_field_groups', $groups);
+    update_option(
+        'ff_field_groups',
+        $groups
+    );
+
+    /**
+     * Refresh Forge Fields' request-level group cache so any
+     * later reads during this same request see the saved data.
+     */
+    ff_get_all_groups(true);
 }
