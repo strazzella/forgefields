@@ -1434,7 +1434,7 @@ function ff_render_field_groups_list()
                     name="ff_search"
                     value="<?php echo esc_attr($search_term); ?>"
                     class="regular-text ff-search-input"
-                    placeholder="Search field groups..." />
+                    placeholder="" />
 
                 <?php if ($search_term !== '') : ?>
                     <a href="<?php echo esc_url($search_base_url); ?>"
@@ -1496,7 +1496,37 @@ function ff_render_field_groups_list()
             });
         }
 
+        /**
+         * Paginate Field Groups.
+         *
+         * The list displays a maximum of 10 groups per page after
+         * filtering, searching, and sorting have been applied.
+         */
         $visible_count = count($display_groups);
+
+        $per_page     = 10;
+        $current_page = isset($_GET['paged'])
+            ? max(1, absint($_GET['paged']))
+            : 1;
+
+        $total_pages = max(
+            1,
+            (int) ceil($visible_count / $per_page)
+        );
+
+        /**
+         * Prevent an invalid page number from producing an empty list.
+         */
+        $current_page = min($current_page, $total_pages);
+
+        $offset = ($current_page - 1) * $per_page;
+
+        $paged_groups = array_slice(
+            $display_groups,
+            $offset,
+            $per_page,
+            true
+        );
 
         if (empty($display_groups)) : ?>
             <p>No field groups found for this view. Click “Add New” to create one.</p>
@@ -1524,7 +1554,16 @@ function ff_render_field_groups_list()
                     ];
                 }
 
-                $render_bulk = function ($position) use ($bulk_actions, $visible_count) {
+                $render_bulk = function ($position) use (
+                    $bulk_actions,
+                    $visible_count,
+                    $current_page,
+                    $total_pages,
+                    $current_view,
+                    $orderby,
+                    $order,
+                    $search_term
+                ) {
                     $id = $position === 'top'
                         ? 'ff-bulk-action-selector-top'
                         : 'ff-bulk-action-selector-bottom';
@@ -1550,7 +1589,8 @@ function ff_render_field_groups_list()
                         </div>
 
                         <?php if ($position === 'bottom') : ?>
-                            <div class="tablenav-pages one-page">
+                            <div class="tablenav-pages">
+
                                 <span class="displaying-num">
                                     <?php
                                     if ($visible_count === 1) {
@@ -1560,6 +1600,87 @@ function ff_render_field_groups_list()
                                     }
                                     ?>
                                 </span>
+
+                                <?php if ($total_pages > 1) : ?>
+                                    <?php
+                                    $pagination_base = admin_url(
+                                        'admin.php?page=forge-fields'
+                                    );
+
+                                    if ($current_view !== 'all') {
+                                        $pagination_base = add_query_arg(
+                                            'ff_view',
+                                            $current_view,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($orderby) {
+                                        $pagination_base = add_query_arg(
+                                            'orderby',
+                                            $orderby,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($order) {
+                                        $pagination_base = add_query_arg(
+                                            'order',
+                                            $order,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($search_term !== '') {
+                                        $pagination_base = add_query_arg(
+                                            'ff_search',
+                                            $search_term,
+                                            $pagination_base
+                                        );
+                                    }
+                                    ?>
+
+                                    <span class="pagination-links">
+
+                                        <?php if ($current_page > 1) : ?>
+                                            <a
+                                                class="prev-page button"
+                                                href="<?php echo esc_url(
+                                                            add_query_arg(
+                                                                'paged',
+                                                                $current_page - 1,
+                                                                $pagination_base
+                                                            )
+                                                        ); ?>">
+                                                ‹
+                                            </a>
+                                        <?php endif; ?>
+
+                                        <span class="paging-input">
+                                            <?php echo intval($current_page); ?>
+                                            of
+                                            <span class="total-pages">
+                                                <?php echo intval($total_pages); ?>
+                                            </span>
+                                        </span>
+
+                                        <?php if ($current_page < $total_pages) : ?>
+                                            <a
+                                                class="next-page button"
+                                                href="<?php echo esc_url(
+                                                            add_query_arg(
+                                                                'paged',
+                                                                $current_page + 1,
+                                                                $pagination_base
+                                                            )
+                                                        ); ?>">
+                                                ›
+                                            </a>
+                                        <?php endif; ?>
+
+                                    </span>
+                                <?php endif; ?>
+
                             </div>
                         <?php endif; ?>
 
@@ -1614,7 +1735,7 @@ function ff_render_field_groups_list()
                         <?php $render_header_row(); ?>
                     </thead>
                     <tbody>
-                        <?php foreach ($display_groups as $group_id => $group) :
+                        <?php foreach ($paged_groups as $group_id => $group) :
 
                             $title    = ! empty($group['title']) ? $group['title'] : '(no title)';
                             $location = isset($group['location']) ? $group['location'] : 'page';
@@ -2824,7 +2945,7 @@ function ff_render_field_group_edit()
                             class="regular-text"
                             maxlength="75"
                             value="<?php echo esc_attr($title); ?>">
-                        <p class="description">e.g. “Landing Page – Hero Section”.</p>
+                        <p class="description">Add a descriptive title for this field group.</p>
                     </td>
                 </tr>
 
