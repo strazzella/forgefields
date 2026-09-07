@@ -4084,10 +4084,56 @@ input#_ff_range_slider {
 }
 
 /**
- * Ensure file inputs appear on their own line.
+ * Settings-page file input.
+ *
+ * Keeps the native file picker behavior while giving the control
+ * a modern Forge Fields appearance.
  */
 .ff-settings-field input[type="file"] {
   display: block;
+  width: 100%;
+  max-width: 520px;
+  color: #667085;
+  font-size: 13px;
+}
+
+/**
+ * Native file-picker button.
+ */
+.ff-settings-field input[type="file"]::file-selector-button {
+  height: 36px;
+  margin-right: 10px;
+  padding: 0 14px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/**
+ * File-picker hover state.
+ */
+.ff-settings-field input[type="file"]::file-selector-button:hover {
+  background: #f8fafc;
+  border-color: #c7ccd6;
+  box-shadow:
+    0 2px 6px rgba(16, 24, 40, 0.08),
+    0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+/**
+ * File-picker pressed state.
+ */
+.ff-settings-field input[type="file"]::file-selector-button:active {
+  background: #f1f3f5;
 }
 
 /**
@@ -4481,8 +4527,16 @@ input#_ff_range_slider {
  * Keeps the input and label text aligned horizontally, adds spacing
  * between neighboring choices, and makes the full label clickable.
  */
-#poststuff .postbox .inside .ff-mb label:has(input[type="checkbox"]),
-#poststuff .postbox .inside .ff-mb label:has(input[type="radio"]) {
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  label:not(.ff-button-group__btn):has(input[type="checkbox"]),
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  label:not(.ff-button-group__btn):has(input[type="radio"]) {
   display: inline-flex !important;
   align-items: center;
   min-height: 32px;
@@ -4706,8 +4760,12 @@ input#_ff_range_slider {
  * Keeps radio controls visually consistent across Page/Post
  * metaboxes and Global Fields.
  */
-#poststuff .postbox .inside .ff-mb input[type="radio"],
-.wrap.ff-admin.ff-global input[type="radio"] {
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  input[type="radio"]:not(.ff-button-group__input),
+.wrap.ff-admin.ff-global input[type="radio"]:not(.ff-button-group__input) {
   appearance: none !important;
   -webkit-appearance: none !important;
 
@@ -5473,6 +5531,23 @@ input#_ff_range_slider {
 }
 
 /**
+ * WYSIWYG focus state.
+ *
+ * The focus-within selector handles normal editor controls and Code mode.
+ * The ff-wysiwyg-focused class is applied by JavaScript when focus enters
+ * the TinyMCE Visual editor iframe.
+ */
+.ff-mb .wp-editor-wrap:focus-within,
+.ff-mb .wp-editor-wrap.ff-wysiwyg-focused,
+.ff-editor-card .wp-editor-wrap:focus-within,
+.ff-editor-card .wp-editor-wrap.ff-wysiwyg-focused {
+  border-color: #1d6df676 !important;
+  box-shadow:
+    0 0 0 2px rgba(29, 109, 246, 0.2),
+    0 1px 2px rgba(16, 24, 40, 0.06) !important;
+}
+
+/**
  * Top media / mode area.
  */
 #poststuff .postbox .inside .ff-mb .wp-editor-tools {
@@ -5569,10 +5644,18 @@ input#_ff_range_slider {
   box-shadow: none;
 }
 
-#poststuff .postbox .inside .ff-mb .mce-btn:hover,
-#poststuff .postbox .inside .ff-mb .mce-btn.mce-active {
+#poststuff .postbox .inside .ff-mb .mce-btn:hover {
   border-color: #d0d5dd;
   background: #fff;
+}
+
+#poststuff .postbox .inside .ff-mb .mce-btn.mce-active {
+  border-color: #8fb4ff;
+  background: #eef4ff;
+}
+
+#poststuff .postbox .inside .ff-mb .mce-btn.mce-active .mce-ico {
+  color: #1f2937 !important;
 }
 
 /**
@@ -5737,10 +5820,18 @@ input#_ff_range_slider {
   box-shadow: none !important;
 }
 
-.wrap.ff-admin.ff-global .ff-editor-card .mce-btn:hover,
-.wrap.ff-admin.ff-global .ff-editor-card .mce-btn.mce-active {
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn:hover {
   border-color: #d0d5dd !important;
   background: #fff !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn.mce-active {
+  border-color: #8fb4ff !important;
+  background: #eef4ff !important;
+}
+
+.wrap.ff-admin.ff-global .ff-editor-card .mce-btn.mce-active .mce-ico {
+  color: #1f2937 !important;
 }
 
 /* Editor content. */

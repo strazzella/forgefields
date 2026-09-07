@@ -169,29 +169,6 @@ add_action('in_admin_header', function () {
         </style>';
     });
 
-    add_action('admin_footer', function () {
-        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-        if ($page !== 'forge-fields-edit') return;
-?>
-        <script>
-            (function() {
-                const choiceTypes = ['select', 'checkbox', 'radio', 'button_group'];
-
-                document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
-
-                document.addEventListener('change', function(e) {
-                    if (e.target && e.target.classList.contains('ff-field-type')) {
-                        const row = e.target.closest('tr.ff-field-row');
-                        if (row) updateRow(row);
-                    }
-                });
-            })();
-        </script>
-    <?php
-    });
-
-
-
     $is_new   = ($page === 'forge-fields-edit' && empty($_GET['group']));
     if ($page === 'forge-fields') {
 
@@ -332,7 +309,7 @@ function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'A
     $is_current = ($page === $list_page);
 
     $home_url = admin_url('admin.php?page=' . $list_page);
-    ?>
+?>
     <div class="ff-brandbar" role="banner" aria-label="Forge Fields">
         <div class="ff-brandbar__inner">
             <div class="ff-brandbar__left">
@@ -3581,3 +3558,48 @@ function ff_render_field_group_edit()
     </div>
 <?php
 }
+
+/**
+ * Remove transient Forge Fields notice parameters from the browser URL.
+ *
+ * Notices are rendered once after redirects using query parameters such
+ * as ff_notice. Once the page is displayed, those parameters are removed
+ * so refreshing the browser does not display the same notice again.
+ */
+add_action('admin_footer', function () {
+
+    $page = isset($_GET['page'])
+        ? sanitize_key(wp_unslash($_GET['page']))
+        : '';
+
+    $forge_pages = [
+        'forge-fields',
+        'forge-fields-edit',
+        'forge-fields-global',
+        'forge-fields-settings',
+    ];
+
+    if (! in_array($page, $forge_pages, true)) {
+        return;
+    }
+
+    if (! isset($_GET['ff_notice'])) {
+        return;
+    }
+?>
+    <script>
+        (function() {
+            const url = new URL(window.location.href);
+
+            url.searchParams.delete('ff_notice');
+            url.searchParams.delete('imported');
+            url.searchParams.delete('skipped');
+
+            window.history.replaceState({},
+                document.title,
+                url.pathname + url.search + url.hash
+            );
+        })();
+    </script>
+<?php
+});

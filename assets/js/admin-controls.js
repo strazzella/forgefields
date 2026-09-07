@@ -456,3 +456,151 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+/**
+ * Apply the standard Forge Fields focus state to WordPress WYSIWYG editors.
+ *
+ * Code/Text mode can use normal browser focus detection, but TinyMCE Visual
+ * mode runs inside an iframe. TinyMCE focus and blur events therefore toggle
+ * a class on the outer WordPress editor wrapper.
+ */
+(function () {
+  const focusClass = "ff-wysiwyg-focused";
+
+  /**
+   * Return the WordPress editor wrapper associated with a TinyMCE editor.
+   *
+   * @param {Object} editor TinyMCE editor instance.
+   * @returns {HTMLElement|null}
+   */
+  function getEditorWrap(editor) {
+    if (!editor || !editor.id) {
+      return null;
+    }
+
+    const textarea = document.getElementById(editor.id);
+
+    if (!textarea) {
+      return null;
+    }
+
+    return textarea.closest(".wp-editor-wrap");
+  }
+
+  /**
+   * Attach Forge Fields focus behavior to one TinyMCE instance.
+   *
+   * @param {Object} editor TinyMCE editor instance.
+   */
+  function bindEditorFocus(editor) {
+    if (!editor || editor.__ffFocusBound) {
+      return;
+    }
+
+    editor.__ffFocusBound = true;
+
+    editor.on("focus", function () {
+      const wrap = getEditorWrap(editor);
+
+      if (wrap) {
+        wrap.classList.add(focusClass);
+      }
+    });
+
+    editor.on("blur", function () {
+      const wrap = getEditorWrap(editor);
+
+      if (wrap) {
+        wrap.classList.remove(focusClass);
+      }
+    });
+
+    editor.on("remove", function () {
+      const wrap = getEditorWrap(editor);
+
+      if (wrap) {
+        wrap.classList.remove(focusClass);
+      }
+    });
+  }
+
+  /**
+   * Bind all TinyMCE editors that already exist.
+   */
+  function bindExistingEditors() {
+    if (!window.tinymce || !Array.isArray(window.tinymce.editors)) {
+      return;
+    }
+
+    window.tinymce.editors.forEach(bindEditorFocus);
+  }
+
+  /**
+   * Initialize TinyMCE focus tracking.
+   *
+   * Existing editors are handled immediately and editors created later
+   * are handled through TinyMCE's AddEditor event.
+   */
+  function initTinyMceFocus() {
+    if (!window.tinymce) {
+      return;
+    }
+
+    bindExistingEditors();
+
+    if (typeof window.tinymce.on === "function") {
+      window.tinymce.on("AddEditor", function (event) {
+        if (event && event.editor) {
+          bindEditorFocus(event.editor);
+        }
+      });
+    }
+  }
+
+  /**
+   * Code/Text mode uses a normal textarea, so standard DOM focus events
+   * can toggle the same wrapper class.
+   */
+  document.addEventListener("focusin", function (event) {
+    if (
+      !event.target.matches(
+        ".ff-mb .wp-editor-area, .ff-editor-card .wp-editor-area",
+      )
+    ) {
+      return;
+    }
+
+    const wrap = event.target.closest(".wp-editor-wrap");
+
+    if (wrap) {
+      wrap.classList.add(focusClass);
+    }
+  });
+
+  document.addEventListener("focusout", function (event) {
+    if (
+      !event.target.matches(
+        ".ff-mb .wp-editor-area, .ff-editor-card .wp-editor-area",
+      )
+    ) {
+      return;
+    }
+
+    const wrap = event.target.closest(".wp-editor-wrap");
+
+    if (wrap) {
+      wrap.classList.remove(focusClass);
+    }
+  });
+
+  /**
+   * WordPress may initialize TinyMCE before or after this script executes.
+   */
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initTinyMceFocus);
+  } else {
+    initTinyMceFocus();
+  }
+
+  window.addEventListener("load", bindExistingEditors);
+})();
