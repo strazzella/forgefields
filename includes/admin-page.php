@@ -427,11 +427,11 @@ add_action('admin_menu', function () {
 
     add_submenu_page(
         null,
-        'Delete Forge Fields',
-        'Delete Forge Fields',
+        'Deactivate Forge Fields',
+        'Deactivate Forge Fields',
         'activate_plugins',
-        'forge-fields-uninstall',
-        'ff_render_uninstall_page'
+        'forge-fields-deactivate',
+        'ff_render_deactivate_page'
     );
 });
 
@@ -2560,8 +2560,11 @@ function ff_normalize_choices_textarea($raw_text)
 }
 
 /**
- * Replace the default plugin Delete action with the Forge Fields
- * controlled uninstall flow.
+ * Replace the normal Forge Fields Deactivate action with a controlled
+ * deactivation flow.
+ *
+ * This allows administrators to explicitly choose whether Forge Fields
+ * data should be preserved or permanently removed before deactivation.
  */
 add_filter(
     'plugin_action_links_forge-fields/forge-fields.php',
@@ -2570,90 +2573,201 @@ add_filter(
 
 function ff_plugin_action_links($actions)
 {
+    if (isset($actions['deactivate'])) {
 
-    if (isset($actions['delete'])) {
-
-        $delete_url = wp_nonce_url(
-            admin_url('admin.php?page=forge-fields-uninstall'),
-            'ff_uninstall_plugin'
+        $deactivate_url = wp_nonce_url(
+            admin_url('admin.php?page=forge-fields-deactivate'),
+            'ff_deactivate_plugin'
         );
 
-        $actions['delete'] = sprintf(
-            '<a href="%s" class="delete">%s</a>',
-            esc_url($delete_url),
-            esc_html__('Delete', 'forge-fields')
+        $actions['deactivate'] = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url($deactivate_url),
+            esc_html__('Deactivate', 'forge-fields')
         );
     }
 
     return $actions;
 }
 
-/**
- * Render the Forge Fields uninstall confirmation screen.
- *
- * Allows administrators to choose whether plugin data should also be
- * removed before the plugin itself is deleted.
- */
-function ff_render_uninstall_page()
-{
 
+/**
+ * Render the Forge Fields deactivation confirmation screen.
+ */
+function ff_render_deactivate_page()
+{
     if (! current_user_can('activate_plugins')) {
-        wp_die(esc_html__('You do not have permission to delete plugins.', 'forge-fields'));
+        wp_die(
+            esc_html__(
+                'You do not have permission to deactivate plugins.',
+                'forge-fields'
+            )
+        );
     }
 
-    check_admin_referer('ff_uninstall_plugin');
-
+    check_admin_referer('ff_deactivate_plugin');
 ?>
     <div class="wrap">
-        <h1>Delete Forge Fields</h1>
+        <h1>Deactivate Forge Fields</h1>
 
         <p>
-            Forge Fields can preserve its data in case the plugin is installed again later.
+            Choose what should happen to your Forge Fields data
+            before the plugin is deactivated.
+        </p>
+
+        <p>
+            <strong>Keep Data</strong> preserves your field groups,
+            global values, and saved post/page values so they are
+            available if Forge Fields is activated again.
+        </p>
+
+        <p>
+            <strong>Delete All Data</strong> permanently removes all
+            Forge Fields data from the database. This cannot be undone.
         </p>
 
         <form method="post">
-            <?php wp_nonce_field('ff_confirm_uninstall', 'ff_uninstall_nonce'); ?>
-
-            <input
-                type="hidden"
-                name="ff_confirm_delete"
-                value="1">
-
-            <p>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="ff_delete_plugin_data"
-                        value="1">
-
-                    <strong>
-                        Also permanently delete all Forge Fields data
-                    </strong>
-                </label>
-            </p>
-
-            <p class="description">
-                This includes field groups, global field values,
-                and Forge Fields values saved to posts and pages.
-                This cannot be undone.
-            </p>
+            <?php
+            wp_nonce_field(
+                'ff_confirm_deactivate',
+                'ff_deactivate_nonce'
+            );
+            ?>
 
             <p class="submit">
+                <button
+                    type="submit"
+                    name="ff_deactivate_choice"
+                    value="keep"
+                    class="button button-primary">
+                    Keep Data &amp; Deactivate
+                </button>
+
+                <button
+                    type="submit"
+                    name="ff_deactivate_choice"
+                    value="delete"
+                    class="button">
+                    Delete All Data &amp; Deactivate
+                </button>
+
                 <a
                     href="<?php echo esc_url(admin_url('plugins.php')); ?>"
                     class="button">
                     Cancel
                 </a>
-
-                <button
-                    type="submit"
-                    class="button button-primary">
-                    Delete Forge Fields
-                </button>
             </p>
         </form>
     </div>
 <?php
+}
+
+
+/**
+ * Handle the confirmed Forge Fields deactivation request.
+ */
+add_action('admin_init', 'ff_handle_plugin_deactivation');
+
+function ff_handle_plugin_deactivation()
+{
+    $page = isset($_GET['page'])
+        ? sanitize_key(wp_unslash($_GET['page']))
+        : '';
+
+    if ($page !== 'forge-fields-deactivate') {
+        return;
+    }
+
+    if (! isset($_POST['ff_deactivate_choice'])) {
+        return;
+    }
+
+    if (! current_user_can('activate_plugins')) {
+        wp_die(
+            esc_html__(
+                'You do not have permission to deactivate plugins.',
+                'forge-fields'
+            )
+        );
+    }
+
+    check_admin_referer(
+        'ff_confirm_deactivate',
+        'ff_deactivate_nonce'
+    );
+
+    $choice = sanitize_key(
+        wp_unslash($_POST['ff_deactivate_choice'])
+    );
+
+    if (! in_array($choice, ['keep', 'delete'], true)) {
+        wp_die(
+            esc_html__(
+                'Invalid Forge Fields deactivation choice.',
+                'forge-fields'
+            )
+        );
+    }
+
+    /**
+     * Preserve data unless permanent removal was explicitly selected.
+     */
+    if ($choice === 'keep') {
+
+        update_option(
+            'ff_delete_data_on_uninstall',
+            0
+        );
+    }
+
+    /**
+     * Permanently remove Forge Fields database data before
+     * deactivating the plugin.
+     */
+    if ($choice === 'delete') {
+
+        delete_option('ff_field_groups');
+        delete_option('ff_global_fields');
+
+        /**
+         * Legacy Forge Fields option.
+         */
+        delete_option('ff_field_group');
+
+        /**
+         * Remove all Forge Fields post/page metadata.
+         */
+        global $wpdb;
+
+        $meta_key_pattern =
+            $wpdb->esc_like('_ff_') . '%';
+
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->postmeta}
+                 WHERE meta_key LIKE %s",
+                $meta_key_pattern
+            )
+        );
+
+        delete_option(
+            'ff_delete_data_on_uninstall'
+        );
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    deactivate_plugins(
+        'forge-fields/forge-fields.php',
+        false,
+        false
+    );
+
+    wp_safe_redirect(
+        admin_url('plugins.php?deactivate=true')
+    );
+
+    exit;
 }
 
 add_action('admin_init', 'ff_handle_plugin_uninstall');

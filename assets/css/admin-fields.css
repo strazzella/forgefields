@@ -5734,6 +5734,20 @@ input#_ff_range_slider {
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
 }
 
+/**
+ * Global WYSIWYG focus state.
+ *
+ * This rule follows the Global editor-shell overrides so the focused
+ * border and shadow are not replaced by the default editor styling.
+ */
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap:focus-within,
+.wrap.ff-admin.ff-global .ff-editor-card .wp-editor-wrap.ff-wysiwyg-focused {
+  border-color: #1d6df676 !important;
+  box-shadow:
+    0 0 0 2px rgba(29, 109, 246, 0.2),
+    0 1px 2px rgba(16, 24, 40, 0.06) !important;
+}
+
 /* Top media / mode area. */
 .wrap.ff-admin.ff-global .ff-editor-card .wp-editor-tools {
   min-height: 54px;
