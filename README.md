@@ -85,4 +85,4 @@ $value = ff_get_field(
 );
 ```
 
-More examples are available in Developer Usage.
+More examples are available in [Developer Usage](docs/usage.md).
