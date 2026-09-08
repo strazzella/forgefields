@@ -2650,13 +2650,13 @@ function ff_render_deactivate_page()
         </p>
 
         <p>
-            <strong>Keep Data</strong> preserves your field groups,
+            <strong>Keep Forge Data</strong> preserves your field groups,
             global values, and saved post/page values so they are
             available if Forge Fields is activated again.
         </p>
 
         <p>
-            <strong>Delete All Data</strong> permanently removes all
+            <strong>Delete All Forge Data</strong> permanently removes all
             Forge Fields data from the database. This cannot be undone.
         </p>
 
@@ -2674,7 +2674,7 @@ function ff_render_deactivate_page()
                     name="ff_deactivate_choice"
                     value="keep"
                     class="button button-primary">
-                    Keep Data &amp; Deactivate
+                    Keep Forge Data &amp; Deactivate
                 </button>
 
                 <button
@@ -2682,7 +2682,7 @@ function ff_render_deactivate_page()
                     name="ff_deactivate_choice"
                     value="delete"
                     class="button">
-                    Delete All Data &amp; Deactivate
+                    Delete All Forge Data &amp; Deactivate
                 </button>
 
                 <a
