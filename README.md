@@ -53,6 +53,7 @@ Retrieve a field from the current Page or Post:
 
 ```php
 $value = ff_get_field('field_name');
+```
 
 Retrieve a Global Field:
 
