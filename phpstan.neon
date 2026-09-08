@@ -1,0 +1,26 @@
+parameters:
+  level: 5
+
+  paths:
+    - forge-fields.php
+    - includes
+
+  reportUnmatchedIgnoredErrors: false
+
+  ignoreErrors:
+    # Hook & enqueue signature noise
+    - '~^Parameter #\d+ .+ of function (add_action|add_filter|wp_enqueue_style|wp_enqueue_script|wp_editor|get_post_meta|update_post_meta|delete_post_meta|wp_get_attachment_image_src) expects .*$~'
+
+    # WordPress global functions
+    - '~^Function (plugin_dir_path|plugin_dir_url|is_admin|add_menu_page|add_submenu_page|add_query_arg|remove_query_arg|wp_safe_redirect|wp_cache_delete|check_admin_referer|get_the_ID|sanitize_textarea_field|current_user_can|admin_menu) not found\.$~'
+
+  tmpDir: .phpstan-cache
+
+  bootstrapFiles:
+    - phpstan-bootstrap.php
+    - phpstan-wp-classes.php
+
+  
+
+  parallel:
+    maximumNumberOfProcesses: 1
