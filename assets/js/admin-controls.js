@@ -458,6 +458,91 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /**
+ * Handle Forge Fields tab navigation on rendered field groups.
+ *
+ * Each tab button activates the matching panel inside its own
+ * data-ff-tabs container without affecting other Field Groups.
+ */
+document.addEventListener("click", function (event) {
+  const button = event.target.closest(".ff-tab-button");
+
+  if (!button) {
+    return;
+  }
+
+  const tabsWrap = button.closest("[data-ff-tabs]");
+
+  if (!tabsWrap) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const target = button.getAttribute("data-ff-tab");
+
+  if (target === null) {
+    return;
+  }
+
+  const buttons = tabsWrap.querySelectorAll(".ff-tab-button");
+  const panels = tabsWrap.querySelectorAll(".ff-tab-panel");
+
+  /**
+   * Clear the currently active tab and panel.
+   */
+  buttons.forEach(function (tabButton) {
+    tabButton.classList.remove("is-active");
+  });
+
+  panels.forEach(function (panel) {
+    panel.classList.remove("is-active");
+  });
+
+  /**
+   * Activate the clicked tab.
+   */
+  button.classList.add("is-active");
+
+  /**
+   * Activate the panel belonging to the clicked tab.
+   */
+  const targetPanel = tabsWrap.querySelector(
+    '[data-ff-tab-panel="' + target + '"]',
+  );
+
+  if (targetPanel) {
+    targetPanel.classList.add("is-active");
+  }
+});
+
+/**
+ * Keep True/False field labels synchronized with their toggle state.
+ *
+ * Applies to Forge Fields controls rendered on:
+ * - Page/Post edit screens
+ * - Global Fields
+ */
+document.addEventListener("change", function (event) {
+  if (!event.target.matches(".ff-true-false-input")) {
+    return;
+  }
+
+  const control = event.target.closest(".ff-true-false-control");
+
+  if (!control) {
+    return;
+  }
+
+  const label = control.querySelector(".ff-true-false-label");
+
+  if (!label) {
+    return;
+  }
+
+  label.textContent = event.target.checked ? "True" : "False";
+});
+
+/**
  * Apply the standard Forge Fields focus state to WordPress WYSIWYG editors.
  *
  * Code/Text mode can use normal browser focus detection, but TinyMCE Visual

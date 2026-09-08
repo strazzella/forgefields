@@ -1091,12 +1091,11 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 
             echo '<div class="ff-true-false-control">';
 
-            echo '<span class="ff-true-false-label">False</span>';
-
             echo '<label class="ff-toggle-field">';
 
             echo '<input
         type="checkbox"
+        class="ff-true-false-input"
         name="' . esc_attr($meta_key) . '"
         id="' . esc_attr($meta_key) . '"
         value="1"'
@@ -1107,7 +1106,9 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 
             echo '</label>';
 
-            echo '<span class="ff-true-false-label">True</span>';
+            echo '<span class="ff-true-false-label">'
+                . ($checked ? 'True' : 'False')
+                . '</span>';
 
             echo '</div>';
 

@@ -345,6 +345,36 @@ document.addEventListener("DOMContentLoaded", function () {
       const typeSelect = row.querySelector(".ff-field-type");
       const optionsToggle = row.querySelector(".ff-field-options-toggle");
 
+      function syncOptionsToggleVisibility() {
+        if (!typeSelect || !optionsToggle) {
+          return;
+        }
+
+        const isTab = typeSelect.value === "tab";
+
+        optionsToggle.style.display = isTab ? "none" : "";
+
+        /**
+         * If the row was switched to Tab while Field Options was open,
+         * close the now-empty options row as well.
+         */
+        if (isTab) {
+          const settingsRow = row.nextElementSibling;
+
+          if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+            settingsRow.classList.add("is-hidden");
+            settingsRow.style.display = "none";
+
+            row.classList.remove("ff-options-open");
+            settingsRow.classList.remove("ff-options-open");
+
+            optionsToggle.setAttribute("aria-expanded", "false");
+          }
+        }
+      }
+
+      syncOptionsToggleVisibility();
+
       /**
        * Whenever the field type changes, synchronize any special behavior
        * required by that field type.
@@ -355,6 +385,7 @@ document.addEventListener("DOMContentLoaded", function () {
         typeSelect.addEventListener("change", function () {
           syncTabRowState(row);
           syncFieldOptions(row);
+          syncOptionsToggleVisibility();
 
           /**
            * Choice-based fields require configured choices.
@@ -423,6 +454,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
             optionsToggle.setAttribute("aria-expanded", "true");
             syncFieldOptions(row);
+          }
+        });
+      }
+
+      const trueFalseToggle = row.nextElementSibling
+        ? row.nextElementSibling.querySelector(".ff-true-false-default-toggle")
+        : null;
+
+      if (trueFalseToggle) {
+        trueFalseToggle.addEventListener("change", function () {
+          const settingsRow = row.nextElementSibling;
+
+          if (!settingsRow) {
+            return;
+          }
+
+          const defaultInput = settingsRow.querySelector(
+            'input[name$="[default_value]"]',
+          );
+
+          const label = settingsRow.querySelector(
+            ".ff-true-false-default-label",
+          );
+
+          if (defaultInput) {
+            defaultInput.value = this.checked ? "1" : "0";
+          }
+
+          if (label) {
+            label.textContent = this.checked ? "True" : "False";
           }
         });
       }
@@ -677,6 +738,24 @@ document.addEventListener("DOMContentLoaded", function () {
         '[data-ff-option="default"]',
       );
 
+      const standardDefault = settingsRow.querySelector(".ff-default-standard");
+
+      const trueFalseDefault = settingsRow.querySelector(
+        ".ff-default-true-false",
+      );
+
+      const defaultInput = settingsRow.querySelector(
+        'input[name$="[default_value]"]',
+      );
+
+      const trueFalseToggle = settingsRow.querySelector(
+        ".ff-true-false-default-toggle",
+      );
+
+      const trueFalseLabel = settingsRow.querySelector(
+        ".ff-true-false-default-label",
+      );
+
       const characterLimitOption = settingsRow.querySelector(
         '[data-ff-option="character-limit"]',
       );
@@ -699,6 +778,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (defaultOption) {
         defaultOption.style.display = type === "tab" ? "none" : "";
+
+        if (standardDefault) {
+          standardDefault.style.display = type === "true_false" ? "none" : "";
+        }
+
+        if (trueFalseDefault) {
+          trueFalseDefault.style.display = type === "true_false" ? "" : "none";
+        }
+
+        if (type === "true_false" && defaultInput && trueFalseToggle) {
+          trueFalseToggle.checked = defaultInput.value === "1";
+
+          if (trueFalseLabel) {
+            trueFalseLabel.textContent = trueFalseToggle.checked
+              ? "True"
+              : "False";
+          }
+        }
       }
 
       if (characterLimitOption) {
@@ -708,7 +805,21 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (requiredOption) {
-        requiredOption.style.display = type === "tab" ? "none" : "";
+        const requiredInput = requiredOption.querySelector(
+          'input[type="checkbox"]',
+        );
+
+        const supportsRequired = type !== "tab" && type !== "true_false";
+
+        requiredOption.style.display = supportsRequired ? "" : "none";
+
+        /**
+         * True/False and Tab fields cannot meaningfully be required.
+         * Clear any previously checked state when switching to either type.
+         */
+        if (!supportsRequired && requiredInput) {
+          requiredInput.checked = false;
+        }
       }
 
       if (prependOption) {

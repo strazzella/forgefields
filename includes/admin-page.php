@@ -753,6 +753,13 @@ function ff_handle_field_group_save()
             ? 1
             : 0;
 
+        /**
+         * True/False always has a state, so Required does not apply.
+         */
+        if ($type === 'true_false') {
+            $required = 0;
+        }
+
         $character_limit = isset($field_raw['character_limit'])
             ? absint($field_raw['character_limit'])
             : 0;
@@ -2243,12 +2250,11 @@ function ff_render_global_field_row(array $field, array $stored)
 
                     echo '<div class="ff-true-false-control">';
 
-                    echo '<span class="ff-true-false-label">False</span>';
-
                     echo '<label class="ff-toggle-field">';
 
                     echo '<input
         type="checkbox"
+        class="ff-true-false-input"
         name="ff_global[' . esc_attr($name) . ']"
         id="' . esc_attr($id) . '"
         value="1"'
@@ -2259,7 +2265,9 @@ function ff_render_global_field_row(array $field, array $stored)
 
                     echo '</label>';
 
-                    echo '<span class="ff-true-false-label">True</span>';
+                    echo '<span class="ff-true-false-label">'
+                        . ($checked ? 'True' : 'False')
+                        . '</span>';
 
                     echo '</div>';
 
@@ -3314,17 +3322,18 @@ function ff_render_field_group_edit()
                 </thead>
 
                 <tbody id="ff-fields-body">
-                    <?php
-                    if (empty($fields)) {
-                        $fields = [
-                            [
-                                'label' => '',
-                                'name'  => '',
-                                'type'  => 'text',
-                            ],
-                        ];
-                    }
+                    <?php if (empty($fields)) : ?>
+                        <tr class="ff-fields-empty-state">
+                            <td colspan="6">
+                                <div class="ff-fields-empty-state__inner">
+                                    <strong>No fields added yet.</strong>
+                                    <p>Add your first field to start building this Field Group.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
 
+                    <?php
                     foreach ($fields as $index => $field) :
                         $label = isset($field['label']) ? $field['label'] : '';
                         $name  = isset($field['name'])  ? $field['name']  : '';
@@ -3454,21 +3463,37 @@ function ff_render_field_group_edit()
                                             class="ff-field-option ff-option-default"
                                             data-ff-option="default">
 
-                                            <label
-                                                for="ff-default-value-<?php echo esc_attr($index); ?>">
+                                            <label>
                                                 Default Value
                                             </label>
 
-                                            <input
-                                                type="text"
-                                                id="ff-default-value-<?php echo esc_attr($index); ?>"
-                                                name="ff_fields[<?php echo esc_attr($index); ?>][default_value]"
-                                                value="<?php echo esc_attr($default_value); ?>"
-                                                class="regular-text">
+                                            <div class="ff-default-standard">
+                                                <input
+                                                    type="text"
+                                                    id="ff-default-value-<?php echo esc_attr($index); ?>"
+                                                    name="ff_fields[<?php echo esc_attr($index); ?>][default_value]"
+                                                    value="<?php echo esc_attr($default_value); ?>"
+                                                    class="regular-text">
 
-                                            <p class="description">
-                                                Used when no value has been saved yet.
-                                            </p>
+                                                <p class="description">
+                                                    Used when no value has been saved yet.
+                                                </p>
+                                            </div>
+
+                                            <div class="ff-default-true-false">
+                                                <label class="ff-toggle-field">
+                                                    <input
+                                                        type="checkbox"
+                                                        class="ff-true-false-default-toggle"
+                                                        <?php checked((string) $default_value, '1'); ?>>
+
+                                                    <span class="ff-toggle" aria-hidden="true"></span>
+                                                </label>
+
+                                                <span class="ff-true-false-default-label">
+                                                    <?php echo (string) $default_value === '1' ? 'True' : 'False'; ?>
+                                                </span>
+                                            </div>
 
                                         </div>
 
@@ -3730,20 +3755,36 @@ function ff_render_field_group_edit()
                                     class="ff-field-option ff-option-default"
                                     data-ff-option="default">
 
-                                    <label for="ff-default-value-__INDEX__">
+                                    <label>
                                         Default Value
                                     </label>
 
-                                    <input
-                                        type="text"
-                                        id="ff-default-value-__INDEX__"
-                                        name="ff_fields[__INDEX__][default_value]"
-                                        value=""
-                                        class="regular-text">
+                                    <div class="ff-default-standard">
+                                        <input
+                                            type="text"
+                                            id="ff-default-value-__INDEX__"
+                                            name="ff_fields[__INDEX__][default_value]"
+                                            value=""
+                                            class="regular-text">
 
-                                    <p class="description">
-                                        Used when no value has been saved yet.
-                                    </p>
+                                        <p class="description">
+                                            Used when no value has been saved yet.
+                                        </p>
+                                    </div>
+
+                                    <div class="ff-default-true-false">
+                                        <label class="ff-toggle-field">
+                                            <input
+                                                type="checkbox"
+                                                class="ff-true-false-default-toggle">
+
+                                            <span class="ff-toggle" aria-hidden="true"></span>
+                                        </label>
+
+                                        <span class="ff-true-false-default-label">
+                                            False
+                                        </span>
+                                    </div>
 
                                 </div>
 
@@ -3780,9 +3821,8 @@ function ff_render_field_group_edit()
                                     <label class="ff-toggle-field">
                                         <input
                                             type="checkbox"
-                                            name="ff_fields[<?php echo esc_attr($index); ?>][required]"
-                                            value="1"
-                                            <?php checked($required); ?>>
+                                            name="ff_fields[__INDEX__][required]"
+                                            value="1">
 
                                         <span class="ff-toggle" aria-hidden="true"></span>
                                     </label>

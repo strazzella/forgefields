@@ -3571,6 +3571,53 @@ input#_ff_range_slider {
 }
 
 /**
+ * Stack Forge Fields labels above their controls on Page/Post screens.
+ *
+ * WordPress form-table markup normally creates a label column on the left.
+ * Forge Fields uses a vertical field layout instead so each label appears
+ * directly above its associated control.
+ */
+#poststuff .postbox .inside .ff-mb .form-table tr {
+  display: block;
+  width: 100%;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table th,
+#poststuff .postbox .inside .ff-mb .form-table td {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+
+#poststuff .postbox .inside .ff-mb .form-table th {
+  padding: 16px 12px 6px !important;
+  border-top: 1px solid var(--ff-border, #dcdcde);
+}
+
+#poststuff .postbox .inside .ff-mb .form-table td {
+  padding: 0 12px 16px !important;
+  border-top: 0 !important;
+}
+
+/**
+ * The first field does not need a divider above it.
+ */
+#poststuff .postbox .inside .ff-mb .form-table tbody tr:first-child th {
+  border-top: 0;
+}
+
+/**
+ * Field labels.
+ */
+#poststuff .postbox .inside .ff-mb .form-table th label {
+  display: block;
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/**
  * Hide field-group key pills on screens up to 1440px wide.
  */
 @media screen and (max-width: 1440px) {
@@ -4250,9 +4297,8 @@ input#_ff_range_slider {
  */
 #poststuff .postbox .inside .ff-mb .form-table tr {
   display: grid;
-  grid-template-columns: var(--ff-metabox-label-w) minmax(0, 1fr);
-  align-items: center;
-  column-gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 8px;
   width: 100%;
   padding: 16px 12px;
   background: #fff;
@@ -4333,7 +4379,7 @@ input#_ff_range_slider {
  */
 #poststuff .postbox .inside .ff-mb .form-table td {
   width: 100%;
-  max-width: var(--ff-metabox-field-w);
+  max-width: none;
 }
 
 /* ---------------------------------------------------------
@@ -4373,6 +4419,22 @@ input#_ff_range_slider {
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+/**
+ * Keep standalone Number fields compact on Page/Post screens.
+ *
+ * Range fields use their own .ff-range-number sizing and are not
+ * affected by this rule.
+ */
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  tr[data-ff-field-type="number"]
+  input[type="number"] {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 /* ---------------------------------------------------------
@@ -4498,8 +4560,12 @@ input#_ff_range_slider {
  */
 .wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"],
 .wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"],
-#poststuff .postbox .inside .ff-mb input[type="checkbox"],
-.wrap.ff-admin.ff-global input[type="checkbox"] {
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  input[type="checkbox"]:not(.ff-true-false-input),
+.wrap.ff-admin.ff-global input[type="checkbox"]:not(.ff-true-false-input) {
   appearance: none !important;
   -webkit-appearance: none !important;
 
@@ -4538,7 +4604,9 @@ input#_ff_range_slider {
   .postbox
   .inside
   .ff-mb
-  label:not(.ff-button-group__btn):has(input[type="checkbox"]),
+  label:not(.ff-button-group__btn):has(
+    input[type="checkbox"]:not(.ff-true-false-input)
+  ),
 #poststuff
   .postbox
   .inside
@@ -4635,11 +4703,10 @@ input#_ff_range_slider {
 }
 
 /**
- * Refine the metabox row grid so the label column can shrink
- * between 140px and 180px while the field column remains flexible.
+ * Keep Forge Fields labels stacked above their controls.
  */
 #poststuff .postbox .inside .ff-mb .form-table tr {
-  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /**
@@ -4715,8 +4782,13 @@ input#_ff_range_slider {
  */
 .wrap.ff-admin.ff-edit .ff-field-check-column input[type="checkbox"]:checked,
 .wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked,
-#poststuff .postbox .inside .ff-mb input[type="checkbox"]:checked,
-.wrap.ff-admin.ff-global input[type="checkbox"]:checked {
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  input[type="checkbox"]:not(.ff-true-false-input):checked,
+.wrap.ff-admin.ff-global
+  input[type="checkbox"]:not(.ff-true-false-input):checked {
   border-color: #363637;
   background: #ffffff !important;
 }
@@ -4729,8 +4801,13 @@ input#_ff_range_slider {
   .ff-field-check-column
   input[type="checkbox"]:checked::before,
 .wrap.ff-admin.ff-list .ff-list-table input[type="checkbox"]:checked::before,
-#poststuff .postbox .inside .ff-mb input[type="checkbox"]:checked::before,
-.wrap.ff-admin.ff-global input[type="checkbox"]:checked::before {
+#poststuff
+  .postbox
+  .inside
+  .ff-mb
+  input[type="checkbox"]:not(.ff-true-false-input):checked::before,
+.wrap.ff-admin.ff-global
+  input[type="checkbox"]:not(.ff-true-false-input):checked::before {
   content: "" !important;
 
   position: absolute;
@@ -4988,21 +5065,6 @@ input#_ff_range_slider {
   box-shadow:
     0 1px 2px rgba(16, 24, 40, 0.08),
     0 1px 3px rgba(16, 24, 40, 0.04);
-}
-
-/**
- * Small active indicator beneath the active tab label.
- */
-#poststuff .postbox .inside .ff-mb .ff-tab-button.is-active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 3px;
-  width: 14px;
-  height: 2px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: #363637;
 }
 
 /**
@@ -5375,7 +5437,19 @@ input#_ff_range_slider {
 .wrap.ff-admin.ff-global .ff-true-false-control {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+}
+
+.ff-mb .ff-true-false-control .ff-toggle-field,
+.wrap.ff-admin.ff-global .ff-true-false-control .ff-toggle-field {
+  margin: 0;
+}
+
+.ff-mb .ff-true-false-label,
+.wrap.ff-admin.ff-global .ff-true-false-label {
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .ff-mb .ff-true-false-label,
