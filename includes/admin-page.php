@@ -3208,7 +3208,7 @@ function ff_render_field_group_edit()
 
             <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row"><label for="ff_group_title">Group Title</label></th>
+                    <th scope="row"><label for="ff_group_title">Group Title <span class="ff-required-indicator">*</span></label></th>
                     <td>
                         <input type="text"
                             id="ff_group_title"
