@@ -4,7 +4,7 @@
  * Plugin Name:       Forge Fields
  * Plugin URI:        https://github.com/strazzella/forgefields
  * Description:       Create and manage custom fields, field groups, global fields, media fields, and developer-friendly template functions for WordPress.
- * Version:           0.1.19
+ * Version:           0.2.0
  * Author:            Vince Strazzella
  * Author URI:        https://github.com/strazzella
  * License:           GPLv2 or later
@@ -18,7 +18,7 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-define('FF_VERSION', '0.1.19');
+define('FF_VERSION', '0.2.0');
 
 define('FF_PATH', plugin_dir_path(__FILE__));
 
