@@ -241,3 +241,204 @@ if ($show_banner) {
         Banner is enabled.
     </div>
 <?php endif; ?>
+
+/*
+|--------------------------------------------------------------------------
+| Output Image
+|--------------------------------------------------------------------------
+*/
+<?php
+$image_id = ff_get_field('image');
+
+if ($image_id) {
+    echo wp_get_attachment_image(
+        $image_id,
+        'large',
+        false,
+        [
+            'alt' => get_post_meta(
+                $image_id,
+                '_wp_attachment_image_alt',
+                true
+            ),
+        ]
+    );
+}
+?>
+
+/*
+|--------------------------------------------------------------------------
+| Output File Open Tab
+|--------------------------------------------------------------------------
+*/
+<?php
+$file_id = ff_get_field('file');
+
+if ($file_id) {
+    $file_url   = wp_get_attachment_url($file_id);
+    $file_title = get_the_title($file_id);
+
+    if ($file_url) {
+        ?>
+        <a
+            href="<?php echo esc_url($file_url); ?>"
+            target="_blank"
+            rel="noopener">
+            <?php echo esc_html($file_title ?: 'Download file'); ?>
+        </a>
+        <?php
+    }
+}
+?>
+
+/*
+|--------------------------------------------------------------------------
+| Output File Download
+|--------------------------------------------------------------------------
+*/
+<?php
+$file_id = ff_get_field('file');
+
+if ($file_id) {
+    $file_url   = wp_get_attachment_url($file_id);
+    $file_title = get_the_title($file_id);
+
+    if ($file_url) {
+        ?>
+        <a
+            href="<?php echo esc_url($file_url); ?>"
+            download>
+            <?php echo esc_html($file_title ?: 'Download file'); ?>
+        </a>
+        <?php
+    }
+}
+?>
+
+/*
+|--------------------------------------------------------------------------
+| Output WYSIWYG
+|--------------------------------------------------------------------------
+*/
+<?php
+$wsy = ff_get_field('wsy');
+
+if ($wsy) {
+    echo apply_filters('the_content', $wsy);
+}
+?>
+
+/*
+|--------------------------------------------------------------------------
+| Output Select
+|--------------------------------------------------------------------------
+*/
+<?php
+                    $selected_color = ff_get_field('select');
+                    ?>
+
+                    <select name="color">
+                        <option value="red" <?php selected($selected_color, 'red'); ?>>
+                            Red
+                        </option>
+
+                        <option value="green" <?php selected($selected_color, 'green'); ?>>
+                            Green
+                        </option>
+
+                        <option value="blue" <?php selected($selected_color, 'blue'); ?>>
+                            Blue
+                        </option>
+                    </select>
+
+
+<?php
+                    $selected = ff_get_field('select');
+                    $choices  = ff_get_field_choices('select');
+                    ?>
+
+                    <select name="forge-test-select">
+                        <option value="">
+                            Select one:
+                        </option>
+
+                        <?php foreach ($choices as $value => $label) : ?>
+                            <option
+                                value="<?php echo esc_attr($value); ?>"
+                                <?php selected($value); ?>>
+                                <?php echo esc_html($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+
+/*
+|--------------------------------------------------------------------------
+| Output Radio
+|--------------------------------------------------------------------------
+*/
+<?php
+$selected = ff_get_field('radio');
+$choices  = ff_get_field_choices('radio');
+?>
+
+<div class="forge-radio-group">
+    <?php foreach ($choices as $value => $label) : ?>
+        <label>
+            <input
+                type="radio"
+                name="forge-test-radio"
+                value="<?php echo esc_attr($value); ?>"
+                <?php checked($selected, $value); ?>
+            >
+
+            <?php echo esc_html($label); ?>
+        </label>
+    <?php endforeach; ?>
+</div>
+
+/*
+|--------------------------------------------------------------------------
+| Output Button Group
+|--------------------------------------------------------------------------
+*/
+<?php
+$selected = ff_get_field('button_group');
+$choices  = ff_get_field_choices('button_group');
+?>
+
+<div class="forge-button-group">
+    <?php foreach ($choices as $value => $label) : ?>
+        <label>
+            <input
+                type="radio"
+                name="forge-test-button-group"
+                value="<?php echo esc_attr($value); ?>"
+                <?php checked($selected, $value); ?>
+            >
+
+            <span>
+                <?php echo esc_html($label); ?>
+            </span>
+        </label>
+    <?php endforeach; ?>
+</div>
+
+
+/*
+|--------------------------------------------------------------------------
+| Output True False
+|--------------------------------------------------------------------------
+*/
+<?php
+$is_enabled = ff_get_field('true_false');
+?>
+
+<?php if ($is_enabled) : ?>
+    <p>Yes</p>
+<?php else : ?>
+    <p>No</p>
+<?php endif; ?>
+
+<p>
+    <?php echo ff_get_field('true_false') ? 'Yes' : 'No'; ?>
+</p>

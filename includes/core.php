@@ -1700,6 +1700,263 @@ if (! function_exists('ff_parse_choices_string')) {
 }
 
 /**
+ * Retrieve the configured choices for a Forge Fields choice field.
+ *
+ * Supported field types:
+ * - Select
+ * - Checkbox
+ * - Radio
+ * - Button Group
+ *
+ * By default, the field is resolved against the current post/page.
+ * Passing "global" or "option" searches Global Field Groups.
+ * A Forge Group Key may be supplied as the third argument when the
+ * same field name exists in multiple Field Groups.
+ *
+ * Example:
+ *
+ * ff_get_field_choices('color');
+ *
+ * Returns:
+ *
+ * [
+ *     'red'   => 'Red',
+ *     'green' => 'Green',
+ *     'blue'  => 'Blue',
+ * ]
+ *
+ * @param string          $field_name Field name.
+ * @param int|string|null $post_id    Post ID, "global", "option", or null.
+ * @param string|null     $group_id   Optional Forge Group Key.
+ *
+ * @return array Configured value => label choices, or an empty array.
+ */
+function ff_get_field_choices(
+    $field_name,
+    $post_id = null,
+    $group_id = null
+) {
+    $field_name = sanitize_key(
+        (string) $field_name
+    );
+
+    if ($field_name === '') {
+        return [];
+    }
+
+    $choice_types = [
+        'select',
+        'checkbox',
+        'radio',
+        'button_group',
+    ];
+
+    $groups = ff_get_all_groups();
+
+    if (empty($groups) || ! is_array($groups)) {
+        return [];
+    }
+
+    /**
+     * Explicit Forge Group Key.
+     *
+     * When supplied, the group itself resolves any ambiguity.
+     */
+    if ($group_id !== null && $group_id !== '') {
+
+        $group_id = sanitize_key(
+            (string) $group_id
+        );
+
+        if (
+            $group_id === ''
+            || ! isset($groups[$group_id])
+            || ! is_array($groups[$group_id])
+        ) {
+            return [];
+        }
+
+        $group = $groups[$group_id];
+
+        if (($group['status'] ?? 'active') !== 'active') {
+            return [];
+        }
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            $candidate_name = isset($field['name'])
+                ? sanitize_key(
+                    (string) $field['name']
+                )
+                : '';
+
+            if ($candidate_name !== $field_name) {
+                continue;
+            }
+
+            $type = isset($field['type'])
+                ? sanitize_key(
+                    (string) $field['type']
+                )
+                : '';
+
+            if (! in_array($type, $choice_types, true)) {
+                return [];
+            }
+
+            return ff_parse_choices_string(
+                $field['choices'] ?? ''
+            );
+        }
+
+        return [];
+    }
+
+    /**
+     * Determine whether this is a Global Fields lookup.
+     */
+    $is_global =
+        $post_id === 'global'
+        || $post_id === 'option';
+
+    /**
+     * Normal Page/Post lookup.
+     */
+    if (! $is_global) {
+
+        if ($post_id === null) {
+            $post_id = get_the_ID();
+        }
+
+        $post_id = absint($post_id);
+
+        if (! $post_id) {
+            return [];
+        }
+
+        $post_type = get_post_type($post_id);
+
+        if (! $post_type) {
+            return [];
+        }
+    }
+
+    $matching_fields = [];
+
+    foreach ($groups as $candidate_group_id => $group) {
+
+        if (! is_array($group)) {
+            continue;
+        }
+
+        if (($group['status'] ?? 'active') !== 'active') {
+            continue;
+        }
+
+        $location = isset($group['location'])
+            ? sanitize_key(
+                (string) $group['location']
+            )
+            : 'page';
+
+        /**
+         * Global lookups only search Global Field Groups.
+         */
+        if ($is_global) {
+
+            if ($location !== 'global') {
+                continue;
+            }
+        } else {
+
+            /**
+             * Page/Post lookups must match the current post type.
+             */
+            if (
+                ! in_array($location, ['page', 'post'], true)
+                || $location !== $post_type
+            ) {
+                continue;
+            }
+
+            $target = isset($group['location_target'])
+                ? (string) $group['location_target']
+                : '';
+
+            if (
+                $target !== ''
+                && (string) $post_id !== $target
+            ) {
+                continue;
+            }
+        }
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            $candidate_name = isset($field['name'])
+                ? sanitize_key(
+                    (string) $field['name']
+                )
+                : '';
+
+            if ($candidate_name !== $field_name) {
+                continue;
+            }
+
+            $type = isset($field['type'])
+                ? sanitize_key(
+                    (string) $field['type']
+                )
+                : '';
+
+            if (! in_array($type, $choice_types, true)) {
+                return [];
+            }
+
+            $matching_fields[] = [
+                'group_id' => $candidate_group_id,
+                'field'    => $field,
+            ];
+
+            break;
+        }
+    }
+
+    /**
+     * No matching choice field was found.
+     */
+    if (empty($matching_fields)) {
+        return [];
+    }
+
+    /**
+     * Do not guess when multiple applicable groups contain the
+     * same field name.
+     */
+    if (count($matching_fields) > 1) {
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+
+            trigger_error(
+                sprintf(
+                    'Forge Fields: Choice field "%s" exists in multiple applicable Field Groups. Specify a Forge Group Key as the third argument to ff_get_field_choices().',
+                    $field_name
+                ),
+                E_USER_WARNING
+            );
+        }
+
+        return [];
+    }
+
+    $field = $matching_fields[0]['field'];
+
+    return ff_parse_choices_string(
+        $field['choices'] ?? ''
+    );
+}
+
+/**
  * Organize field definitions into tabbed sections.
  *
  * Groups normal fields beneath structural Tab fields. When no Tab fields

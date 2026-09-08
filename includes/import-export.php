@@ -209,9 +209,9 @@ function ff_render_settings_page()
                 <h2>Feedback</h2>
 
                 <p>
-                    Found a bug or have an idea for Forge Fields? Send feedback directly from WordPress.
-                    Your WordPress version, PHP version, Forge Fields version, site URL, and account email
-                    will be included to help diagnose issues.
+                    Found a bug, have an idea, or need help with Forge Fields?
+                    Send us a message directly from WordPress.
+                    Bug reports can include additional site information to help diagnose the issue.
                 </p>
 
                 <form method="post">
@@ -231,10 +231,62 @@ function ff_render_settings_page()
                             <select
                                 id="ff_feedback_type"
                                 name="ff_feedback_type">
-                                <option value="bug">Bug Report</option>
+                                <option value="general">General Inquiry</option>
                                 <option value="feature">Feature Request</option>
-                                <option value="general">General Feedback</option>
+                                <option value="bug">Bug Report</option>
                             </select>
+                        </div>
+
+                        <div
+                            id="ff_feedback_bug_details"
+                            style="display: none;">
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_php_version">
+                                    PHP Version
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ff_feedback_php_version"
+                                    name="ff_feedback_php_version"
+                                    value="<?php echo esc_attr(PHP_VERSION); ?>">
+
+                            </div>
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_plugin_version">
+                                    Forge Fields Version
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ff_feedback_plugin_version"
+                                    name="ff_feedback_plugin_version"
+                                    value="<?php echo esc_attr(
+                                                defined('FF_VERSION')
+                                                    ? FF_VERSION
+                                                    : ''
+                                            ); ?>">
+
+                            </div>
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_site_url">
+                                    Site URL
+                                </label>
+
+                                <input
+                                    type="url"
+                                    id="ff_feedback_site_url"
+                                    name="ff_feedback_site_url"
+                                    value="<?php echo esc_url(home_url()); ?>">
+
+                            </div>
+
                         </div>
 
                     </div>
@@ -264,7 +316,27 @@ function ff_render_settings_page()
                     </button>
 
                 </form>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const typeSelect = document.getElementById('ff_feedback_type');
+                        const bugDetails = document.getElementById('ff_feedback_bug_details');
 
+                        if (!typeSelect || !bugDetails) {
+                            return;
+                        }
+
+                        function syncBugFields() {
+                            bugDetails.style.display =
+                                typeSelect.value === 'bug' ?
+                                'block' :
+                                'none';
+                        }
+
+                        syncBugFields();
+
+                        typeSelect.addEventListener('change', syncBugFields);
+                    });
+                </script>
             </div>
 
         </div>
@@ -1097,10 +1169,39 @@ function ff_handle_feedback_submission()
     $type_labels = [
         'bug'     => 'Bug Report',
         'feature' => 'Feature Request',
-        'general' => 'General Feedback',
+        'general' => 'General Inquiry',
     ];
 
     $type_label = $type_labels[$type];
+
+    $php_version = PHP_VERSION;
+
+    $plugin_version = defined('FF_VERSION')
+        ? FF_VERSION
+        : 'Unknown';
+
+    $site_url = home_url();
+
+    if ($type === 'bug') {
+
+        $php_version = isset($_POST['ff_feedback_php_version'])
+            ? sanitize_text_field(
+                wp_unslash($_POST['ff_feedback_php_version'])
+            )
+            : $php_version;
+
+        $plugin_version = isset($_POST['ff_feedback_plugin_version'])
+            ? sanitize_text_field(
+                wp_unslash($_POST['ff_feedback_plugin_version'])
+            )
+            : $plugin_version;
+
+        $site_url = isset($_POST['ff_feedback_site_url'])
+            ? esc_url_raw(
+                wp_unslash($_POST['ff_feedback_site_url'])
+            )
+            : $site_url;
+    }
 
     $subject = sprintf(
         '[Forge Fields] %s',
@@ -1117,10 +1218,10 @@ function ff_handle_feedback_submission()
             "User: %s <%s>\n\n" .
             "Message:\n%s",
         $type_label,
-        defined('FF_VERSION') ? FF_VERSION : 'Unknown',
+        $plugin_version,
         get_bloginfo('version'),
-        PHP_VERSION,
-        home_url(),
+        $php_version,
+        $site_url,
         $current_user->display_name,
         $current_user->user_email,
         $message

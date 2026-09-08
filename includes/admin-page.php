@@ -548,15 +548,19 @@ function ff_handle_field_group_save()
 
     foreach ($fields_raw as $field_raw) {
 
-        $name = isset($field_raw['name'])
-            ? substr(
-                sanitize_key(
-                    wp_unslash($field_raw['name'])
-                ),
-                0,
-                50
+        $name_raw = isset($field_raw['name'])
+            ? trim(
+                wp_unslash(
+                    (string) $field_raw['name']
+                )
             )
             : '';
+
+        $name = substr(
+            sanitize_key($name_raw),
+            0,
+            50
+        );
 
         $label = isset($field_raw['label'])
             ? substr(
@@ -632,7 +636,36 @@ function ff_handle_field_group_save()
             continue;
         }
 
-        if ($name === '') {
+        /**
+         * Manually entered field names must already be valid WordPress-style keys.
+         *
+         * Do not silently alter what the developer entered. For example:
+         *
+         * yes?     -> invalid
+         * my field -> invalid
+         * $#$      -> invalid
+         * my_field -> valid
+         * my-field -> valid
+         */
+        if (
+            $name_raw !== ''
+            && $name_raw !== $name
+        ) {
+
+            $has_save_errors = true;
+
+            $error_messages[] = sprintf(
+                'Field "%s" needs a valid name. Use only lowercase letters, numbers, hyphens, or underscores.',
+                $label
+            );
+
+            continue;
+        }
+
+        /**
+         * A genuinely blank field name may be generated from the label.
+         */
+        if ($name_raw === '' && $name === '') {
             $name = sanitize_key(
                 strtolower(
                     str_replace(' ', '_', $label)
@@ -832,11 +865,35 @@ function ff_handle_field_group_save()
 
     if ($has_save_errors) {
 
-        $error_key = 'ff_save_errors_' . get_current_user_id();
+        $user_id = get_current_user_id();
 
+        $error_key = 'ff_save_errors_' . $user_id;
+        $form_key  = 'ff_save_form_' . $user_id;
+
+        /**
+         * Preserve validation messages for the redirected edit screen.
+         */
         set_transient(
             $error_key,
             $error_messages,
+            60
+        );
+
+        /**
+         * Preserve the submitted Field Group state so validation errors
+         * do not discard unsaved user changes.
+         */
+        set_transient(
+            $form_key,
+            [
+                'id'              => $posted_group_id,
+                'title'           => $title,
+                'location'        => $location,
+                'location_target' => $location_target
+                    ? (string) $location_target
+                    : '',
+                'fields'          => $fields_raw,
+            ],
             60
         );
 
@@ -2946,23 +3003,138 @@ function ff_render_field_group_edit()
     }
 
     $group = [
-        'id'       => '',
-        'title'    => '',
-        'location' => 'page',
+        'id'              => '',
+        'title'           => '',
+        'location'        => 'page',
         'location_target' => '',
-        'fields'   => [],
-        'status'   => 'active',
+        'fields'          => [],
+        'status'          => 'active',
     ];
 
-    if ($group_id && isset($groups[$group_id]) && is_array($groups[$group_id])) {
-        $group   = $groups[$group_id];
-        $is_new  = false;
+    /**
+     * Start with the last successfully saved Field Group.
+     */
+    if (
+        $group_id
+        && isset($groups[$group_id])
+        && is_array($groups[$group_id])
+    ) {
+        $group  = $groups[$group_id];
+        $is_new = false;
     }
 
-    $title           = isset($group['title']) ? $group['title'] : '';
-    $location        = isset($group['location']) ? $group['location'] : 'page';
-    $location_target = isset($group['location_target']) ? (string) $group['location_target'] : '';
-    $fields          = isset($group['fields']) && is_array($group['fields']) ? $group['fields'] : [];
+    /**
+     * After a validation failure, restore the user's submitted form state
+     * instead of reverting the editor to the last saved database version.
+     */
+    if (
+        isset($_GET['ff_notice'])
+        && sanitize_key(
+            wp_unslash($_GET['ff_notice'])
+        ) === 'save_error'
+    ) {
+
+        $form_key = 'ff_save_form_' . get_current_user_id();
+
+        $saved_form = get_transient($form_key);
+
+        if (is_array($saved_form)) {
+
+            /**
+             * Remove WordPress request slashes from the preserved values.
+             */
+            $saved_form = wp_unslash($saved_form);
+
+            $submitted_fields =
+                isset($saved_form['fields'])
+                && is_array($saved_form['fields'])
+                ? $saved_form['fields']
+                : [];
+
+            /**
+             * Normalize field names before displaying them again.
+             *
+             * If an invalid value such as "#$#%" was entered,
+             * sanitize_key() reduces it to an empty string. This leaves the
+             * Name field blank so the user can enter a valid key manually.
+             */
+            foreach ($submitted_fields as &$submitted_field) {
+
+                if (! is_array($submitted_field)) {
+                    continue;
+                }
+
+                $submitted_name = isset($submitted_field['name'])
+                    ? trim((string) $submitted_field['name'])
+                    : '';
+
+                $sanitized_name = substr(
+                    sanitize_key($submitted_name),
+                    0,
+                    50
+                );
+
+                /**
+                 * If the submitted name contains some valid key characters,
+                 * preserve exactly what the user typed so they can see and fix
+                 * the invalid portion.
+                 *
+                 * If sanitization removes everything, leave the field blank.
+                 */
+                $submitted_field['name'] =
+                    $sanitized_name === ''
+                    ? ''
+                    : $submitted_name;
+            }
+
+            unset($submitted_field);
+
+            $group['title'] = isset($saved_form['title'])
+                ? sanitize_text_field(
+                    (string) $saved_form['title']
+                )
+                : '';
+
+            $group['location'] = isset($saved_form['location'])
+                ? sanitize_key(
+                    (string) $saved_form['location']
+                )
+                : 'page';
+
+            $group['location_target'] =
+                isset($saved_form['location_target'])
+                ? (string) absint(
+                    $saved_form['location_target']
+                )
+                : '';
+
+            $group['fields'] = $submitted_fields;
+
+            /**
+             * The preserved state is only needed for this one redirected
+             * request.
+             */
+            delete_transient($form_key);
+        }
+    }
+
+    $title = isset($group['title'])
+        ? $group['title']
+        : '';
+
+    $location = isset($group['location'])
+        ? $group['location']
+        : 'page';
+
+    $location_target = isset($group['location_target'])
+        ? (string) $group['location_target']
+        : '';
+
+    $fields =
+        isset($group['fields'])
+        && is_array($group['fields'])
+        ? $group['fields']
+        : [];
 
     $page_options = get_posts([
         'post_type'      => 'page',

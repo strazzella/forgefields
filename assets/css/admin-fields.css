@@ -2466,6 +2466,13 @@ span.dashicons {
 }
 
 /**
+ * Compact diagnostic fields shown for Bug Report feedback.
+ */
+#ff_feedback_bug_details input {
+  max-width: 420px;
+}
+
+/**
  * Container for multiple subbar action controls.
  */
 .ff-subbar__actions {
@@ -6282,4 +6289,16 @@ input#_ff_range_slider {
 .wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-select,
 .wrap.ff-admin.ff-global .ff-media-wrap[data-type="file"] .ff-media-clear {
   margin: 0 !important;
+}
+
+/**
+ * Keep Forge Fields meta boxes fixed in place.
+ *
+ * WordPress's Move Up / Move Down controls can move a Forge Fields
+ * group into the narrow sidebar, where the fields are not usable.
+ * Hide those ordering controls while preserving collapse/expand.
+ */
+#poststuff .postbox[id^="ff_field_group_"] .handle-order-higher,
+#poststuff .postbox[id^="ff_field_group_"] .handle-order-lower {
+  display: none !important;
 }
