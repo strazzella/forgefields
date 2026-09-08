@@ -1998,10 +1998,31 @@ function ff_render_global_field_row(array $field, array $stored)
 
     $name  = $field['name'];
     $label = isset($field['label']) ? $field['label'] : $name;
-    $type  = isset($field['type'])  ? $field['type']  : 'text';
+    $type = isset($field['type'])
+        ? $field['type']
+        : 'text';
 
-    $id    = 'ff_global_' . esc_attr($name);
-    $value = isset($stored[$name]) ? $stored[$name] : '';
+    $prepend = isset($field['prepend'])
+        ? (string) $field['prepend']
+        : '';
+
+    $append = isset($field['append'])
+        ? (string) $field['append']
+        : '';
+
+    $supports_affixes = in_array(
+        $type,
+        ['text', 'number', 'email', 'password'],
+        true
+    );
+
+    $has_affixes = $supports_affixes
+        && ($prepend !== '' || $append !== '');
+
+    $id    = 'ff_global_' . $name;
+    $value = isset($stored[$name])
+        ? $stored[$name]
+        : '';
 ?>
     <tr>
         <th scope="row">
@@ -2022,12 +2043,35 @@ function ff_render_global_field_row(array $field, array $stored)
                     break;
 
                 case 'number':
-                    printf(
-                        '<input type="number" name="ff_global[%1$s]" id="%2$s" value="%3$s" class="regular-text" />',
-                        esc_attr($name),
-                        esc_attr($id),
-                        esc_attr($value)
-                    );
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+            ?>
+                    <input
+                        type="number"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'regular-text'); ?>">
+                    <?php
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'range':
@@ -2038,7 +2082,7 @@ function ff_render_global_field_row(array $field, array $stored)
 
                     $slider_id = $id . '_slider';
                     $num_id    = $id . '_num';
-            ?>
+                    ?>
                     <div class="ff-range-wrap">
                         <input
                             type="range"
@@ -2064,25 +2108,90 @@ function ff_render_global_field_row(array $field, array $stored)
                     break;
 
                 case 'password':
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+
                     echo '<div class="ff-password-wrap">';
-                    echo '<input type="password" name="ff_global[' . esc_attr($name) . ']" id="' . esc_attr($id) . '" value="' . esc_attr((string) $value) . '" class="regular-text ff-password-input" maxlength="45" autocomplete="off" />';
-                    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($id) . '" aria-label="Show password" aria-controls="' . esc_attr($id) . '">';
+                ?>
+                    <input
+                        type="password"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field ff-password-input' : 'regular-text ff-password-input'); ?>"
+                        maxlength="45"
+                        autocomplete="off">
+                    <?php
+
+                    echo '<button type="button" class="ff-password-toggle"'
+                        . ' data-target="#' . esc_attr($id) . '"'
+                        . ' aria-label="Show password"'
+                        . ' aria-controls="' . esc_attr($id) . '">';
+
                     echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
                     echo '</button>';
                     echo '</div>';
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'email':
                 case 'url':
                 case 'text':
-                    $input_type = in_array($type, ['email', 'url'], true) ? $type : 'text';
-                    printf(
-                        '<input type="%4$s" name="ff_global[%1$s]" id="%2$s" value="%3$s" class="regular-text" />',
-                        esc_attr($name),
-                        esc_attr($id),
-                        esc_attr((string) $value),
-                        esc_attr($input_type)
-                    );
+
+                    $input_type = in_array(
+                        $type,
+                        ['email', 'url'],
+                        true
+                    )
+                        ? $type
+                        : 'text';
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+                    ?>
+                    <input
+                        type="<?php echo esc_attr($input_type); ?>"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'regular-text'); ?>">
+                    <?php
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'wysiwyg':
@@ -2117,7 +2226,7 @@ function ff_render_global_field_row(array $field, array $stored)
                             $img_src = $src[0];
                         }
                     }
-                ?>
+                    ?>
                     <div class="ff-media-wrap" data-type="image">
                         <input type="hidden" name="ff_global[<?php echo esc_attr($name); ?>]" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($value); ?>">
                         <div class="ff-media-preview-wrap" style="margin-bottom:8px;">
@@ -3803,7 +3912,47 @@ function ff_render_field_group_edit()
                                         Is this field required?
                                     </p>
                                 </div>
+                                <div
+                                    class="ff-field-option ff-option-prepend"
+                                    data-ff-option="prepend">
 
+                                    <label for="ff-prepend-__INDEX__">
+                                        Prepend
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="ff-prepend-__INDEX__"
+                                        name="ff_fields[__INDEX__][prepend]"
+                                        value=""
+                                        class="regular-text">
+
+                                    <p class="description">
+                                        Appears before the input.
+                                    </p>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-append"
+                                    data-ff-option="append">
+
+                                    <label for="ff-append-__INDEX__">
+                                        Append
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="ff-append-__INDEX__"
+                                        name="ff_fields[__INDEX__][append]"
+                                        value=""
+                                        class="regular-text">
+
+                                    <p class="description">
+                                        Appears after the input.
+                                    </p>
+
+                                </div>
                             </div>
 
                             <div

@@ -3643,7 +3643,8 @@ input#_ff_range_slider {
    AFFIX INPUTS
 --------------------------------------------- */
 
-.ff-mb .ff-affix-input {
+.ff-mb .ff-affix-input,
+.wrap.ff-admin.ff-global .ff-affix-input {
   display: inline-flex;
   align-items: center;
   width: 100%;
@@ -3659,14 +3660,24 @@ input#_ff_range_slider {
     background-color 0.18s ease;
 }
 
-.ff-mb .ff-affix-input:focus-within {
+.ff-mb .ff-affix-input .ff-password-wrap,
+.wrap.ff-admin.ff-global .ff-affix-input .ff-password-wrap {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.ff-mb .ff-affix-input:focus-within,
+.wrap.ff-admin.ff-global .ff-affix-input:focus-within {
   border-color: #8fb4ff;
   box-shadow:
     0 0 0 3px rgba(59, 130, 246, 0.14),
     0 1px 2px rgba(16, 24, 40, 0.06);
 }
 
-.ff-mb .ff-affix-input__addon {
+.ff-mb .ff-affix-input__addon,
+.wrap.ff-admin.ff-global .ff-affix-input__addon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3680,15 +3691,18 @@ input#_ff_range_slider {
   border: 0;
 }
 
-.ff-mb .ff-affix-input__addon--prepend {
+.ff-mb .ff-affix-input__addon--prepend,
+.wrap.ff-admin.ff-global .ff-affix-input__addon--prepend {
   border-right: 1px solid #e2e8f0;
 }
 
-.ff-mb .ff-affix-input__addon--append {
+.ff-mb .ff-affix-input__addon--append,
+.wrap.ff-admin.ff-global .ff-affix-input__addon--append {
   border-left: 1px solid #e2e8f0;
 }
 
-.ff-mb .ff-affix-input__field {
+.ff-mb .ff-affix-input__field,
+.wrap.ff-admin.ff-global .ff-affix-input__field {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -3705,12 +3719,14 @@ input#_ff_range_slider {
   border-radius: 0 !important;
 }
 
-.ff-mb .ff-affix-input__field:focus {
+.ff-mb .ff-affix-input__field:focus,
+.wrap.ff-admin.ff-global .ff-affix-input__field:focus {
   outline: none !important;
   box-shadow: none !important;
 }
 
-.ff-mb .ff-affix-input__field::placeholder {
+.ff-mb .ff-affix-input__field::placeholder,
+.wrap.ff-admin.ff-global .ff-affix-input__field::placeholder {
   color: #94a3b8;
 }
 

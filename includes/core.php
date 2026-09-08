@@ -244,7 +244,7 @@ function ff_render_type_range(array $field, $value, WP_Post $post)
             value="<?php echo esc_attr($value); ?>"
             data-target="#<?php echo esc_attr($id_slider); ?>" />
     </div>
-<?php
+    <?php
 }
 
 
@@ -533,7 +533,6 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
     $append_html = $append !== ''
         ? '<span class="ff-input-affix ff-input-append">' . esc_html($append) . '</span>'
         : '';
-
     /**
      * Prefer the new group-scoped post meta key.
      *
@@ -638,10 +637,10 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
     }
 
     $row_class = $required
-        ? ' class="ff-required-field"'
+        ? 'ff-required-field'
         : '';
 
-    echo '<tr' . $row_class . ' data-ff-field-type="' . esc_attr($type) . '">';
+    echo '<tr class="' . esc_attr($row_class) . '" data-ff-field-type="' . esc_attr($type) . '">';
     echo '<th scope="row">';
     echo '<label for="' . esc_attr($meta_key) . '">';
     echo esc_html($label);
@@ -683,27 +682,56 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
             break;
 
         case 'textarea':
-            printf(
-                '<textarea name="%1$s" id="%2$s" rows="6" class="large-text">%3$s</textarea>',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                esc_textarea((string) $value),
-                $required_attr,
-                $maxlength_attr
-            );
+    ?>
+            <textarea
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                rows="6"
+                class="large-text"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>><?php echo esc_textarea((string) $value); ?></textarea>
+        <?php
             break;
 
         case 'number':
 
-            if ($prepend !== '' || $append !== '') {
-                echo '<div class="ff-input-affix-wrap">';
-                echo $prepend_html;
+            $has_affixes = ($prepend !== '' || $append !== '');
+
+            if ($has_affixes) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
             }
 
-            echo '<input type="number" class="small-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . '>';
+        ?>
+            <input
+                type="number"
+                class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'small-text'); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>>
+            <?php
 
-            if ($prepend !== '' || $append !== '') {
-                echo $append_html;
+            if ($has_affixes) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
                 echo '</div>';
             }
 
@@ -755,20 +783,54 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 
         case 'password':
 
-            if ($prepend !== '' || $append !== '') {
-                echo '<div class="ff-input-affix-wrap">';
-                echo $prepend_html;
+            $has_affixes = ($prepend !== '' || $append !== '');
+
+            if ($has_affixes) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
             }
 
             echo '<div class="ff-password-wrap">';
-            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" autocomplete="off"' . $required_attr . $maxlength_attr . '>';
-            echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($meta_key) . '" aria-label="Show password" aria-controls="' . esc_attr($meta_key) . '">';
+
+            ?>
+            <input
+                type="password"
+                class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field ff-password-input' : 'regular-text ff-password-input'); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                autocomplete="off"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>>
+<?php
+
+            echo '<button type="button" class="ff-password-toggle"'
+                . ' data-target="#' . esc_attr($meta_key) . '"'
+                . ' aria-label="Show password"'
+                . ' aria-controls="' . esc_attr($meta_key) . '">';
+
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
+
             echo '</div>';
 
-            if ($prepend !== '' || $append !== '') {
-                echo $append_html;
+            if ($has_affixes) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
                 echo '</div>';
             }
 
