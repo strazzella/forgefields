@@ -1151,11 +1151,13 @@ add_action('save_post', function ($post_id) {
                 continue;
             }
 
-            $raw = $has_key ? $_POST[$key] : null;
+            $raw = $has_key
+                ? wp_unslash($_POST[$key])
+                : null;
 
             switch ($type) {
                 case 'wysiwyg':
-                    $val = $has_key ? wp_kses_post(wp_unslash($raw)) : '';
+                    $val = $has_key ? wp_kses_post($raw) : '';
                     break;
 
                 case 'image':
@@ -1204,7 +1206,7 @@ add_action('save_post', function ($post_id) {
                 case 'checkbox':
                     if ($has_key && is_array($raw)) {
 
-                        $raw_values = wp_unslash($raw);
+                        $raw_values = $raw;
 
                         $vals = array_map(
                             static function ($v) {
@@ -1232,7 +1234,7 @@ add_action('save_post', function ($post_id) {
 
                 default:
                     $val = ($has_key && ! is_array($raw))
-                        ? sanitize_text_field(wp_unslash($raw))
+                        ? sanitize_text_field($raw)
                         : '';
                     break;
             }
@@ -1435,7 +1437,8 @@ function ff_get_field($field_name, $post_id = null, $group_id = null)
     if (count($matching_group_ids) > 1) {
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            trigger_error(
+            wp_trigger_error(
+                'ff_get_field',
                 sprintf(
                     'Forge Fields: Field "%s" exists in multiple applicable Field Groups. Choose a unique name or specify a Forge Key as the third argument to ff_get_field().',
                     esc_html($field_name)
@@ -1765,7 +1768,8 @@ function ff_get_field_choices(
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
 
-            trigger_error(
+            wp_trigger_error(
+                'ff_get_field_choices',
                 sprintf(
                     'Forge Fields: Choice field "%s" exists in multiple applicable Field Groups. Specify a Forge Group Key as the third argument to ff_get_field_choices().',
                     esc_html($field_name)

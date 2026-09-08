@@ -360,7 +360,28 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
             <div class="ff-subbar__actions">
                 <?php
                 if ($right_html) {
-                    echo wp_kses_post($right_html);
+                    echo wp_kses(
+                        $right_html,
+                        [
+                            'button' => [
+                                'type'  => true,
+                                'class' => true,
+                                'id'    => true,
+                                'form'  => true,
+                                'name'  => true,
+                                'value' => true,
+                            ],
+                            'span' => [
+                                'class' => true,
+                            ],
+                            'a' => [
+                                'class'  => true,
+                                'href'   => true,
+                                'target' => true,
+                                'rel'    => true,
+                            ],
+                        ]
+                    );
                 } elseif ($cta_url) { ?>
                     <a class="button button-primary ff-subbar__btn"
                         href="<?php echo esc_url($cta_url); ?>">
@@ -534,7 +555,7 @@ function ff_handle_field_group_save()
     }
 
     $fields_raw = isset($_POST['ff_fields']) && is_array($_POST['ff_fields'])
-        ? $_POST['ff_fields']
+        ? wp_unslash($_POST['ff_fields'])
         : [];
 
     $fields          = [];
@@ -545,11 +566,7 @@ function ff_handle_field_group_save()
     foreach ($fields_raw as $field_raw) {
 
         $name_raw = isset($field_raw['name'])
-            ? trim(
-                wp_unslash(
-                    (string) $field_raw['name']
-                )
-            )
+            ? trim((string) $field_raw['name'])
             : '';
 
         $name = substr(
@@ -560,18 +577,14 @@ function ff_handle_field_group_save()
 
         $label = isset($field_raw['label'])
             ? substr(
-                sanitize_text_field(
-                    wp_unslash($field_raw['label'])
-                ),
+                sanitize_text_field($field_raw['label']),
                 0,
                 50
             )
             : '';
 
         $type = isset($field_raw['type'])
-            ? sanitize_key(
-                wp_unslash($field_raw['type'])
-            )
+            ? sanitize_key($field_raw['type'])
             : 'text';
 
         $allowed_types = [
@@ -708,9 +721,7 @@ function ff_handle_field_group_save()
 
             $choices_raw = isset($field_raw['choices'])
                 ? trim(
-                    wp_unslash(
-                        (string) $field_raw['choices']
-                    )
+                    (string) $field_raw['choices']
                 )
                 : '';
 
@@ -737,9 +748,7 @@ function ff_handle_field_group_save()
 
         $default_value = isset($field_raw['default_value'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['default_value']
-                )
+                (string) $field_raw['default_value']
             )
             : '';
 
@@ -760,17 +769,13 @@ function ff_handle_field_group_save()
 
         $prepend = isset($field_raw['prepend'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['prepend']
-                )
+                (string) $field_raw['prepend']
             )
             : '';
 
         $append = isset($field_raw['append'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['append']
-                )
+                (string) $field_raw['append']
             )
             : '';
 
@@ -1071,10 +1076,7 @@ function ff_handle_field_group_actions()
 
         $selected_ids = array_map(
             'sanitize_text_field',
-            array_map(
-                'wp_unslash',
-                $_POST['ff_group_ids']
-            )
+            wp_unslash($_POST['ff_group_ids'])
         );
 
         $current_view = isset($_POST['ff_view'])
@@ -1316,8 +1318,17 @@ function ff_render_field_groups_list()
         $current_view = 'all';
     }
 
-    $orderby = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'title';
-    $order   = isset($_GET['order']) ? strtolower(sanitize_text_field($_GET['order'])) : 'asc';
+    $orderby = isset($_GET['orderby'])
+        ? sanitize_key(wp_unslash($_GET['orderby']))
+        : 'title';
+
+    $order = isset($_GET['order'])
+        ? strtolower(
+            sanitize_text_field(
+                wp_unslash($_GET['order'])
+            )
+        )
+        : 'asc';
     $order   = ($order === 'desc') ? 'desc' : 'asc';
 
     $search_term = isset($_GET['ff_search'])
@@ -2424,7 +2435,7 @@ function ff_render_global_options_page()
         check_admin_referer('ff_save_global');
 
         $raw = isset($_POST['ff_global']) && is_array($_POST['ff_global'])
-            ? $_POST['ff_global']
+            ? wp_unslash($_POST['ff_global'])
             : [];
 
         $type_map = [];
@@ -2471,14 +2482,18 @@ function ff_render_global_options_page()
                 case 'password':
                     $new_values[$name] = is_array($value_raw)
                         ? ''
-                        : ff_sanitize_type_password(wp_unslash($value_raw), ['name' => $name, 'type' => 'password'], 0);
+                        : ff_sanitize_type_password(
+                            $value_raw,
+                            ['name' => $name, 'type' => 'password'],
+                            0
+                        );
                     break;
 
                 case 'wysiwyg':
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : wp_kses_post(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2486,7 +2501,7 @@ function ff_render_global_options_page()
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : sanitize_textarea_field(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2494,7 +2509,7 @@ function ff_render_global_options_page()
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : sanitize_text_field(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2512,7 +2527,7 @@ function ff_render_global_options_page()
                 case 'checkbox':
                     if (is_array($value_raw)) {
 
-                        $raw_values = wp_unslash($value_raw);
+                        $raw_values = $value_raw;
 
                         $vals = array_map(
                             static function ($v) {
@@ -2533,7 +2548,9 @@ function ff_render_global_options_page()
                     break;
 
                 default:
-                    $new_values[$name] = is_array($value_raw) ? '' : sanitize_text_field(wp_unslash($value_raw));
+                    $new_values[$name] = is_array($value_raw)
+                        ? ''
+                        : sanitize_text_field($value_raw);
                     break;
             }
         }

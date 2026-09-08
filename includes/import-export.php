@@ -429,7 +429,10 @@ function ff_handle_field_group_export()
         'Content-Length: ' . strlen($json)
     );
 
-    echo $json;
+    echo wp_json_encode(
+        $export,
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+    );
     exit;
 }
 
@@ -479,10 +482,10 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    $file = $_FILES['ff_import_file'];
-
-    $filename = isset($file['name'])
-        ? sanitize_file_name($file['name'])
+    $filename = isset($_FILES['ff_import_file']['name'])
+        ? sanitize_file_name(
+            (string) $_FILES['ff_import_file']['name']
+        )
         : '';
 
     $extension = strtolower(
@@ -501,9 +504,12 @@ function ff_handle_field_group_import()
         exit;
     }
 
+    $file_size = isset($_FILES['ff_import_file']['size'])
+        ? absint($_FILES['ff_import_file']['size'])
+        : 0;
+
     if (
-        ! empty($file['size'])
-        && (int) $file['size'] > 2 * MB_IN_BYTES
+        $file_size > 2 * MB_IN_BYTES
     ) {
         wp_safe_redirect(
             add_query_arg(
@@ -516,8 +522,8 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    $tmp_name = isset($file['tmp_name'])
-        ? $file['tmp_name']
+    $tmp_name = isset($_FILES['ff_import_file']['tmp_name'])
+        ? (string) $_FILES['ff_import_file']['tmp_name']
         : '';
 
     if (
@@ -1144,10 +1150,7 @@ function ff_handle_feedback_submission()
 
     if (is_wp_error($response)) {
 
-        error_log(
-            'Forge Fields feedback request failed: ' .
-                $response->get_error_message()
-        );
+        $sent = false;
     } else {
 
         $status_code = wp_remote_retrieve_response_code($response);
@@ -1162,12 +1165,6 @@ function ff_handle_feedback_submission()
             && $status_code < 300
             && is_array($response_body)
             && ! empty($response_body['success']);
-
-        if (! $sent) {
-            error_log(
-                'Forge Fields feedback service returned an unsuccessful response.'
-            );
-        }
     }
 
     wp_safe_redirect(
@@ -1182,13 +1179,3 @@ function ff_handle_feedback_submission()
 
     exit;
 }
-
-/**
- * Log WordPress mail failures related to feedback delivery.
- */
-add_action('wp_mail_failed', function ($error) {
-    error_log(
-        'Forge Fields wp_mail error: ' .
-            $error->get_error_message()
-    );
-});
