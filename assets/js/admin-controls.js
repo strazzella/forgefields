@@ -1,23 +1,10 @@
 /**
  * Forge Fields field-control behavior.
  *
- * This file contains JavaScript required by rendered Forge Fields
- * on WordPress Page/Post editing screens.
- *
- * Builder and Forge Fields admin-page behavior belongs in
- * admin-fields.js.
+ * Rendered Page/Post field behavior belongs here.
+ * Builder/admin-page behavior belongs in admin-fields.js.
  */
 
-/**
- * Initializes all password-field visibility controls.
- *
- * Each password wrapper contains:
- * - A toggle button.
- * - A password input.
- * - A Dashicons visibility icon.
- *
- * The control keeps the input type, icon, and accessible label synchronized.
- */
 document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
   const btn = wrap.querySelector(".ff-password-toggle");
   const input = wrap.querySelector(".ff-password-input");
@@ -46,25 +33,15 @@ document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
 });
 
 /**
- * Initializes delegated jQuery synchronization for Forge Fields
- * range sliders and their associated numeric inputs.
+ * Synchronizes Range sliders with their paired numeric controls.
  *
- * data-target attributes are used to locate the paired control.
+ * data-target identifies the paired control.
  */
 jQuery(function ($) {
-  /**
-   * Stop immediately when the current screen contains
-   * no Forge Fields Range controls.
-   */
   if (!document.querySelector(".ff-range-wrap")) {
     return;
   }
-  /**
-   * Synchronize a range slider with its linked numeric input.
-   *
-   * Whenever the slider receives an input or change event, its current
-   * value is copied into the element referenced by data-target.
-   */
+
   $(document).on("input change", ".ff-range-slider", function () {
     var $num = $($(this).data("target"));
 
@@ -72,42 +49,21 @@ jQuery(function ($) {
   });
 
   /**
-   * Synchronize a numeric range input with its linked slider.
-   *
-   * The entered value is constrained to the slider's configured
-   * minimum and maximum before both controls are updated.
+   * Numeric values are clamped to the slider's configured range.
    */
   $(document).on("input change", ".ff-range-number", function () {
     var $rng = $($(this).data("target"));
 
     if ($rng.length) {
-      /**
-       * Read the linked slider's minimum and maximum values.
-       *
-       * Defaults are used when those attributes cannot be parsed.
-       */
       var min = parseFloat($rng.attr("min")) || 0;
       var max = parseFloat($rng.attr("max")) || 100;
 
-      /**
-       * Parse the numeric value entered by the user.
-       */
       var val = parseFloat(this.value);
 
-      /**
-       * Invalid numeric input falls back to the slider's minimum value.
-       */
       if (isNaN(val)) val = min;
 
-      /**
-       * Clamp the value so it cannot fall outside the slider's
-       * configured minimum and maximum.
-       */
       val = Math.min(max, Math.max(min, val));
 
-      /**
-       * Apply the normalized value to both controls.
-       */
       this.value = val;
       $rng.val(val);
     }
@@ -115,37 +71,22 @@ jQuery(function ($) {
 });
 
 /**
- * Self-contained WordPress Media Library integration for Forge Fields
- * image and file controls.
+ * WordPress Media Library integration for Image and File fields.
  *
- * This section:
- * - Prevents duplicate event binding.
- * - Opens the WordPress media frame.
- * - Stores selected attachment IDs.
- * - Updates image previews.
- * - Updates selected file links.
+ * Attachment IDs are stored rather than URLs, and global binding
+ * protection prevents duplicate delegated media handlers.
  */
 (function ($) {
-  /**
-   * Stop immediately when the current screen contains no
-   * Forge Fields Image or File controls.
-   */
   if (!document.querySelector(".ff-media-wrap")) {
     return;
   }
 
-  /**
-   * Stop if WordPress Media Library is not available.
-   */
   if (typeof wp === "undefined" || !wp.media) {
     return;
   }
 
   /**
-   * Prevent the media handlers from being bound more than once.
-   *
-   * The flag is stored globally so repeated script execution does not
-   * create duplicate WordPress Media Library event handlers.
+   * Prevent duplicate handlers if this script is executed more than once.
    */
   if (window.ffMediaBound) {
     return;
@@ -154,29 +95,14 @@ jQuery(function ($) {
   window.ffMediaBound = true;
 
   /**
-   * Opens the WordPress Media Library for a Forge Fields media control.
-   *
-   * The field wrapper's data-type determines whether the frame is configured
-   * for image selection or general file selection.
-   *
-   * Once an attachment is selected:
-   * - Its attachment ID is stored in the field input.
-   * - Image fields display the selected image preview.
-   * - File fields display the selected filename and link.
-   * - The media-clear control becomes visible.
+   * Opens the WordPress Media Library for an Image or File field.
    *
    * @param {jQuery} $wrap The Forge Fields media wrapper.
    * @param {jQuery} $input The input used to store the attachment ID.
    */
   function openFFFrame($wrap, $input) {
-    /**
-     * Determine whether this media control represents an image or file field.
-     */
     var type = $wrap.data("type");
 
-    /**
-     * Create the WordPress media-selection frame.
-     */
     var frame = wp.media({
       title: type === "image" ? "Select Image" : "Select File",
       button: {
@@ -186,152 +112,78 @@ jQuery(function ($) {
       library: type === "image" ? { type: "image" } : {},
     });
 
-    /**
-     * Handle the attachment selected from the WordPress Media Library.
-     */
     frame.on("select", function () {
-      /**
-       * Retrieve the first selected attachment as a plain object.
-       */
       var att = frame.state().get("selection").first().toJSON();
 
-      /**
-       * Store the WordPress attachment ID and trigger the input's
-       * change event so any dependent behavior is notified.
-       */
       $input.val(att.id).trigger("change");
 
-      /**
-       * Image fields display an image preview.
-       */
       if (type === "image") {
         /**
-         * Prefer the generated thumbnail size when available,
-         * otherwise fall back to the attachment's original URL.
+         * Prefer WordPress's generated thumbnail and fall back
+         * to the original attachment URL.
          */
         var url =
           att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url;
 
         $wrap.find(".ff-media-preview").attr("src", url).show();
       } else {
-        /**
-         * File fields display a clickable link containing the selected filename.
-         */
         $wrap
           .find(".ff-media-fileurl")
           .attr("href", att.url)
           .text(att.filename)
           .show();
 
-        /**
-         * Hide the empty-state message now that a file has been selected.
-         */
         $wrap.find(".ff-media-nofile").hide();
       }
 
-      /**
-       * Show the control that allows the selected media item to be cleared.
-       */
       $wrap.find(".ff-media-clear").show();
     });
 
-    /**
-     * Display the configured WordPress Media Library frame.
-     */
     frame.open();
   }
 
   /**
-   * Bind the media-selection control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia click handler is removed first to prevent
-   * duplicate bindings, then the current handler is attached.
+   * Namespaced delegated handlers allow dynamically rendered media
+   * controls while preventing duplicate bindings.
    */
   $(document)
     .off("click.ffMedia", ".ff-media-select")
     .on("click.ffMedia", ".ff-media-select", function (e) {
       e.preventDefault();
 
-      /**
-       * Read the target input ID stored on the clicked media-select control.
-       */
       var id = $(this).data("target");
 
-      /**
-       * Locate the input that stores the selected attachment ID.
-       */
       var $input = $("#" + id);
 
       if (!$input.length) return;
 
-      /**
-       * Find the surrounding Forge Fields media wrapper.
-       */
       var $wrap = $input.closest(".ff-media-wrap");
 
-      /**
-       * Open the WordPress Media Library for this media field.
-       */
       openFFFrame($wrap, $input);
     });
 
-  /**
-   * Bind the media-clear control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia handler is removed first so the clear action
-   * cannot be bound multiple times.
-   */
   $(document)
     .off("click.ffMedia", ".ff-media-clear")
     .on("click.ffMedia", ".ff-media-clear", function (e) {
       e.preventDefault();
 
-      /**
-       * Read the target input ID stored on the clicked clear control.
-       */
       var id = $(this).data("target");
 
-      /**
-       * Locate the input currently storing the attachment ID.
-       */
       var $input = $("#" + id);
 
       if (!$input.length) return;
 
-      /**
-       * Find the surrounding media wrapper so its preview state
-       * can also be reset.
-       */
       var $wrap = $input.closest(".ff-media-wrap");
 
-      /**
-       * Clear the stored attachment ID and trigger its change event.
-       */
       $input.val("").trigger("change");
 
-      /**
-       * Reset the visual state differently depending on whether this
-       * media field represents an image or a general file.
-       */
       if ($wrap.data("type") === "image") {
-        /**
-         * Image fields clear and hide the image preview.
-         */
         $wrap.find(".ff-media-preview").attr("src", "").hide();
       } else {
-        /**
-         * File fields clear and hide the selected file link,
-         * then restore the no-file-selected message.
-         */
         $wrap.find(".ff-media-fileurl").attr("href", "").text("").hide();
         $wrap.find(".ff-media-nofile").show();
       }
 
-      /**
-       * Hide the Clear control after the selected media has been removed.
-       */
       $(this).hide();
     });
 })(jQuery);
@@ -396,8 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             /**
-             * When TinyMCE is active, read the content directly from
-             * the editor because it may not yet be synchronized with
+             * TinyMCE content may not yet be synchronized with
              * the underlying textarea.
              */
             if (
@@ -458,10 +309,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /**
- * Handle Forge Fields tab navigation on rendered field groups.
- *
- * Each tab button activates the matching panel inside its own
- * data-ff-tabs container without affecting other Field Groups.
+ * Handles tab navigation within each rendered Field Group independently.
  */
 document.addEventListener("click", function (event) {
   const button = event.target.closest(".ff-tab-button");
@@ -487,9 +335,6 @@ document.addEventListener("click", function (event) {
   const buttons = tabsWrap.querySelectorAll(".ff-tab-button");
   const panels = tabsWrap.querySelectorAll(".ff-tab-panel");
 
-  /**
-   * Clear the currently active tab and panel.
-   */
   buttons.forEach(function (tabButton) {
     tabButton.classList.remove("is-active");
   });
@@ -498,14 +343,8 @@ document.addEventListener("click", function (event) {
     panel.classList.remove("is-active");
   });
 
-  /**
-   * Activate the clicked tab.
-   */
   button.classList.add("is-active");
 
-  /**
-   * Activate the panel belonging to the clicked tab.
-   */
   const targetPanel = tabsWrap.querySelector(
     '[data-ff-tab-panel="' + target + '"]',
   );
@@ -516,11 +355,7 @@ document.addEventListener("click", function (event) {
 });
 
 /**
- * Keep True/False field labels synchronized with their toggle state.
- *
- * Applies to Forge Fields controls rendered on:
- * - Page/Post edit screens
- * - Global Fields
+ * Keeps rendered True/False labels synchronized with their toggle state.
  */
 document.addEventListener("change", function (event) {
   if (!event.target.matches(".ff-true-false-input")) {
@@ -543,18 +378,15 @@ document.addEventListener("change", function (event) {
 });
 
 /**
- * Apply the standard Forge Fields focus state to WordPress WYSIWYG editors.
+ * Applies the Forge Fields focus state to WordPress WYSIWYG editors.
  *
- * Code/Text mode can use normal browser focus detection, but TinyMCE Visual
- * mode runs inside an iframe. TinyMCE focus and blur events therefore toggle
- * a class on the outer WordPress editor wrapper.
+ * TinyMCE Visual mode runs inside an iframe, so its own focus and blur
+ * events must update the outer WordPress editor wrapper.
  */
 (function () {
   const focusClass = "ff-wysiwyg-focused";
 
   /**
-   * Return the WordPress editor wrapper associated with a TinyMCE editor.
-   *
    * @param {Object} editor TinyMCE editor instance.
    * @returns {HTMLElement|null}
    */
@@ -573,7 +405,7 @@ document.addEventListener("change", function (event) {
   }
 
   /**
-   * Attach Forge Fields focus behavior to one TinyMCE instance.
+   * Bind focus behavior once per TinyMCE instance.
    *
    * @param {Object} editor TinyMCE editor instance.
    */
@@ -609,9 +441,6 @@ document.addEventListener("change", function (event) {
     });
   }
 
-  /**
-   * Bind all TinyMCE editors that already exist.
-   */
   function bindExistingEditors() {
     if (!window.tinymce || !Array.isArray(window.tinymce.editors)) {
       return;
@@ -621,10 +450,7 @@ document.addEventListener("change", function (event) {
   }
 
   /**
-   * Initialize TinyMCE focus tracking.
-   *
-   * Existing editors are handled immediately and editors created later
-   * are handled through TinyMCE's AddEditor event.
+   * Handles both existing TinyMCE editors and editors added later by WordPress.
    */
   function initTinyMceFocus() {
     if (!window.tinymce) {
@@ -643,8 +469,7 @@ document.addEventListener("change", function (event) {
   }
 
   /**
-   * Code/Text mode uses a normal textarea, so standard DOM focus events
-   * can toggle the same wrapper class.
+   * Code/Text mode uses normal DOM focus events.
    */
   document.addEventListener("focusin", function (event) {
     if (
