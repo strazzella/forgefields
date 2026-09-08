@@ -244,7 +244,7 @@ function ff_render_type_range(array $field, $value, WP_Post $post)
             value="<?php echo esc_attr($value); ?>"
             data-target="#<?php echo esc_attr($id_slider); ?>" />
     </div>
-<?php
+    <?php
 }
 
 
@@ -522,18 +522,6 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
         ? (string) $field['append']
         : '';
 
-    $maxlength_attr = $character_limit > 0
-        ? ' maxlength="' . esc_attr($character_limit) . '"'
-        : '';
-
-    $prepend_html = $prepend !== ''
-        ? '<span class="ff-input-affix ff-input-prepend">' . esc_html($prepend) . '</span>'
-        : '';
-
-    $append_html = $append !== ''
-        ? '<span class="ff-input-affix ff-input-append">' . esc_html($append) . '</span>'
-        : '';
-
     /**
      * Prefer the new group-scoped post meta key.
      *
@@ -638,10 +626,10 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
     }
 
     $row_class = $required
-        ? ' class="ff-required-field"'
+        ? 'ff-required-field'
         : '';
 
-    echo '<tr' . $row_class . ' data-ff-field-type="' . esc_attr($type) . '">';
+    echo '<tr class="' . esc_attr($row_class) . '" data-ff-field-type="' . esc_attr($type) . '">';
     echo '<th scope="row">';
     echo '<label for="' . esc_attr($meta_key) . '">';
     echo esc_html($label);
@@ -653,10 +641,6 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
     echo '</label>';
     echo '</th>';
     echo '<td>';
-
-    $required_attr = $required
-        ? ' required aria-required="true"'
-        : '';
 
     switch ($type) {
         case 'wysiwyg':
@@ -683,27 +667,56 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
             break;
 
         case 'textarea':
-            printf(
-                '<textarea name="%1$s" id="%2$s" rows="6" class="large-text">%3$s</textarea>',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                esc_textarea((string) $value),
-                $required_attr,
-                $maxlength_attr
-            );
+    ?>
+            <textarea
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                rows="6"
+                class="large-text"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>><?php echo esc_textarea((string) $value); ?></textarea>
+        <?php
             break;
 
         case 'number':
 
-            if ($prepend !== '' || $append !== '') {
-                echo '<div class="ff-input-affix-wrap">';
-                echo $prepend_html;
+            $has_affixes = ($prepend !== '' || $append !== '');
+
+            if ($has_affixes) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
             }
 
-            echo '<input type="number" class="small-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . '>';
+        ?>
+            <input
+                type="number"
+                class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'small-text'); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>>
+            <?php
 
-            if ($prepend !== '' || $append !== '') {
-                echo $append_html;
+            if ($has_affixes) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
                 echo '</div>';
             }
 
@@ -732,14 +745,25 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
                 }
             }
 
-            echo '<input type="' . esc_attr($input) . '"'
-                . ' class="' . ($supports_affixes && ($prepend !== '' || $append !== '') ? 'ff-affix-input__field' : 'regular-text') . '"'
-                . ' name="' . esc_attr($meta_key) . '"'
-                . ' id="' . esc_attr($meta_key) . '"'
-                . ' value="' . esc_attr((string) $value) . '"'
-                . $required_attr
-                . $maxlength_attr
-                . '>';
+            ?>
+            <input
+                type="<?php echo esc_attr($input); ?>"
+                class="<?php echo esc_attr(
+                            $supports_affixes && ($prepend !== '' || $append !== '')
+                                ? 'ff-affix-input__field'
+                                : 'regular-text'
+                        ); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>>
+            <?php
 
             if ($supports_affixes && ($prepend !== '' || $append !== '')) {
                 if ($append !== '') {
@@ -755,20 +779,54 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 
         case 'password':
 
-            if ($prepend !== '' || $append !== '') {
-                echo '<div class="ff-input-affix-wrap">';
-                echo $prepend_html;
+            $has_affixes = ($prepend !== '' || $append !== '');
+
+            if ($has_affixes) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
             }
 
             echo '<div class="ff-password-wrap">';
-            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" autocomplete="off"' . $required_attr . $maxlength_attr . '>';
-            echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($meta_key) . '" aria-label="Show password" aria-controls="' . esc_attr($meta_key) . '">';
+
+            ?>
+            <input
+                type="password"
+                class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field ff-password-input' : 'regular-text ff-password-input'); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                autocomplete="off"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>>
+            <?php
+
+            echo '<button type="button" class="ff-password-toggle"'
+                . ' data-target="#' . esc_attr($meta_key) . '"'
+                . ' aria-label="Show password"'
+                . ' aria-controls="' . esc_attr($meta_key) . '">';
+
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
+
             echo '</div>';
 
-            if ($prepend !== '' || $append !== '') {
-                echo $append_html;
+            if ($has_affixes) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
                 echo '</div>';
             }
 
@@ -829,7 +887,15 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
             $current     = is_scalar($value) ? (string) $value : '';
 
             echo '<div class="ff-select-wrap">';
-            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '"' . $required_attr . '>';
+            ?>
+            <select
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>>
+    <?php
             foreach ($choices_map as $v => $lbl) {
                 printf(
                     '<option value="%1$s"%3$s>%2$s</option>',
@@ -1085,11 +1151,13 @@ add_action('save_post', function ($post_id) {
                 continue;
             }
 
-            $raw = $has_key ? $_POST[$key] : null;
+            $raw = $has_key
+                ? wp_unslash($_POST[$key])
+                : null;
 
             switch ($type) {
                 case 'wysiwyg':
-                    $val = $has_key ? wp_kses_post(wp_unslash($raw)) : '';
+                    $val = $has_key ? wp_kses_post($raw) : '';
                     break;
 
                 case 'image':
@@ -1138,7 +1206,7 @@ add_action('save_post', function ($post_id) {
                 case 'checkbox':
                     if ($has_key && is_array($raw)) {
 
-                        $raw_values = wp_unslash($raw);
+                        $raw_values = $raw;
 
                         $vals = array_map(
                             static function ($v) {
@@ -1166,7 +1234,7 @@ add_action('save_post', function ($post_id) {
 
                 default:
                     $val = ($has_key && ! is_array($raw))
-                        ? sanitize_text_field(wp_unslash($raw))
+                        ? sanitize_text_field($raw)
                         : '';
                     break;
             }
@@ -1369,10 +1437,11 @@ function ff_get_field($field_name, $post_id = null, $group_id = null)
     if (count($matching_group_ids) > 1) {
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            trigger_error(
+            wp_trigger_error(
+                'ff_get_field',
                 sprintf(
                     'Forge Fields: Field "%s" exists in multiple applicable Field Groups. Choose a unique name or specify a Forge Key as the third argument to ff_get_field().',
-                    $field_name
+                    esc_html($field_name)
                 ),
                 E_USER_WARNING
             );
@@ -1699,10 +1768,11 @@ function ff_get_field_choices(
 
         if (defined('WP_DEBUG') && WP_DEBUG) {
 
-            trigger_error(
+            wp_trigger_error(
+                'ff_get_field_choices',
                 sprintf(
                     'Forge Fields: Choice field "%s" exists in multiple applicable Field Groups. Specify a Forge Group Key as the third argument to ff_get_field_choices().',
-                    $field_name
+                    esc_html($field_name)
                 ),
                 E_USER_WARNING
             );

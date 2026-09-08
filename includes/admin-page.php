@@ -360,7 +360,28 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
             <div class="ff-subbar__actions">
                 <?php
                 if ($right_html) {
-                    echo $right_html;
+                    echo wp_kses(
+                        $right_html,
+                        [
+                            'button' => [
+                                'type'  => true,
+                                'class' => true,
+                                'id'    => true,
+                                'form'  => true,
+                                'name'  => true,
+                                'value' => true,
+                            ],
+                            'span' => [
+                                'class' => true,
+                            ],
+                            'a' => [
+                                'class'  => true,
+                                'href'   => true,
+                                'target' => true,
+                                'rel'    => true,
+                            ],
+                        ]
+                    );
                 } elseif ($cta_url) { ?>
                     <a class="button button-primary ff-subbar__btn"
                         href="<?php echo esc_url($cta_url); ?>">
@@ -534,7 +555,7 @@ function ff_handle_field_group_save()
     }
 
     $fields_raw = isset($_POST['ff_fields']) && is_array($_POST['ff_fields'])
-        ? $_POST['ff_fields']
+        ? wp_unslash($_POST['ff_fields'])
         : [];
 
     $fields          = [];
@@ -545,11 +566,7 @@ function ff_handle_field_group_save()
     foreach ($fields_raw as $field_raw) {
 
         $name_raw = isset($field_raw['name'])
-            ? trim(
-                wp_unslash(
-                    (string) $field_raw['name']
-                )
-            )
+            ? trim((string) $field_raw['name'])
             : '';
 
         $name = substr(
@@ -560,18 +577,14 @@ function ff_handle_field_group_save()
 
         $label = isset($field_raw['label'])
             ? substr(
-                sanitize_text_field(
-                    wp_unslash($field_raw['label'])
-                ),
+                sanitize_text_field($field_raw['label']),
                 0,
                 50
             )
             : '';
 
         $type = isset($field_raw['type'])
-            ? sanitize_key(
-                wp_unslash($field_raw['type'])
-            )
+            ? sanitize_key($field_raw['type'])
             : 'text';
 
         $allowed_types = [
@@ -708,9 +721,7 @@ function ff_handle_field_group_save()
 
             $choices_raw = isset($field_raw['choices'])
                 ? trim(
-                    wp_unslash(
-                        (string) $field_raw['choices']
-                    )
+                    (string) $field_raw['choices']
                 )
                 : '';
 
@@ -737,9 +748,7 @@ function ff_handle_field_group_save()
 
         $default_value = isset($field_raw['default_value'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['default_value']
-                )
+                (string) $field_raw['default_value']
             )
             : '';
 
@@ -760,17 +769,13 @@ function ff_handle_field_group_save()
 
         $prepend = isset($field_raw['prepend'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['prepend']
-                )
+                (string) $field_raw['prepend']
             )
             : '';
 
         $append = isset($field_raw['append'])
             ? sanitize_text_field(
-                wp_unslash(
-                    (string) $field_raw['append']
-                )
+                (string) $field_raw['append']
             )
             : '';
 
@@ -1071,10 +1076,7 @@ function ff_handle_field_group_actions()
 
         $selected_ids = array_map(
             'sanitize_text_field',
-            array_map(
-                'wp_unslash',
-                $_POST['ff_group_ids']
-            )
+            wp_unslash($_POST['ff_group_ids'])
         );
 
         $current_view = isset($_POST['ff_view'])
@@ -1316,8 +1318,17 @@ function ff_render_field_groups_list()
         $current_view = 'all';
     }
 
-    $orderby = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'title';
-    $order   = isset($_GET['order']) ? strtolower(sanitize_text_field($_GET['order'])) : 'asc';
+    $orderby = isset($_GET['orderby'])
+        ? sanitize_key(wp_unslash($_GET['orderby']))
+        : 'title';
+
+    $order = isset($_GET['order'])
+        ? strtolower(
+            sanitize_text_field(
+                wp_unslash($_GET['order'])
+            )
+        )
+        : 'asc';
     $order   = ($order === 'desc') ? 'desc' : 'asc';
 
     $search_term = isset($_GET['ff_search'])
@@ -1948,21 +1959,39 @@ function ff_render_field_groups_list()
 
                                 <td>
                                     <?php
-                                    $count_html = '<span class="ff-chip" title="Fields">' . intval($field_cnt) . '</span>';
                                     if ($current_view === 'trash') {
-                                        echo $count_html;
+                                        echo '<span class="ff-chip" title="Fields">'
+                                            . esc_html((string) intval($field_cnt))
+                                            . '</span>';
                                     } else {
-                                        echo '<a href="' . esc_url($edit_url) . '" class="ff-count-link">' . $count_html . '</a>';
+                                        echo '<a href="' . esc_url($edit_url) . '" class="ff-count-link">';
+                                        echo '<span class="ff-chip" title="Fields">'
+                                            . esc_html((string) intval($field_cnt))
+                                            . '</span>';
+                                        echo '</a>';
                                     }
                                     ?>
                                 </td>
 
                                 <td>
                                     <?php
-                                    $status_key   = strtolower($status);
-                                    $status_label = ($status_key === 'active') ? 'Active' : ($status_key === 'inactive' ? 'Inactive' : ucfirst($status_key));
-                                    $status_class = 'ff-status ff-status--' . esc_attr($status_key);
-                                    echo '<span class="' . $status_class . '">' . esc_html($status_label) . '</span>';
+                                    $status_key = sanitize_html_class(
+                                        strtolower((string) $status)
+                                    );
+
+                                    $status_label = ($status_key === 'active')
+                                        ? 'Active'
+                                        : (
+                                            $status_key === 'inactive'
+                                            ? 'Inactive'
+                                            : ucfirst($status_key)
+                                        );
+
+                                    echo '<span class="'
+                                        . esc_attr('ff-status ff-status--' . $status_key)
+                                        . '">'
+                                        . esc_html($status_label)
+                                        . '</span>';
                                     ?>
                                 </td>
                             </tr>
@@ -1998,14 +2027,35 @@ function ff_render_global_field_row(array $field, array $stored)
 
     $name  = $field['name'];
     $label = isset($field['label']) ? $field['label'] : $name;
-    $type  = isset($field['type'])  ? $field['type']  : 'text';
+    $type = isset($field['type'])
+        ? $field['type']
+        : 'text';
 
-    $id    = 'ff_global_' . esc_attr($name);
-    $value = isset($stored[$name]) ? $stored[$name] : '';
+    $prepend = isset($field['prepend'])
+        ? (string) $field['prepend']
+        : '';
+
+    $append = isset($field['append'])
+        ? (string) $field['append']
+        : '';
+
+    $supports_affixes = in_array(
+        $type,
+        ['text', 'number', 'email', 'password'],
+        true
+    );
+
+    $has_affixes = $supports_affixes
+        && ($prepend !== '' || $append !== '');
+
+    $id    = 'ff_global_' . $name;
+    $value = isset($stored[$name])
+        ? $stored[$name]
+        : '';
 ?>
     <tr>
         <th scope="row">
-            <label for="<?php echo $id; ?>">
+            <label for="<?php echo esc_attr($id); ?>">
                 <?php echo esc_html($label); ?>
             </label>
         </th>
@@ -2022,12 +2072,35 @@ function ff_render_global_field_row(array $field, array $stored)
                     break;
 
                 case 'number':
-                    printf(
-                        '<input type="number" name="ff_global[%1$s]" id="%2$s" value="%3$s" class="regular-text" />',
-                        esc_attr($name),
-                        esc_attr($id),
-                        esc_attr($value)
-                    );
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+            ?>
+                    <input
+                        type="number"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'regular-text'); ?>">
+                    <?php
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'range':
@@ -2038,7 +2111,7 @@ function ff_render_global_field_row(array $field, array $stored)
 
                     $slider_id = $id . '_slider';
                     $num_id    = $id . '_num';
-            ?>
+                    ?>
                     <div class="ff-range-wrap">
                         <input
                             type="range"
@@ -2064,25 +2137,90 @@ function ff_render_global_field_row(array $field, array $stored)
                     break;
 
                 case 'password':
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+
                     echo '<div class="ff-password-wrap">';
-                    echo '<input type="password" name="ff_global[' . esc_attr($name) . ']" id="' . esc_attr($id) . '" value="' . esc_attr((string) $value) . '" class="regular-text ff-password-input" maxlength="45" autocomplete="off" />';
-                    echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($id) . '" aria-label="Show password" aria-controls="' . esc_attr($id) . '">';
+                ?>
+                    <input
+                        type="password"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field ff-password-input' : 'regular-text ff-password-input'); ?>"
+                        maxlength="45"
+                        autocomplete="off">
+                    <?php
+
+                    echo '<button type="button" class="ff-password-toggle"'
+                        . ' data-target="#' . esc_attr($id) . '"'
+                        . ' aria-label="Show password"'
+                        . ' aria-controls="' . esc_attr($id) . '">';
+
                     echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
                     echo '</button>';
                     echo '</div>';
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'email':
                 case 'url':
                 case 'text':
-                    $input_type = in_array($type, ['email', 'url'], true) ? $type : 'text';
-                    printf(
-                        '<input type="%4$s" name="ff_global[%1$s]" id="%2$s" value="%3$s" class="regular-text" />',
-                        esc_attr($name),
-                        esc_attr($id),
-                        esc_attr((string) $value),
-                        esc_attr($input_type)
-                    );
+
+                    $input_type = in_array(
+                        $type,
+                        ['email', 'url'],
+                        true
+                    )
+                        ? $type
+                        : 'text';
+
+                    if ($has_affixes) {
+                        echo '<div class="ff-affix-input">';
+
+                        if ($prepend !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                                . esc_html($prepend)
+                                . '</span>';
+                        }
+                    }
+                    ?>
+                    <input
+                        type="<?php echo esc_attr($input_type); ?>"
+                        name="ff_global[<?php echo esc_attr($name); ?>]"
+                        id="<?php echo esc_attr($id); ?>"
+                        value="<?php echo esc_attr((string) $value); ?>"
+                        class="<?php echo esc_attr($has_affixes ? 'ff-affix-input__field' : 'regular-text'); ?>">
+                    <?php
+
+                    if ($has_affixes) {
+                        if ($append !== '') {
+                            echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                                . esc_html($append)
+                                . '</span>';
+                        }
+
+                        echo '</div>';
+                    }
+
                     break;
 
                 case 'wysiwyg':
@@ -2117,7 +2255,7 @@ function ff_render_global_field_row(array $field, array $stored)
                             $img_src = $src[0];
                         }
                     }
-                ?>
+                    ?>
                     <div class="ff-media-wrap" data-type="image">
                         <input type="hidden" name="ff_global[<?php echo esc_attr($name); ?>]" id="<?php echo esc_attr($id); ?>" value="<?php echo esc_attr($value); ?>">
                         <div class="ff-media-preview-wrap" style="margin-bottom:8px;">
@@ -2297,7 +2435,7 @@ function ff_render_global_options_page()
         check_admin_referer('ff_save_global');
 
         $raw = isset($_POST['ff_global']) && is_array($_POST['ff_global'])
-            ? $_POST['ff_global']
+            ? wp_unslash($_POST['ff_global'])
             : [];
 
         $type_map = [];
@@ -2344,14 +2482,18 @@ function ff_render_global_options_page()
                 case 'password':
                     $new_values[$name] = is_array($value_raw)
                         ? ''
-                        : ff_sanitize_type_password(wp_unslash($value_raw), ['name' => $name, 'type' => 'password'], 0);
+                        : ff_sanitize_type_password(
+                            $value_raw,
+                            ['name' => $name, 'type' => 'password'],
+                            0
+                        );
                     break;
 
                 case 'wysiwyg':
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : wp_kses_post(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2359,7 +2501,7 @@ function ff_render_global_options_page()
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : sanitize_textarea_field(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2367,7 +2509,7 @@ function ff_render_global_options_page()
                     $new_values[$name] = is_array($value_raw)
                         ? ''
                         : sanitize_text_field(
-                            wp_unslash($value_raw)
+                            $value_raw
                         );
                     break;
 
@@ -2385,7 +2527,7 @@ function ff_render_global_options_page()
                 case 'checkbox':
                     if (is_array($value_raw)) {
 
-                        $raw_values = wp_unslash($value_raw);
+                        $raw_values = $value_raw;
 
                         $vals = array_map(
                             static function ($v) {
@@ -2406,7 +2548,9 @@ function ff_render_global_options_page()
                     break;
 
                 default:
-                    $new_values[$name] = is_array($value_raw) ? '' : sanitize_text_field(wp_unslash($value_raw));
+                    $new_values[$name] = is_array($value_raw)
+                        ? ''
+                        : sanitize_text_field($value_raw);
                     break;
             }
         }
@@ -3347,7 +3491,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <input type="text"
-                                    name="ff_fields[<?php echo $index; ?>][label]"
+                                    name="ff_fields[<?php echo esc_attr($index); ?>][label]"
                                     value="<?php echo esc_attr($label); ?>"
                                     class="regular-text ff-field-label"
                                     maxlength="50"
@@ -3357,7 +3501,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <input type="text"
-                                    name="ff_fields[<?php echo $index; ?>][name]"
+                                    name="ff_fields[<?php echo esc_attr($index); ?>][name]"
                                     value="<?php echo esc_attr($name); ?>"
                                     class="regular-text ff-field-name"
                                     maxlength="50"
@@ -3367,7 +3511,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <div class="ff-select-wrap">
-                                    <select name="ff_fields[<?php echo $index; ?>][type]" class="ff-field-type" data-field-part="type">
+                                    <select name="ff_fields[<?php echo esc_attr($index); ?>][type]" class="ff-field-type" data-field-part="type">
                                         <?php foreach ($type_groups as $group_label => $opts) : ?>
                                             <optgroup label="<?php echo esc_attr($group_label); ?>">
                                                 <?php foreach ($opts as $t) : ?>
@@ -3803,7 +3947,47 @@ function ff_render_field_group_edit()
                                         Is this field required?
                                     </p>
                                 </div>
+                                <div
+                                    class="ff-field-option ff-option-prepend"
+                                    data-ff-option="prepend">
 
+                                    <label for="ff-prepend-__INDEX__">
+                                        Prepend
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="ff-prepend-__INDEX__"
+                                        name="ff_fields[__INDEX__][prepend]"
+                                        value=""
+                                        class="regular-text">
+
+                                    <p class="description">
+                                        Appears before the input.
+                                    </p>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-append"
+                                    data-ff-option="append">
+
+                                    <label for="ff-append-__INDEX__">
+                                        Append
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="ff-append-__INDEX__"
+                                        name="ff_fields[__INDEX__][append]"
+                                        value=""
+                                        class="regular-text">
+
+                                    <p class="description">
+                                        Appears after the input.
+                                    </p>
+
+                                </div>
                             </div>
 
                             <div
