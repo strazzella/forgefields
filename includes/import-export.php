@@ -7,9 +7,6 @@
  * field-group JSON exports, JSON imports, and feedback submissions.
  */
 
-/**
- * Prevent direct access to this file outside of WordPress.
- */
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -346,13 +343,7 @@ function ff_render_settings_page()
 }
 
 
-/**
- * Export field-group definitions as a portable Forge Fields JSON file.
- */
 /* EXPORT */
-/**
- * Register the field-group export handler during admin initialization.
- */
 add_action('admin_init', 'ff_handle_field_group_export');
 
 /**
@@ -377,9 +368,6 @@ function ff_handle_field_group_export()
         'ff_export_nonce'
     );
 
-    /**
-     * Retrieve all saved field groups for export.
-     */
     $groups = ff_get_all_groups();
 
     /**
@@ -394,9 +382,6 @@ function ff_handle_field_group_export()
         ? FF_VERSION
         : 'unknown';
 
-    /**
-     * Build the portable Forge Fields export payload.
-     */
     $export = [
         'format'               => 'forge-fields',
         'signature'            => 'forge-fields-export',
@@ -410,9 +395,6 @@ function ff_handle_field_group_export()
         'field_groups'         => $groups,
     ];
 
-    /**
-     * Encode the export payload as human-readable JSON.
-     */
     $json = wp_json_encode(
         $export,
         JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
@@ -422,9 +404,6 @@ function ff_handle_field_group_export()
         wp_die('Forge Fields could not generate the JSON export.');
     }
 
-    /**
-     * Generate a timestamped download filename.
-     */
     $filename = sprintf(
         'forge-fields-%s.json',
         wp_date(
@@ -434,9 +413,6 @@ function ff_handle_field_group_export()
         )
     );
 
-    /**
-     * Send download headers and output the generated JSON file.
-     */
     nocache_headers();
 
     header(
@@ -458,13 +434,7 @@ function ff_handle_field_group_export()
 }
 
 
-/**
- * Import previously exported Forge Fields field-group definitions.
- */
 /* IMPORT */
-/**
- * Register the field-group import handler during admin initialization.
- */
 add_action('admin_init', 'ff_handle_field_group_import');
 
 /**
@@ -489,9 +459,6 @@ function ff_handle_field_group_import()
         'ff_import_nonce'
     );
 
-    /**
-     * Base URL used for returning import results to the Settings page.
-     */
     $settings_url = admin_url(
         'admin.php?page=forge-fields-settings'
     );
@@ -512,9 +479,6 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    /**
-     * Read and validate the uploaded JSON file metadata.
-     */
     $file = $_FILES['ff_import_file'];
 
     $filename = isset($file['name'])
@@ -571,9 +535,6 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    /**
-     * Read the uploaded JSON file after upload validation succeeds.
-     */
     $json = file_get_contents($tmp_name);
 
     if ($json === false) {
@@ -588,9 +549,6 @@ function ff_handle_field_group_import()
         exit;
     }
 
-    /**
-     * Decode the JSON payload and verify that it is a Forge Fields export.
-     */
     $data = json_decode($json, true);
 
     /**
@@ -782,9 +740,6 @@ function ff_handle_field_group_import()
         }
     }
 
-    /**
-     * Determine how imported groups should behave when an ID already exists.
-     */
     $conflict_mode = isset($_POST['ff_import_conflict'])
         ? sanitize_key(
             wp_unslash($_POST['ff_import_conflict'])
@@ -801,17 +756,11 @@ function ff_handle_field_group_import()
         $conflict_mode = 'skip';
     }
 
-    /**
-     * Load existing field groups before merging imported definitions.
-     */
     $existing_groups = ff_get_all_groups();
 
     $imported = 0;
     $skipped  = 0;
 
-    /**
-     * Validate and sanitize each imported field group before saving it.
-     */
     foreach ($data['field_groups'] as $group_key => $group) {
 
         if (! is_array($group)) {
@@ -858,10 +807,6 @@ function ff_handle_field_group_import()
             $group['status'] = 'active';
         }
 
-        /**
-         * Rebuild the imported field collection using only supported,
-         * sanitized Forge Fields definitions.
-         */
         $sanitized_fields = [];
 
         if (
@@ -1034,9 +979,6 @@ function ff_handle_field_group_import()
 
         $group['last_saved'] = time();
 
-        /**
-         * Resolve ID conflicts according to the selected import behavior.
-         */
         $already_exists = isset(
             $existing_groups[$import_id]
         );
@@ -1070,9 +1012,6 @@ function ff_handle_field_group_import()
         $imported++;
     }
 
-    /**
-     * Save the merged collection and return the import result to Settings.
-     */
     ff_save_all_groups($existing_groups);
 
     $redirect_url = add_query_arg(
@@ -1088,13 +1027,7 @@ function ff_handle_field_group_import()
     exit;
 }
 
-/**
- * Process feedback submitted from the Forge Fields Settings page.
- */
 /* SUBMIT FEEDBACK */
-/**
- * Register the feedback submission handler during admin initialization.
- */
 add_action('admin_init', 'ff_handle_feedback_submission');
 
 /**
@@ -1119,9 +1052,6 @@ function ff_handle_feedback_submission()
         'ff_feedback_nonce'
     );
 
-    /**
-     * Base URL used for returning feedback results to the Settings page.
-     */
     $settings_url = admin_url(
         'admin.php?page=forge-fields-settings'
     );
@@ -1160,10 +1090,6 @@ function ff_handle_feedback_submission()
         exit;
     }
 
-    /**
-     * Collect the current administrator and environment details included
-     * with the feedback message for troubleshooting purposes.
-     */
     $current_user = wp_get_current_user();
 
     $type_labels = [
@@ -1229,9 +1155,6 @@ function ff_handle_feedback_submission()
 
     $to = 'useforgedev@gmail.com';
 
-    /**
-     * Send the feedback message through the site's WordPress mail system.
-     */
     $sent = wp_mail(
         $to,
         $subject,

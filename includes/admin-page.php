@@ -1,8 +1,6 @@
 <?php
 
-/**
- * Prevent direct access to this file outside of WordPress.
- */
+
 if (! defined('ABSPATH')) {
     exit;
 }
@@ -145,13 +143,7 @@ add_action('in_admin_header', function () {
         return;
     }
 
-    /**
-     * Add Forge Fields-specific body classes on plugin admin screens.
-     *
-     * @param string $classes Existing WordPress admin body classes.
-     *
-     * @return string Updated body class string.
-     */
+
     add_filter('admin_body_class', function ($classes) {
         return trim($classes . ' ff-has-brandbar ff-has-subbar');
     });
@@ -162,9 +154,9 @@ add_action('in_admin_header', function () {
             return;
         }
         echo '<style>
-            /* hidden by default */
+            
             tr.ff-field-settings { display:none !important; }
-            /* shown when JS says so */
+            
             tr.ff-field-settings.is-visible { display:table-row !important; }
         </style>';
     });
@@ -372,9 +364,7 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
     </div>
 <?php }
 
-/**
- * Register Forge Fields admin menu and submenu pages.
- */
+
 add_action('admin_menu', function () {
 
     $parent_slug = 'forge-fields';
@@ -454,9 +444,7 @@ add_filter('admin_body_class', function ($classes) {
     return $classes;
 });
 
-/**
- * Process field-group save requests during admin initialization.
- */
+
 add_action('admin_init', 'ff_handle_field_group_save');
 
 /**
@@ -738,9 +726,7 @@ function ff_handle_field_group_save()
             }
         }
 
-        /**
-         * Sanitize optional field settings.
-         */
+
         $default_value = isset($field_raw['default_value'])
             ? sanitize_text_field(
                 wp_unslash(
@@ -791,9 +777,7 @@ function ff_handle_field_group_save()
             $prepend = '';
             $append  = '';
         }
-        /**
-         * Character limits only apply to compatible text-based fields.
-         */
+
         $character_limit_types = [
             'text',
             'textarea',
@@ -806,9 +790,7 @@ function ff_handle_field_group_save()
             $character_limit = 0;
         }
 
-        /**
-         * Build the sanitized field definition.
-         */
+
         $row = [
             'name'            => $name,
             'label'           => $label,
@@ -819,9 +801,7 @@ function ff_handle_field_group_save()
             'prepend'         => $prepend,
             'append'          => $append,
         ];
-        /**
-         * Choice-based fields also store their normalized choices.
-         */
+
         if (in_array($type, $choice_types, true)) {
             $row['choices'] = $choices_to_save;
         }
@@ -877,9 +857,7 @@ function ff_handle_field_group_save()
         $error_key = 'ff_save_errors_' . $user_id;
         $form_key  = 'ff_save_form_' . $user_id;
 
-        /**
-         * Preserve validation messages for the redirected edit screen.
-         */
+
         set_transient(
             $error_key,
             $error_messages,
@@ -1019,9 +997,7 @@ function ff_handle_field_group_save()
     exit;
 }
 
-/**
- * Process individual and bulk field-group actions during admin initialization.
- */
+
 add_action('admin_init', 'ff_handle_field_group_actions');
 
 /**
@@ -1537,12 +1513,7 @@ function ff_render_field_groups_list()
             });
         }
 
-        /**
-         * Paginate Field Groups.
-         *
-         * The list displays a maximum of 10 groups per page after
-         * filtering, searching, and sorting have been applied.
-         */
+
         $visible_count = count($display_groups);
 
         $per_page     = 10;
@@ -1555,9 +1526,7 @@ function ff_render_field_groups_list()
             (int) ceil($visible_count / $per_page)
         );
 
-        /**
-         * Prevent an invalid page number from producing an empty list.
-         */
+
         $current_page = min($current_page, $total_pages);
 
         $offset = ($current_page - 1) * $per_page;
@@ -3019,9 +2988,7 @@ function ff_render_field_group_edit()
         'status'          => 'active',
     ];
 
-    /**
-     * Start with the last successfully saved Field Group.
-     */
+
     if (
         $group_id
         && isset($groups[$group_id])
@@ -3048,9 +3015,7 @@ function ff_render_field_group_edit()
 
         if (is_array($saved_form)) {
 
-            /**
-             * Remove WordPress request slashes from the preserved values.
-             */
+
             $saved_form = wp_unslash($saved_form);
 
             $submitted_fields =
