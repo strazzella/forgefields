@@ -27,15 +27,100 @@ function ff_generate_group_id()
 }
 
 /**
+ * Build the post meta key used to store a Forge Fields value.
+ *
+ * Field values are namespaced by both Field Group ID and field name
+ * so identical field names can safely exist in different groups.
+ *
+ * Example:
+ * Group ID:   ff_group_6a997bba1fdae
+ * Field name: test
+ *
+ * Result:
+ * _ff_ff_group_6a997bba1fdae_test
+ *
+ * @param string $group_id   Forge Fields group ID.
+ * @param string $field_name Forge Fields field name.
+ *
+ * @return string Namespaced WordPress post meta key.
+ */
+function ff_get_post_meta_key($group_id, $field_name)
+{
+    $group_id   = sanitize_key((string) $group_id);
+    $field_name = sanitize_key((string) $field_name);
+
+    if ($group_id === '' || $field_name === '') {
+        return '';
+    }
+
+    return '_ff_' . $group_id . '_' . $field_name;
+}
+
+/**
+ * Delete every saved post-meta value for one field within one Field Group.
+ *
+ * Because Forge Fields post meta is namespaced by Field Group ID,
+ * removing this data cannot affect a same-named field that belongs
+ * to another Field Group.
+ *
+ * @param string $group_id   Forge Fields group ID.
+ * @param string $field_name Forge Fields field name.
+ *
+ * @return bool True when the delete operation succeeds.
+ */
+function ff_delete_group_field_values($group_id, $field_name)
+{
+    $meta_key = ff_get_post_meta_key(
+        $group_id,
+        $field_name
+    );
+
+    if ($meta_key === '') {
+        return false;
+    }
+
+    return delete_metadata(
+        'post',
+        0,
+        $meta_key,
+        '',
+        true
+    );
+}
+
+/**
  * Retrieve all saved Forge Fields field groups.
  *
  * @return array Saved field groups, or an empty array when none exist.
  */
-function ff_get_all_groups()
+function ff_get_all_groups($refresh = false)
 {
-    $groups = get_option('ff_field_groups', []);
+    static $groups = null;
 
-    return is_array($groups) ? $groups : [];
+    /**
+     * Return the request-level cache unless a fresh read
+     * has explicitly been requested.
+     */
+    if (! $refresh && $groups !== null) {
+        return $groups;
+    }
+
+    /**
+     * Load the latest Field Groups from WordPress.
+     */
+    $stored_groups = get_option(
+        'ff_field_groups',
+        []
+    );
+
+    /**
+     * Normalize invalid or missing data to an empty array.
+     */
+    $groups = is_array($stored_groups)
+        ? $stored_groups
+        : [];
+
+    return $groups;
 }
 
 /**
@@ -512,7 +597,7 @@ function ff_boot_field_groups()
         return;
     }
 
-    foreach ($groups as $group) {
+    foreach ($groups as $group_id => $group) {
 
         if (! is_array($group)) {
             continue;
@@ -589,21 +674,171 @@ add_action('add_meta_boxes', function () {
  * @param array   $field Field definition.
  * @param WP_Post $post  Current post object.
  */
-function ff_render_metabox_field_row(array $field, WP_Post $post)
+function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
 {
     $name = $field['name'] ?? '';
     if ($name === '') {
         return;
     }
 
-    $label    = $field['label'] ?? $name;
-    $type     = $field['type']  ?? 'text';
-    $meta_key = '_ff_' . $name;
-    $value    = get_post_meta($post->ID, $meta_key, true);
+    $label         = $field['label'] ?? $name;
+    $type          = $field['type'] ?? 'text';
+    $required = ! empty($field['required']);
+    $meta_key      = ff_get_post_meta_key($group_id, $name);
+    $default_value = isset($field['default_value'])
+        ? $field['default_value']
+        : '';
 
-    echo '<tr>';
-    echo '<th scope="row"><label for="' . esc_attr($meta_key) . '">' . esc_html($label) . '</label></th>';
+    $character_limit = isset($field['character_limit'])
+        ? absint($field['character_limit'])
+        : 0;
+
+    $prepend = isset($field['prepend'])
+        ? (string) $field['prepend']
+        : '';
+
+    $append = isset($field['append'])
+        ? (string) $field['append']
+        : '';
+
+    $maxlength_attr = $character_limit > 0
+        ? ' maxlength="' . esc_attr($character_limit) . '"'
+        : '';
+
+    $prepend_html = $prepend !== ''
+        ? '<span class="ff-input-affix ff-input-prepend">' . esc_html($prepend) . '</span>'
+        : '';
+
+    $append_html = $append !== ''
+        ? '<span class="ff-input-affix ff-input-append">' . esc_html($append) . '</span>'
+        : '';
+    /**
+     * Use the saved post-meta value when it exists.
+     * Otherwise, fall back to the field's configured default value.
+     */
+    /**
+     * Prefer the new group-scoped post meta key.
+     *
+     * If this field still has a value stored under the legacy
+     * _ff_<field_name> key, migrate that value into the new
+     * group-scoped key when it can be done safely.
+     */
+    if (metadata_exists('post', $post->ID, $meta_key)) {
+
+        $value = get_post_meta(
+            $post->ID,
+            $meta_key,
+            true
+        );
+    } else {
+
+        $legacy_meta_key = '_ff_' . sanitize_key($name);
+
+        if (metadata_exists('post', $post->ID, $legacy_meta_key)) {
+
+            $groups = ff_get_all_groups();
+            $matching_groups = [];
+
+            foreach ($groups as $candidate_group_id => $candidate_group) {
+
+                if (! is_array($candidate_group)) {
+                    continue;
+                }
+
+                $status = isset($candidate_group['status'])
+                    ? $candidate_group['status']
+                    : 'active';
+
+                if ($status !== 'active') {
+                    continue;
+                }
+
+                $location = isset($candidate_group['location'])
+                    ? $candidate_group['location']
+                    : 'page';
+
+                if ($location !== get_post_type($post->ID)) {
+                    continue;
+                }
+
+                $target = isset($candidate_group['location_target'])
+                    ? (string) $candidate_group['location_target']
+                    : '';
+
+                if (
+                    $target !== ''
+                    && (string) $post->ID !== $target
+                ) {
+                    continue;
+                }
+
+                foreach ((array) ($candidate_group['fields'] ?? []) as $candidate_field) {
+
+                    $candidate_name = isset($candidate_field['name'])
+                        ? sanitize_key((string) $candidate_field['name'])
+                        : '';
+
+                    if ($candidate_name !== sanitize_key($name)) {
+                        continue;
+                    }
+
+                    $matching_groups[] = $candidate_group_id;
+                    break;
+                }
+            }
+
+            /**
+             * Only migrate legacy data when exactly one applicable
+             * Field Group owns this field name.
+             */
+            if (
+                count($matching_groups) === 1
+                && reset($matching_groups) === $group_id
+            ) {
+                $value = get_post_meta(
+                    $post->ID,
+                    $legacy_meta_key,
+                    true
+                );
+
+                update_post_meta(
+                    $post->ID,
+                    $meta_key,
+                    $value
+                );
+
+                delete_post_meta(
+                    $post->ID,
+                    $legacy_meta_key
+                );
+            } else {
+                $value = $default_value;
+            }
+        } else {
+            $value = $default_value;
+        }
+    }
+
+    $row_class = $required
+        ? ' class="ff-required-field"'
+        : '';
+
+    echo '<tr' . $row_class . ' data-ff-field-type="' . esc_attr($type) . '">';
+    echo '<th scope="row">';
+    echo '<label for="' . esc_attr($meta_key) . '">';
+    echo esc_html($label);
+
+    if ($required) {
+        echo ' <span class="ff-required-indicator" aria-hidden="true">*</span>';
+    }
+
+    echo '</label>';
+    echo '</th>';
     echo '<td>';
+
+    $required_attr = $required
+        ? ' required aria-required="true"'
+        : '';
 
     switch ($type) {
         case 'wysiwyg':
@@ -634,33 +869,91 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
                 '<textarea name="%1$s" id="%2$s" rows="6" class="large-text">%3$s</textarea>',
                 esc_attr($meta_key),
                 esc_attr($meta_key),
-                esc_textarea((string) $value)
+                esc_textarea((string) $value),
+                $required_attr,
+                $maxlength_attr
             );
             break;
 
         case 'number':
-            printf(
-                '<input type="number" class="small-text" name="%1$s" id="%2$s" value="%3$s">',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                esc_attr((string) $value)
-            );
+
+            if ($prepend !== '' || $append !== '') {
+                echo '<div class="ff-input-affix-wrap">';
+                echo $prepend_html;
+            }
+
+            echo '<input type="number" class="small-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '"' . $required_attr . '>';
+
+            if ($prepend !== '' || $append !== '') {
+                echo $append_html;
+                echo '</div>';
+            }
+
             break;
 
         case 'email':
         case 'url':
         case 'text':
-            $input = in_array($type, ['email', 'url'], true) ? $type : 'text';
-            echo '<input type="' . esc_attr($input) . '" class="regular-text" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '">';
+            $input = in_array($type, ['email', 'url'], true)
+                ? $type
+                : 'text';
+
+            $supports_affixes = in_array(
+                $type,
+                ['text', 'email'],
+                true
+            );
+
+            if ($supports_affixes && ($prepend !== '' || $append !== '')) {
+                echo '<div class="ff-affix-input">';
+
+                if ($prepend !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--prepend">'
+                        . esc_html($prepend)
+                        . '</span>';
+                }
+            }
+
+            echo '<input type="' . esc_attr($input) . '"'
+                . ' class="' . ($supports_affixes && ($prepend !== '' || $append !== '') ? 'ff-affix-input__field' : 'regular-text') . '"'
+                . ' name="' . esc_attr($meta_key) . '"'
+                . ' id="' . esc_attr($meta_key) . '"'
+                . ' value="' . esc_attr((string) $value) . '"'
+                . $required_attr
+                . $maxlength_attr
+                . '>';
+
+            if ($supports_affixes && ($prepend !== '' || $append !== '')) {
+                if ($append !== '') {
+                    echo '<span class="ff-affix-input__addon ff-affix-input__addon--append">'
+                        . esc_html($append)
+                        . '</span>';
+                }
+
+                echo '</div>';
+            }
+
             break;
 
         case 'password':
+
+            if ($prepend !== '' || $append !== '') {
+                echo '<div class="ff-input-affix-wrap">';
+                echo $prepend_html;
+            }
+
             echo '<div class="ff-password-wrap">';
-            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" maxlength="45" autocomplete="off">';
+            echo '<input type="password" class="regular-text ff-password-input" name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '" value="' . esc_attr((string) $value) . '" autocomplete="off"' . $required_attr . $maxlength_attr . '>';
             echo '<button type="button" class="ff-password-toggle" data-target="#' . esc_attr($meta_key) . '" aria-label="Show password" aria-controls="' . esc_attr($meta_key) . '">';
             echo '<span class="dashicons dashicons-visibility" aria-hidden="true"></span>';
             echo '</button>';
             echo '</div>';
+
+            if ($prepend !== '' || $append !== '') {
+                echo $append_html;
+                echo '</div>';
+            }
+
             break;
 
         case 'range':
@@ -718,7 +1011,7 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
             $current     = is_scalar($value) ? (string) $value : '';
 
             echo '<div class="ff-select-wrap">';
-            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '">';
+            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '"' . $required_attr . '>';
             foreach ($choices_map as $v => $lbl) {
                 printf(
                     '<option value="%1$s"%3$s>%2$s</option>',
@@ -795,16 +1088,30 @@ function ff_render_metabox_field_row(array $field, WP_Post $post)
 
         case 'true_false':
             $checked = ! empty($value);
-            printf(
-                '<label>
-                    <input type="checkbox" name="%1$s" id="%2$s" value="1" %3$s>
-                    %4$s
-                </label>',
-                esc_attr($meta_key),
-                esc_attr($meta_key),
-                checked($checked, true, false),
-                esc_html__('Enabled', 'forge-fields')
-            );
+
+            echo '<div class="ff-true-false-control">';
+
+            echo '<label class="ff-toggle-field">';
+
+            echo '<input
+        type="checkbox"
+        class="ff-true-false-input"
+        name="' . esc_attr($meta_key) . '"
+        id="' . esc_attr($meta_key) . '"
+        value="1"'
+                . checked($checked, true, false)
+                . '>';
+
+            echo '<span class="ff-toggle" aria-hidden="true"></span>';
+
+            echo '</label>';
+
+            echo '<span class="ff-true-false-label">'
+                . ($checked ? 'True' : 'False')
+                . '</span>';
+
+            echo '</div>';
+
             break;
     }
 
@@ -863,7 +1170,11 @@ function ff_render_field_group_metabox($post, $box)
             echo '<table class="form-table"><tbody>';
 
             foreach ($section['fields'] as $field) {
-                ff_render_metabox_field_row($field, $post);
+                ff_render_metabox_field_row(
+                    $field,
+                    $post,
+                    $group_id
+                );
             }
 
             echo '</tbody></table>';
@@ -875,7 +1186,11 @@ function ff_render_field_group_metabox($post, $box)
         echo '<table class="form-table"><tbody>';
 
         foreach ($fields as $field) {
-            ff_render_metabox_field_row($field, $post);
+            ff_render_metabox_field_row(
+                $field,
+                $post,
+                $group_id
+            );
         }
 
         echo '</tbody></table>';
@@ -914,7 +1229,7 @@ add_action('save_post', function ($post_id) {
 
     $groups = ff_get_all_groups();
 
-    foreach ($groups as $group) {
+    foreach ($groups as $group_id => $group) {
 
         $status = isset($group['status'])
             ? $group['status']
@@ -952,7 +1267,15 @@ add_action('save_post', function ($post_id) {
                 continue;
             }
 
-            $key     = '_ff_' . $name;
+            $key = ff_get_post_meta_key(
+                $group_id,
+                $name
+            );
+
+            if ($key === '') {
+                continue;
+            }
+
             $has_key = array_key_exists($key, $_POST);
 
             if (! $has_key && ! in_array($type, ['checkbox', 'true_false'], true)) {
@@ -962,7 +1285,6 @@ add_action('save_post', function ($post_id) {
             $raw = $has_key ? $_POST[$key] : null;
 
             switch ($type) {
-
                 case 'wysiwyg':
                     $val = $has_key ? wp_kses_post(wp_unslash($raw)) : '';
                     break;
@@ -1046,10 +1368,13 @@ add_action('save_post', function ($post_id) {
                     break;
             }
 
+            /**
+             * Save or remove the actual field value.
+             */
             if ($val === '' || $val === [] || $val === null) {
-                delete_post_meta($post_id, '_ff_' . $name);
+                delete_post_meta($post_id, $key);
             } else {
-                update_post_meta($post_id, '_ff_' . $name, $val);
+                update_post_meta($post_id, $key, $val);
             }
         }
     }
@@ -1067,28 +1392,252 @@ add_action('save_post', function ($post_id) {
  *
  * @return mixed Stored field value or an empty string when unavailable.
  */
-function ff_get_field($field_name, $post_id = null)
+function ff_get_field($field_name, $post_id = null, $group_id = null)
 {
-    if (! $field_name) {
+    $field_name = sanitize_key((string) $field_name);
+
+    if ($field_name === '') {
         return '';
     }
 
+    /**
+     * Global/options lookup.
+     *
+     * Global Fields continue using their existing site-wide
+     * storage and are not stored as post meta.
+     */
     if ($post_id === 'global' || $post_id === 'option') {
         $global = get_option('ff_global_fields', []);
-        return isset($global[$field_name]) ? $global[$field_name] : '';
+
+        return isset($global[$field_name])
+            ? $global[$field_name]
+            : '';
     }
 
+    /**
+     * Use the current post when no explicit post ID was supplied.
+     */
     if ($post_id === null) {
         $post_id = get_the_ID();
     }
+
+    $post_id = absint($post_id);
 
     if (! $post_id) {
         return '';
     }
 
-    $value = get_post_meta($post_id, '_ff_' . $field_name, true);
+    $groups = ff_get_all_groups();
 
-    return $value;
+    if (empty($groups) || ! is_array($groups)) {
+        return '';
+    }
+
+    /**
+     * An explicit Forge Key removes any ambiguity.
+     *
+     * Example:
+     * ff_get_field(
+     *     'meta_title',
+     *     null,
+     *     'ff_group_6a997bba1fdae'
+     * );
+     */
+    if ($group_id !== null && $group_id !== '') {
+
+        $group_id = sanitize_key((string) $group_id);
+
+        if (
+            $group_id === ''
+            || ! isset($groups[$group_id])
+            || ! is_array($groups[$group_id])
+        ) {
+            return '';
+        }
+
+        $group = $groups[$group_id];
+
+        if (($group['status'] ?? 'active') !== 'active') {
+            return '';
+        }
+
+        $field_exists = false;
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            if (
+                isset($field['name'])
+                && sanitize_key((string) $field['name']) === $field_name
+            ) {
+                $field_exists = true;
+                break;
+            }
+        }
+
+        if (! $field_exists) {
+            return '';
+        }
+
+        $meta_key = ff_get_post_meta_key(
+            $group_id,
+            $field_name
+        );
+
+        return $meta_key !== ''
+            ? get_post_meta($post_id, $meta_key, true)
+            : '';
+    }
+
+    /**
+     * No Forge Key was supplied.
+     *
+     * Find active Field Groups that:
+     * - apply to this post type,
+     * - apply to this specific post when targeted,
+     * - contain the requested field name.
+     */
+    $matching_group_ids = [];
+
+    $post_type = get_post_type($post_id);
+
+    if (! $post_type) {
+        return '';
+    }
+
+    foreach ($groups as $candidate_group_id => $group) {
+
+        if (! is_array($group)) {
+            continue;
+        }
+
+        $status = isset($group['status'])
+            ? $group['status']
+            : 'active';
+
+        if ($status !== 'active') {
+            continue;
+        }
+
+        $location = isset($group['location'])
+            ? $group['location']
+            : 'page';
+
+        if (! in_array($location, ['page', 'post'], true)) {
+            continue;
+        }
+
+        if ($location !== $post_type) {
+            continue;
+        }
+
+        $target = isset($group['location_target'])
+            ? (string) $group['location_target']
+            : '';
+
+        if (
+            $target !== ''
+            && (string) $post_id !== $target
+        ) {
+            continue;
+        }
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            $candidate_name = isset($field['name'])
+                ? sanitize_key((string) $field['name'])
+                : '';
+
+            if ($candidate_name !== $field_name) {
+                continue;
+            }
+
+            $matching_group_ids[] = $candidate_group_id;
+            break;
+        }
+    }
+
+    /**
+     * No matching field definition exists.
+     */
+    if (empty($matching_group_ids)) {
+        return '';
+    }
+
+    /**
+     * More than one applicable group contains the same field name.
+     *
+     * Do not guess which value the developer intended.
+     * They must supply the Forge Key as the third argument.
+     */
+    if (count($matching_group_ids) > 1) {
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            trigger_error(
+                sprintf(
+                    'Forge Fields: Field "%s" exists in multiple applicable Field Groups. Choose a unique name or specify a Forge Key as the third argument to ff_get_field().',
+                    $field_name
+                ),
+                E_USER_WARNING
+            );
+        }
+
+        return '';
+    }
+
+    $resolved_group_id = reset($matching_group_ids);
+
+    $meta_key = ff_get_post_meta_key(
+        $resolved_group_id,
+        $field_name
+    );
+
+    if ($meta_key === '') {
+        return '';
+    }
+
+    /**
+     * Return the new group-scoped value when one already exists.
+     */
+    if (metadata_exists('post', $post_id, $meta_key)) {
+        return get_post_meta(
+            $post_id,
+            $meta_key,
+            true
+        );
+    }
+
+    /**
+     * Backwards compatibility for legacy Forge Fields values.
+     *
+     * Because we have already established that exactly one
+     * applicable Field Group owns this field name, the legacy
+     * value can be migrated safely.
+     */
+    $legacy_meta_key = '_ff_' . $field_name;
+
+    if (metadata_exists('post', $post_id, $legacy_meta_key)) {
+
+        $legacy_value = get_post_meta(
+            $post_id,
+            $legacy_meta_key,
+            true
+        );
+
+        update_post_meta(
+            $post_id,
+            $meta_key,
+            $legacy_value
+        );
+
+        delete_post_meta(
+            $post_id,
+            $legacy_meta_key
+        );
+
+        return $legacy_value;
+    }
+
+    return '';
 }
 
 /**
@@ -1149,6 +1698,263 @@ if (! function_exists('ff_parse_choices_string')) {
         }
         return $out;
     }
+}
+
+/**
+ * Retrieve the configured choices for a Forge Fields choice field.
+ *
+ * Supported field types:
+ * - Select
+ * - Checkbox
+ * - Radio
+ * - Button Group
+ *
+ * By default, the field is resolved against the current post/page.
+ * Passing "global" or "option" searches Global Field Groups.
+ * A Forge Group Key may be supplied as the third argument when the
+ * same field name exists in multiple Field Groups.
+ *
+ * Example:
+ *
+ * ff_get_field_choices('color');
+ *
+ * Returns:
+ *
+ * [
+ *     'red'   => 'Red',
+ *     'green' => 'Green',
+ *     'blue'  => 'Blue',
+ * ]
+ *
+ * @param string          $field_name Field name.
+ * @param int|string|null $post_id    Post ID, "global", "option", or null.
+ * @param string|null     $group_id   Optional Forge Group Key.
+ *
+ * @return array Configured value => label choices, or an empty array.
+ */
+function ff_get_field_choices(
+    $field_name,
+    $post_id = null,
+    $group_id = null
+) {
+    $field_name = sanitize_key(
+        (string) $field_name
+    );
+
+    if ($field_name === '') {
+        return [];
+    }
+
+    $choice_types = [
+        'select',
+        'checkbox',
+        'radio',
+        'button_group',
+    ];
+
+    $groups = ff_get_all_groups();
+
+    if (empty($groups) || ! is_array($groups)) {
+        return [];
+    }
+
+    /**
+     * Explicit Forge Group Key.
+     *
+     * When supplied, the group itself resolves any ambiguity.
+     */
+    if ($group_id !== null && $group_id !== '') {
+
+        $group_id = sanitize_key(
+            (string) $group_id
+        );
+
+        if (
+            $group_id === ''
+            || ! isset($groups[$group_id])
+            || ! is_array($groups[$group_id])
+        ) {
+            return [];
+        }
+
+        $group = $groups[$group_id];
+
+        if (($group['status'] ?? 'active') !== 'active') {
+            return [];
+        }
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            $candidate_name = isset($field['name'])
+                ? sanitize_key(
+                    (string) $field['name']
+                )
+                : '';
+
+            if ($candidate_name !== $field_name) {
+                continue;
+            }
+
+            $type = isset($field['type'])
+                ? sanitize_key(
+                    (string) $field['type']
+                )
+                : '';
+
+            if (! in_array($type, $choice_types, true)) {
+                return [];
+            }
+
+            return ff_parse_choices_string(
+                $field['choices'] ?? ''
+            );
+        }
+
+        return [];
+    }
+
+    /**
+     * Determine whether this is a Global Fields lookup.
+     */
+    $is_global =
+        $post_id === 'global'
+        || $post_id === 'option';
+
+    /**
+     * Normal Page/Post lookup.
+     */
+    if (! $is_global) {
+
+        if ($post_id === null) {
+            $post_id = get_the_ID();
+        }
+
+        $post_id = absint($post_id);
+
+        if (! $post_id) {
+            return [];
+        }
+
+        $post_type = get_post_type($post_id);
+
+        if (! $post_type) {
+            return [];
+        }
+    }
+
+    $matching_fields = [];
+
+    foreach ($groups as $candidate_group_id => $group) {
+
+        if (! is_array($group)) {
+            continue;
+        }
+
+        if (($group['status'] ?? 'active') !== 'active') {
+            continue;
+        }
+
+        $location = isset($group['location'])
+            ? sanitize_key(
+                (string) $group['location']
+            )
+            : 'page';
+
+        /**
+         * Global lookups only search Global Field Groups.
+         */
+        if ($is_global) {
+
+            if ($location !== 'global') {
+                continue;
+            }
+        } else {
+
+            /**
+             * Page/Post lookups must match the current post type.
+             */
+            if (
+                ! in_array($location, ['page', 'post'], true)
+                || $location !== $post_type
+            ) {
+                continue;
+            }
+
+            $target = isset($group['location_target'])
+                ? (string) $group['location_target']
+                : '';
+
+            if (
+                $target !== ''
+                && (string) $post_id !== $target
+            ) {
+                continue;
+            }
+        }
+
+        foreach ((array) ($group['fields'] ?? []) as $field) {
+
+            $candidate_name = isset($field['name'])
+                ? sanitize_key(
+                    (string) $field['name']
+                )
+                : '';
+
+            if ($candidate_name !== $field_name) {
+                continue;
+            }
+
+            $type = isset($field['type'])
+                ? sanitize_key(
+                    (string) $field['type']
+                )
+                : '';
+
+            if (! in_array($type, $choice_types, true)) {
+                return [];
+            }
+
+            $matching_fields[] = [
+                'group_id' => $candidate_group_id,
+                'field'    => $field,
+            ];
+
+            break;
+        }
+    }
+
+    /**
+     * No matching choice field was found.
+     */
+    if (empty($matching_fields)) {
+        return [];
+    }
+
+    /**
+     * Do not guess when multiple applicable groups contain the
+     * same field name.
+     */
+    if (count($matching_fields) > 1) {
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+
+            trigger_error(
+                sprintf(
+                    'Forge Fields: Choice field "%s" exists in multiple applicable Field Groups. Specify a Forge Group Key as the third argument to ff_get_field_choices().',
+                    $field_name
+                ),
+                E_USER_WARNING
+            );
+        }
+
+        return [];
+    }
+
+    $field = $matching_fields[0]['field'];
+
+    return ff_parse_choices_string(
+        $field['choices'] ?? ''
+    );
 }
 
 /**
@@ -1222,5 +2028,14 @@ function ff_group_fields_into_tab_sections(array $fields)
  */
 function ff_save_all_groups(array $groups)
 {
-    update_option('ff_field_groups', $groups);
+    update_option(
+        'ff_field_groups',
+        $groups
+    );
+
+    /**
+     * Refresh Forge Fields' request-level group cache so any
+     * later reads during this same request see the saved data.
+     */
+    ff_get_all_groups(true);
 }

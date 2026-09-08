@@ -121,13 +121,13 @@ document.addEventListener("DOMContentLoaded", function () {
      * - Updates field-type select names.
      * - Enables dragging only when more than one field exists.
      */
+    /**
+     * Reindex all editable field rows and their associated options rows.
+     */
     function renumberRows() {
       const rows = Array.from(tbody.querySelectorAll(".ff-field-row"));
       const canDrag = rows.length > 1;
 
-      /**
-       * Update every row using its current position in the table.
-       */
       rows.forEach(function (row, index) {
         row.dataset.index = index;
 
@@ -136,35 +136,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const typeSelect = row.querySelector(".ff-field-type");
         const handle = row.querySelector(".ff-field-handle");
 
-        /**
-         * Update the field-label input so it submits under the correct index.
-         */
         if (labelInput) {
           labelInput.name = "ff_fields[" + index + "][label]";
           labelInput.dataset.index = index;
         }
 
-        /**
-         * Update the field-name input so it submits under the correct index.
-         */
         if (nameInput) {
           nameInput.name = "ff_fields[" + index + "][name]";
           nameInput.dataset.index = index;
         }
 
-        /**
-         * Update the field-type select so it submits under the correct index.
-         */
         if (typeSelect) {
           typeSelect.name = "ff_fields[" + index + "][type]";
         }
 
-        /**
-         * A drag handle is only useful when more than one field exists.
-         *
-         * Enable dragging when multiple rows are present and visually disable
-         * the handle when only one field remains.
-         */
         if (handle) {
           handle.draggable = canDrag;
 
@@ -173,6 +158,34 @@ document.addEventListener("DOMContentLoaded", function () {
           } else {
             handle.classList.add("ff-handle-disabled");
           }
+        }
+
+        /**
+         * Keep the settings row attached to the same field index.
+         */
+        const settingsRow = row.nextElementSibling;
+
+        if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+          settingsRow.dataset.index = index;
+
+          settingsRow
+            .querySelectorAll("input, textarea, select")
+            .forEach(function (control) {
+              if (!control.name) return;
+
+              control.name = control.name.replace(
+                /ff_fields\[\d+\]/,
+                "ff_fields[" + index + "]",
+              );
+            });
+
+          settingsRow.querySelectorAll("[id]").forEach(function (element) {
+            element.id = element.id.replace(/-\d+$/, "-" + index);
+          });
+
+          settingsRow.querySelectorAll("label[for]").forEach(function (label) {
+            label.htmlFor = label.htmlFor.replace(/-\d+$/, "-" + index);
+          });
         }
       });
     }
@@ -190,11 +203,177 @@ document.addEventListener("DOMContentLoaded", function () {
      *
      * @param {HTMLElement} row The field row receiving the event handlers.
      */
+
+    function normalizeFieldName(value) {
+      return value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, "");
+    }
+
+    function getFieldNameMessageElement(nameInput) {
+      let message = nameInput.parentElement.querySelector(
+        ".ff-field-name-message",
+      );
+
+      if (!message) {
+        message = document.createElement("p");
+        message.className = "ff-field-name-message";
+        nameInput.insertAdjacentElement("afterend", message);
+      }
+
+      return message;
+    }
+
+    function validateFieldNames() {
+      const rows = Array.from(tbody.querySelectorAll(".ff-field-row"));
+
+      const currentNames = {};
+
+      rows.forEach(function (row) {
+        const nameInput = row.querySelector(".ff-field-name");
+
+        if (!nameInput || nameInput.readOnly) {
+          return;
+        }
+
+        const name = normalizeFieldName(nameInput.value);
+
+        if (!name) {
+          return;
+        }
+
+        if (!currentNames[name]) {
+          currentNames[name] = [];
+        }
+
+        currentNames[name].push(nameInput);
+      });
+
+      rows.forEach(function (row) {
+        const nameInput = row.querySelector(".ff-field-name");
+
+        if (!nameInput) {
+          return;
+        }
+
+        const message = getFieldNameMessageElement(nameInput);
+        const name = normalizeFieldName(nameInput.value);
+
+        message.textContent = "";
+        message.classList.remove("is-error", "is-warning");
+
+        nameInput.classList.remove(
+          "ff-field-name-error",
+          "ff-field-name-warning",
+        );
+
+        if (!name || nameInput.readOnly) {
+          message.hidden = true;
+          return;
+        }
+
+        /*
+         * Same Field Group.
+         *
+         * This is an error because two fields in the same group
+         * would use the same group-scoped post-meta key.
+         */
+        if (currentNames[name] && currentNames[name].length > 1) {
+          message.textContent =
+            'Field name "' +
+            name +
+            '" is already used in this Field Group. Choose a unique name.';
+
+          message.classList.add("is-error");
+          nameInput.classList.add("ff-field-name-error");
+          message.hidden = false;
+
+          return;
+        }
+
+        /*
+         * Another saved Field Group in the same retrieval scope.
+         *
+         * Global and Page/Post fields use separate retrieval namespaces,
+         * so the same field name may safely exist once globally and once
+         * within normal Page/Post Field Groups.
+         */
+        const registry =
+          window.ffFieldNameRegistry &&
+          typeof window.ffFieldNameRegistry === "object"
+            ? window.ffFieldNameRegistry
+            : {
+                global: [],
+                non_global: [],
+              };
+
+        const locationSelect = document.querySelector("#ff_location");
+
+        const currentScope =
+          locationSelect && locationSelect.value === "global"
+            ? "global"
+            : "non_global";
+
+        const otherGroupNames = Array.isArray(registry[currentScope])
+          ? registry[currentScope]
+          : [];
+
+        if (otherGroupNames.includes(name)) {
+          message.textContent =
+            'Field name "' +
+            name +
+            '" is already used in another ' +
+            (currentScope === "global" ? "Global " : "") +
+            "Field Group. To avoid ambiguous output, choose a unique name or specify this Field Group Key as the third argument to ff_get_field().";
+
+          message.classList.add("is-warning");
+          nameInput.classList.add("ff-field-name-warning");
+          message.hidden = false;
+
+          return;
+        }
+
+        message.hidden = true;
+      });
+    }
+
     function attachRowEvents(row) {
       const labelInput = row.querySelector(".ff-field-label");
       const nameInput = row.querySelector(".ff-field-name");
       const removeLink = row.querySelector(".ff-field-remove");
       const typeSelect = row.querySelector(".ff-field-type");
+      const optionsToggle = row.querySelector(".ff-field-options-toggle");
+
+      function syncOptionsToggleVisibility() {
+        if (!typeSelect || !optionsToggle) {
+          return;
+        }
+
+        const isTab = typeSelect.value === "tab";
+
+        optionsToggle.style.display = isTab ? "none" : "";
+
+        /**
+         * If the row was switched to Tab while Field Options was open,
+         * close the now-empty options row as well.
+         */
+        if (isTab) {
+          const settingsRow = row.nextElementSibling;
+
+          if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+            settingsRow.classList.add("is-hidden");
+            settingsRow.style.display = "none";
+
+            row.classList.remove("ff-options-open");
+            settingsRow.classList.remove("ff-options-open");
+
+            optionsToggle.setAttribute("aria-expanded", "false");
+          }
+        }
+      }
+
+      syncOptionsToggleVisibility();
 
       /**
        * Whenever the field type changes, synchronize any special behavior
@@ -205,6 +384,107 @@ document.addEventListener("DOMContentLoaded", function () {
       if (typeSelect) {
         typeSelect.addEventListener("change", function () {
           syncTabRowState(row);
+          syncFieldOptions(row);
+          syncOptionsToggleVisibility();
+
+          /**
+           * Choice-based fields require configured choices.
+           * Automatically open Field Options when one is selected.
+           */
+          const choiceTypes = ["select", "checkbox", "radio", "button_group"];
+
+          if (choiceTypes.includes(typeSelect.value)) {
+            const settingsRow = row.nextElementSibling;
+
+            if (settingsRow && settingsRow.matches("[data-ff-settings]")) {
+              settingsRow.classList.remove("is-hidden");
+              settingsRow.style.display = "";
+
+              /**
+               * Apply the same connected open-state styling used when
+               * Field Options is opened manually.
+               */
+              row.classList.add("ff-options-open");
+              settingsRow.classList.add("ff-options-open");
+
+              if (optionsToggle) {
+                optionsToggle.setAttribute("aria-expanded", "true");
+              }
+
+              const choicesInput = settingsRow.querySelector(
+                '[data-ff-option="choices"] textarea',
+              );
+
+              if (choicesInput) {
+                setTimeout(function () {
+                  choicesInput.focus();
+                }, 50);
+              }
+            }
+          }
+        });
+      }
+
+      if (optionsToggle) {
+        optionsToggle.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const settingsRow = row.nextElementSibling;
+
+          if (!settingsRow || !settingsRow.matches("[data-ff-settings]")) {
+            return;
+          }
+
+          const isOpen = !settingsRow.classList.contains("is-hidden");
+
+          if (isOpen) {
+            settingsRow.classList.add("is-hidden");
+            settingsRow.style.display = "none";
+
+            row.classList.remove("ff-options-open");
+            settingsRow.classList.remove("ff-options-open");
+
+            optionsToggle.setAttribute("aria-expanded", "false");
+          } else {
+            settingsRow.classList.remove("is-hidden");
+            settingsRow.style.display = "";
+
+            row.classList.add("ff-options-open");
+            settingsRow.classList.add("ff-options-open");
+
+            optionsToggle.setAttribute("aria-expanded", "true");
+            syncFieldOptions(row);
+          }
+        });
+      }
+
+      const trueFalseToggle = row.nextElementSibling
+        ? row.nextElementSibling.querySelector(".ff-true-false-default-toggle")
+        : null;
+
+      if (trueFalseToggle) {
+        trueFalseToggle.addEventListener("change", function () {
+          const settingsRow = row.nextElementSibling;
+
+          if (!settingsRow) {
+            return;
+          }
+
+          const defaultInput = settingsRow.querySelector(
+            'input[name$="[default_value]"]',
+          );
+
+          const label = settingsRow.querySelector(
+            ".ff-true-false-default-label",
+          );
+
+          if (defaultInput) {
+            defaultInput.value = this.checked ? "1" : "0";
+          }
+
+          if (label) {
+            label.textContent = this.checked ? "True" : "False";
+          }
         });
       }
 
@@ -224,28 +504,29 @@ document.addEventListener("DOMContentLoaded", function () {
           const typeSelect = row.querySelector(".ff-field-type");
           const isTab = typeSelect && typeSelect.value === "tab";
 
-          /**
-           * Tab fields do not use a field name, so ensure the name remains empty.
-           */
           if (isTab) {
             nameInput.value = "";
+            validateFieldNames();
             return;
           }
 
-          /**
-           * Preserve manually entered field names.
-           */
           if (nameInput.value.trim() !== "") return;
 
-          /**
-           * Do nothing when the field label is empty.
-           */
           if (this.value.trim() === "") return;
 
-          /**
-           * Generate the field name from the entered label.
-           */
           nameInput.value = labelToSlug(this.value);
+
+          validateFieldNames();
+        });
+      }
+
+      if (nameInput) {
+        nameInput.addEventListener("input", function () {
+          validateFieldNames();
+        });
+
+        nameInput.addEventListener("blur", function () {
+          validateFieldNames();
         });
       }
     }
@@ -259,12 +540,34 @@ document.addEventListener("DOMContentLoaded", function () {
     tbody.querySelectorAll(".ff-field-row").forEach(function (row) {
       attachRowEvents(row);
       syncTabRowState(row);
+      syncFieldOptions(row);
+
+      const settingsRow = row.nextElementSibling;
+
+      if (
+        settingsRow &&
+        settingsRow.matches("[data-ff-settings]") &&
+        !settingsRow.classList.contains("is-hidden")
+      ) {
+        row.classList.add("ff-options-open");
+        settingsRow.classList.add("ff-options-open");
+      }
     });
 
     /**
-     * Ensure all initially rendered rows have correct sequential indexes.
+     * Ensure all initially rendered rows have correct sequential indexes,
+     * then validate field names for duplicates.
      */
     renumberRows();
+    validateFieldNames();
+
+    const locationSelect = document.querySelector("#ff_location");
+
+    if (locationSelect) {
+      locationSelect.addEventListener("change", function () {
+        validateFieldNames();
+      });
+    }
 
     /**
      * Adds a new editable field row to the field table.
@@ -308,6 +611,8 @@ document.addEventListener("DOMContentLoaded", function () {
           tbody.appendChild(r);
           if (r.classList.contains("ff-field-row")) {
             attachRowEvents(r);
+            syncTabRowState(r);
+            syncFieldOptions(r);
           }
         });
       } else {
@@ -396,11 +701,147 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
+     * Show or hide individual options based on the selected field type.
+     */
+    function syncFieldOptions(row) {
+      const typeSelect = row.querySelector(".ff-field-type");
+
+      if (!typeSelect) {
+        return;
+      }
+
+      const settingsRow = row.nextElementSibling;
+
+      if (!settingsRow || !settingsRow.matches("[data-ff-settings]")) {
+        return;
+      }
+
+      const type = typeSelect.value;
+
+      const choiceTypes = ["select", "checkbox", "radio", "button_group"];
+
+      const characterLimitTypes = [
+        "text",
+        "textarea",
+        "email",
+        "url",
+        "password",
+      ];
+
+      const prependAppendTypes = ["text", "number", "email", "password"];
+
+      const choicesOption = settingsRow.querySelector(
+        '[data-ff-option="choices"]',
+      );
+
+      const defaultOption = settingsRow.querySelector(
+        '[data-ff-option="default"]',
+      );
+
+      const standardDefault = settingsRow.querySelector(".ff-default-standard");
+
+      const trueFalseDefault = settingsRow.querySelector(
+        ".ff-default-true-false",
+      );
+
+      const defaultInput = settingsRow.querySelector(
+        'input[name$="[default_value]"]',
+      );
+
+      const trueFalseToggle = settingsRow.querySelector(
+        ".ff-true-false-default-toggle",
+      );
+
+      const trueFalseLabel = settingsRow.querySelector(
+        ".ff-true-false-default-label",
+      );
+
+      const characterLimitOption = settingsRow.querySelector(
+        '[data-ff-option="character-limit"]',
+      );
+
+      const requiredOption = settingsRow.querySelector(
+        '[data-ff-option="required"]',
+      );
+
+      const prependOption = settingsRow.querySelector(
+        '[data-ff-option="prepend"]',
+      );
+
+      const appendOption = settingsRow.querySelector(
+        '[data-ff-option="append"]',
+      );
+
+      if (choicesOption) {
+        choicesOption.style.display = choiceTypes.includes(type) ? "" : "none";
+      }
+
+      if (defaultOption) {
+        defaultOption.style.display = type === "tab" ? "none" : "";
+
+        if (standardDefault) {
+          standardDefault.style.display = type === "true_false" ? "none" : "";
+        }
+
+        if (trueFalseDefault) {
+          trueFalseDefault.style.display = type === "true_false" ? "" : "none";
+        }
+
+        if (type === "true_false" && defaultInput && trueFalseToggle) {
+          trueFalseToggle.checked = defaultInput.value === "1";
+
+          if (trueFalseLabel) {
+            trueFalseLabel.textContent = trueFalseToggle.checked
+              ? "True"
+              : "False";
+          }
+        }
+      }
+
+      if (characterLimitOption) {
+        characterLimitOption.style.display = characterLimitTypes.includes(type)
+          ? ""
+          : "none";
+      }
+
+      if (requiredOption) {
+        const requiredInput = requiredOption.querySelector(
+          'input[type="checkbox"]',
+        );
+
+        const supportsRequired = type !== "tab" && type !== "true_false";
+
+        requiredOption.style.display = supportsRequired ? "" : "none";
+
+        /**
+         * True/False and Tab fields cannot meaningfully be required.
+         * Clear any previously checked state when switching to either type.
+         */
+        if (!supportsRequired && requiredInput) {
+          requiredInput.checked = false;
+        }
+      }
+
+      if (prependOption) {
+        prependOption.style.display = prependAppendTypes.includes(type)
+          ? ""
+          : "none";
+      }
+
+      if (appendOption) {
+        appendOption.style.display = prependAppendTypes.includes(type)
+          ? ""
+          : "none";
+      }
+    }
+
+    /**
      * Stores the field row currently being dragged.
      *
      * A null value means no row is actively being reordered.
      */
     let draggingRow = null;
+    let draggingSettingsRow = null;
 
     /**
      * Starts field-row drag-and-drop reordering.
@@ -419,6 +860,14 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!row) return;
 
       draggingRow = row;
+      draggingSettingsRow = row.nextElementSibling;
+
+      if (
+        !draggingSettingsRow ||
+        !draggingSettingsRow.matches("[data-ff-settings]")
+      ) {
+        draggingSettingsRow = null;
+      }
       row.classList.add("ff-row-dragging");
       e.dataTransfer.effectAllowed = "move";
 
@@ -438,9 +887,12 @@ document.addEventListener("DOMContentLoaded", function () {
     tbody.addEventListener("dragend", function () {
       if (draggingRow) {
         draggingRow.classList.remove("ff-row-dragging");
-        draggingRow = null;
-        renumberRows();
       }
+
+      draggingRow = null;
+      draggingSettingsRow = null;
+
+      renumberRows();
     });
 
     /**
@@ -458,8 +910,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const afterElement = getDragAfterElement(tbody, e.clientY);
       if (!afterElement) {
         tbody.appendChild(draggingRow);
+
+        if (draggingSettingsRow) {
+          tbody.appendChild(draggingSettingsRow);
+        }
       } else if (afterElement !== draggingRow) {
         tbody.insertBefore(draggingRow, afterElement);
+
+        if (draggingSettingsRow) {
+          tbody.insertBefore(draggingSettingsRow, draggingRow.nextSibling);
+        }
       }
     });
 
@@ -503,136 +963,94 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /**
-   * Initializes field-key copy controls.
+   * Initializes Forge Key copy controls.
    *
-   * Each .ff-copy-key element reads the value stored in its data-key
-   * attribute and prepares clipboard-related behavior when clicked.
+   * Uses the modern Clipboard API when available and falls back
+   * to document.execCommand("copy") for older environments.
    */
   document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
-    btn.addEventListener("click", function (e) {
+    btn.addEventListener("click", async function (e) {
       e.preventDefault();
 
-      /**
-       * Retrieve the key associated with the clicked copy control.
-       */
       const key = this.dataset.key;
-      if (!key) return;
 
-      const self = this;
+      if (!key) {
+        return;
+      }
 
-      /**
-       * Defines a temporary visual success state for this copy button.
-       *
-       * The button receives the is-copied class and its tooltip changes
-       * to "Copied!" before being restored after 1.5 seconds.
-       */
-      const done = () => {
-        self.classList.add("is-copied");
-        const oldTitle = self.getAttribute("title") || "";
-        self.setAttribute("title", "Copied!");
-        setTimeout(() => {
-          self.classList.remove("is-copied");
-          self.setAttribute("title", oldTitle || "Copy to clipboard");
-        }, 1500);
-      };
+      const button = this;
 
       /**
-       * Attach the clipboard-copy implementation to all field-key controls.
-       *
-       * This handler first attempts to use the modern Clipboard API.
-       * If that is unavailable or fails, it falls back to the older
-       * document.execCommand("copy") approach.
+       * Display temporary copied feedback.
        */
-      document.querySelectorAll(".ff-copy-key").forEach(function (btn) {
-        btn.addEventListener("click", async function (e) {
-          e.preventDefault();
+      function showCopiedState() {
+        button.classList.add("is-copied");
 
-          const key = this.dataset.key;
-          if (!key) return;
+        const oldTitle = button.getAttribute("title") || "";
 
-          const self = this;
+        button.setAttribute("title", "Copied!");
 
-          /**
-           * Displays temporary success feedback after a key is copied.
-           *
-           * The copied-state CSS class is applied and the title is changed
-           * to "Copied!" before the previous tooltip is restored.
-           */
-          function showCopiedState() {
-            self.classList.add("is-copied");
+        setTimeout(function () {
+          button.classList.remove("is-copied");
+          button.setAttribute("title", oldTitle || "Copy to clipboard");
+        }, 1000);
+      }
 
-            const oldTitle = self.getAttribute("title") || "";
-            self.setAttribute("title", "Copied!");
+      /**
+       * Legacy clipboard fallback.
+       *
+       * @param {string} text Text to copy.
+       * @returns {boolean} Whether the copy operation succeeded.
+       */
+      function fallbackCopy(text) {
+        const textarea = document.createElement("textarea");
 
-            setTimeout(function () {
-              self.classList.remove("is-copied");
-              self.setAttribute("title", oldTitle || "Copy to clipboard");
-            }, 1000);
-          }
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        textarea.style.pointerEvents = "none";
 
-          /**
-           * Provides a legacy clipboard fallback for environments where
-           * navigator.clipboard.writeText is unavailable or fails.
-           *
-           * A temporary invisible textarea is created, populated with the
-           * requested text, selected, copied, and then removed from the DOM.
-           *
-           * @param {string} text The text to copy to the clipboard.
-           * @returns {boolean} Whether document.execCommand reported success.
-           */
-          function fallbackCopy(text) {
-            const textarea = document.createElement("textarea");
+        document.body.appendChild(textarea);
 
-            textarea.value = text;
-            textarea.setAttribute("readonly", "");
-            textarea.style.position = "fixed";
-            textarea.style.opacity = "0";
-            textarea.style.pointerEvents = "none";
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
 
-            document.body.appendChild(textarea);
+        let copied = false;
 
-            textarea.select();
-            textarea.setSelectionRange(0, textarea.value.length);
+        try {
+          copied = document.execCommand("copy");
+        } catch (error) {
+          copied = false;
+        }
 
-            let copied = false;
+        document.body.removeChild(textarea);
 
-            /**
-             * Attempt the legacy copy operation and safely handle browsers
-             * that reject or do not support the command.
-             */
-            try {
-              copied = document.execCommand("copy");
-            } catch (error) {
-              copied = false;
-            }
+        return copied;
+      }
 
-            document.body.removeChild(textarea);
+      /**
+       * Prefer the modern Clipboard API.
+       */
+      try {
+        if (
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText === "function"
+        ) {
+          await navigator.clipboard.writeText(key);
+          showCopiedState();
+          return;
+        }
+      } catch (error) {
+        // Fall through to the legacy copy method.
+      }
 
-            return copied;
-          }
-
-          /**
-           * Prefer the modern asynchronous Clipboard API when available.
-           */
-          try {
-            if (
-              navigator.clipboard &&
-              typeof navigator.clipboard.writeText === "function"
-            ) {
-              await navigator.clipboard.writeText(key);
-              showCopiedState();
-              return;
-            }
-          } catch (error) {}
-
-          /**
-           * Fall back to the legacy textarea-based copy approach.
-           */
-          if (fallbackCopy(key)) {
-            showCopiedState();
-          }
-        });
-      });
+      /**
+       * Legacy fallback.
+       */
+      if (fallbackCopy(key)) {
+        showCopiedState();
+      }
     });
   });
 
@@ -661,91 +1079,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const tr = td.closest("tr");
       if (tr) tr.classList.remove("ff-row-focus");
     }
-  });
-});
-
-/**
- * Initializes all password-field visibility controls.
- *
- * Each password wrapper contains:
- * - A toggle button.
- * - A password input.
- * - A Dashicons visibility icon.
- *
- * The control keeps the input type, icon, and accessible label synchronized.
- */
-document.querySelectorAll(".ff-password-wrap").forEach(function (wrap) {
-  const btn = wrap.querySelector(".ff-password-toggle");
-  const input = wrap.querySelector(".ff-password-input");
-  const icon = btn ? btn.querySelector(".dashicons") : null;
-
-  /**
-   * Skip incomplete password controls.
-   */
-  if (!btn || !input || !icon) return;
-
-  /**
-   * Synchronizes the toggle button with the password input's visibility.
-   *
-   * When the password is visible:
-   * - The button announces "Hide password".
-   * - The visibility icon is shown.
-   *
-   * When the password is hidden:
-   * - The button announces "Show password".
-   * - The hidden icon is shown.
-   */
-  function sync() {
-    const isVisible = input.type === "text";
-    btn.setAttribute(
-      "aria-label",
-      isVisible ? "Hide password" : "Show password",
-    );
-    icon.classList.toggle("dashicons-visibility", isVisible);
-    icon.classList.toggle("dashicons-hidden", !isVisible);
-  }
-
-  /**
-   * Apply the correct icon and accessibility state on initial load.
-   */
-  sync();
-
-  /**
-   * Toggle between visible text and obscured password input modes.
-   */
-  btn.addEventListener("click", function () {
-    input.type = input.type === "text" ? "password" : "text";
-    sync();
-  });
-});
-
-/**
- * Initializes paired range-slider and number-input controls.
- *
- * Changes to either control are immediately mirrored to the other
- * so both interfaces always display the same value.
- */
-document.querySelectorAll(".ff-range-wrap").forEach(function (wrap) {
-  const slider = wrap.querySelector(".ff-range-slider");
-  const number = wrap.querySelector(".ff-range-number");
-
-  /**
-   * Skip wrappers that do not contain both required controls.
-   */
-  if (!slider || !number) return;
-
-  /**
-   * Copy range-slider changes into the number input.
-   */
-  slider.addEventListener("input", function () {
-    number.value = slider.value;
-  });
-
-  /**
-   * Copy number-input changes back into the range slider.
-   */
-  number.addEventListener("input", function () {
-    slider.value = number.value;
   });
 });
 
@@ -1616,275 +1949,6 @@ document.addEventListener("click", function (e) {
     ta.style.height = "260px";
   }
 });
-
-/**
- * Initializes delegated jQuery synchronization for Forge Fields
- * range sliders and their associated numeric inputs.
- *
- * data-target attributes are used to locate the paired control.
- */
-jQuery(function ($) {
-  /**
-   * Synchronize a range slider with its linked numeric input.
-   *
-   * Whenever the slider receives an input or change event, its current
-   * value is copied into the element referenced by data-target.
-   */
-  $(document).on("input change", ".ff-range-slider", function () {
-    var $num = $($(this).data("target"));
-
-    if ($num.length) $num.val(this.value);
-  });
-
-  /**
-   * Synchronize a numeric range input with its linked slider.
-   *
-   * The entered value is constrained to the slider's configured
-   * minimum and maximum before both controls are updated.
-   */
-  $(document).on("input change", ".ff-range-number", function () {
-    var $rng = $($(this).data("target"));
-
-    if ($rng.length) {
-      /**
-       * Read the linked slider's minimum and maximum values.
-       *
-       * Defaults are used when those attributes cannot be parsed.
-       */
-      var min = parseFloat($rng.attr("min")) || 0;
-      var max = parseFloat($rng.attr("max")) || 100;
-
-      /**
-       * Parse the numeric value entered by the user.
-       */
-      var val = parseFloat(this.value);
-
-      /**
-       * Invalid numeric input falls back to the slider's minimum value.
-       */
-      if (isNaN(val)) val = min;
-
-      /**
-       * Clamp the value so it cannot fall outside the slider's
-       * configured minimum and maximum.
-       */
-      val = Math.min(max, Math.max(min, val));
-
-      /**
-       * Apply the normalized value to both controls.
-       */
-      this.value = val;
-      $rng.val(val);
-    }
-  });
-});
-
-/**
- * Self-contained WordPress Media Library integration for Forge Fields
- * image and file controls.
- *
- * This section:
- * - Prevents duplicate event binding.
- * - Opens the WordPress media frame.
- * - Stores selected attachment IDs.
- * - Updates image previews.
- * - Updates selected file links.
- */
-(function ($) {
-  /**
-   * Prevent the media handlers from being bound more than once.
-   *
-   * The flag is stored globally so repeated script execution does not
-   * create duplicate WordPress Media Library event handlers.
-   */
-  if (window.ffMediaBound) {
-    return;
-  }
-
-  window.ffMediaBound = true;
-
-  /**
-   * Opens the WordPress Media Library for a Forge Fields media control.
-   *
-   * The field wrapper's data-type determines whether the frame is configured
-   * for image selection or general file selection.
-   *
-   * Once an attachment is selected:
-   * - Its attachment ID is stored in the field input.
-   * - Image fields display the selected image preview.
-   * - File fields display the selected filename and link.
-   * - The media-clear control becomes visible.
-   *
-   * @param {jQuery} $wrap The Forge Fields media wrapper.
-   * @param {jQuery} $input The input used to store the attachment ID.
-   */
-  function openFFFrame($wrap, $input) {
-    /**
-     * Determine whether this media control represents an image or file field.
-     */
-    var type = $wrap.data("type");
-
-    /**
-     * Create the WordPress media-selection frame.
-     */
-    var frame = wp.media({
-      title: type === "image" ? "Select Image" : "Select File",
-      button: {
-        text: "Use this " + (type === "image" ? "image" : "file"),
-      },
-      multiple: false,
-      library: type === "image" ? { type: "image" } : {},
-    });
-
-    /**
-     * Handle the attachment selected from the WordPress Media Library.
-     */
-    frame.on("select", function () {
-      /**
-       * Retrieve the first selected attachment as a plain object.
-       */
-      var att = frame.state().get("selection").first().toJSON();
-
-      /**
-       * Store the WordPress attachment ID and trigger the input's
-       * change event so any dependent behavior is notified.
-       */
-      $input.val(att.id).trigger("change");
-
-      /**
-       * Image fields display an image preview.
-       */
-      if (type === "image") {
-        /**
-         * Prefer the generated thumbnail size when available,
-         * otherwise fall back to the attachment's original URL.
-         */
-        var url =
-          att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url;
-
-        $wrap.find(".ff-media-preview").attr("src", url).show();
-      } else {
-        /**
-         * File fields display a clickable link containing the selected filename.
-         */
-        $wrap
-          .find(".ff-media-fileurl")
-          .attr("href", att.url)
-          .text(att.filename)
-          .show();
-
-        /**
-         * Hide the empty-state message now that a file has been selected.
-         */
-        $wrap.find(".ff-media-nofile").hide();
-      }
-
-      /**
-       * Show the control that allows the selected media item to be cleared.
-       */
-      $wrap.find(".ff-media-clear").show();
-    });
-
-    /**
-     * Display the configured WordPress Media Library frame.
-     */
-    frame.open();
-  }
-
-  /**
-   * Bind the media-selection control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia click handler is removed first to prevent
-   * duplicate bindings, then the current handler is attached.
-   */
-  $(document)
-    .off("click.ffMedia", ".ff-media-select")
-    .on("click.ffMedia", ".ff-media-select", function (e) {
-      e.preventDefault();
-
-      /**
-       * Read the target input ID stored on the clicked media-select control.
-       */
-      var id = $(this).data("target");
-
-      /**
-       * Locate the input that stores the selected attachment ID.
-       */
-      var $input = $("#" + id);
-
-      if (!$input.length) return;
-
-      /**
-       * Find the surrounding Forge Fields media wrapper.
-       */
-      var $wrap = $input.closest(".ff-media-wrap");
-
-      /**
-       * Open the WordPress Media Library for this media field.
-       */
-      openFFFrame($wrap, $input);
-    });
-
-  /**
-   * Bind the media-clear control using a namespaced delegated
-   * jQuery click handler.
-   *
-   * The existing ffMedia handler is removed first so the clear action
-   * cannot be bound multiple times.
-   */
-  $(document)
-    .off("click.ffMedia", ".ff-media-clear")
-    .on("click.ffMedia", ".ff-media-clear", function (e) {
-      e.preventDefault();
-
-      /**
-       * Read the target input ID stored on the clicked clear control.
-       */
-      var id = $(this).data("target");
-
-      /**
-       * Locate the input currently storing the attachment ID.
-       */
-      var $input = $("#" + id);
-
-      if (!$input.length) return;
-
-      /**
-       * Find the surrounding media wrapper so its preview state
-       * can also be reset.
-       */
-      var $wrap = $input.closest(".ff-media-wrap");
-
-      /**
-       * Clear the stored attachment ID and trigger its change event.
-       */
-      $input.val("").trigger("change");
-
-      /**
-       * Reset the visual state differently depending on whether this
-       * media field represents an image or a general file.
-       */
-      if ($wrap.data("type") === "image") {
-        /**
-         * Image fields clear and hide the image preview.
-         */
-        $wrap.find(".ff-media-preview").attr("src", "").hide();
-      } else {
-        /**
-         * File fields clear and hide the selected file link,
-         * then restore the no-file-selected message.
-         */
-        $wrap.find(".ff-media-fileurl").attr("href", "").text("").hide();
-        $wrap.find(".ff-media-nofile").show();
-      }
-
-      /**
-       * Hide the Clear control after the selected media has been removed.
-       */
-      $(this).hide();
-    });
-})(jQuery);
 
 /**
  * Initializes conditional field-group location controls after the DOM loads.

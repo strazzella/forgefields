@@ -169,38 +169,6 @@ add_action('in_admin_header', function () {
         </style>';
     });
 
-    add_action('admin_footer', function () {
-        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-        if ($page !== 'forge-fields-edit') return;
-?>
-        <script>
-            (function() {
-                const choiceTypes = ['select', 'checkbox', 'radio', 'button_group'];
-
-                function updateRow(row) {
-                    const select = row.querySelector('.ff-field-type');
-                    const settings = row.nextElementSibling;
-                    if (!select || !settings || !settings.matches('[data-ff-settings]')) return;
-                    const shouldShow = choiceTypes.indexOf(select.value) !== -1;
-                    settings.style.display = shouldShow ? '' : 'none';
-                    settings.classList.toggle('is-hidden', !shouldShow);
-                }
-
-                document.querySelectorAll('tr.ff-field-row').forEach(updateRow);
-
-                document.addEventListener('change', function(e) {
-                    if (e.target && e.target.classList.contains('ff-field-type')) {
-                        const row = e.target.closest('tr.ff-field-row');
-                        if (row) updateRow(row);
-                    }
-                });
-            })();
-        </script>
-    <?php
-    });
-
-
-
     $is_new   = ($page === 'forge-fields-edit' && empty($_GET['group']));
     if ($page === 'forge-fields') {
 
@@ -341,7 +309,7 @@ function ff_render_admin_brandbar($subtitle = '', $add_url = '', $add_label = 'A
     $is_current = ($page === $list_page);
 
     $home_url = admin_url('admin.php?page=' . $list_page);
-    ?>
+?>
     <div class="ff-brandbar" role="banner" aria-label="Forge Fields">
         <div class="ff-brandbar__inner">
             <div class="ff-brandbar__left">
@@ -459,11 +427,11 @@ add_action('admin_menu', function () {
 
     add_submenu_page(
         null,
-        'Delete Forge Fields',
-        'Delete Forge Fields',
+        'Deactivate Forge Fields',
+        'Deactivate Forge Fields',
         'activate_plugins',
-        'forge-fields-uninstall',
-        'ff_render_uninstall_page'
+        'forge-fields-deactivate',
+        'ff_render_deactivate_page'
     );
 });
 
@@ -524,6 +492,21 @@ function ff_handle_field_group_save()
         ? sanitize_text_field(wp_unslash($_POST['ff_group_id']))
         : '';
 
+    /**
+     * Preserve the existing field definitions before the group is
+     * overwritten so removed fields can be detected after validation.
+     */
+    $existing_fields = [];
+
+    if (
+        $posted_group_id !== ''
+        && $posted_group_id !== 'new'
+        && isset($groups[$posted_group_id]['fields'])
+        && is_array($groups[$posted_group_id]['fields'])
+    ) {
+        $existing_fields = $groups[$posted_group_id]['fields'];
+    }
+
     $title = isset($_POST['ff_group_title'])
         ? substr(
             sanitize_text_field(
@@ -565,15 +548,19 @@ function ff_handle_field_group_save()
 
     foreach ($fields_raw as $field_raw) {
 
-        $name = isset($field_raw['name'])
-            ? substr(
-                sanitize_key(
-                    wp_unslash($field_raw['name'])
-                ),
-                0,
-                50
+        $name_raw = isset($field_raw['name'])
+            ? trim(
+                wp_unslash(
+                    (string) $field_raw['name']
+                )
             )
             : '';
+
+        $name = substr(
+            sanitize_key($name_raw),
+            0,
+            50
+        );
 
         $label = isset($field_raw['label'])
             ? substr(
@@ -649,7 +636,36 @@ function ff_handle_field_group_save()
             continue;
         }
 
-        if ($name === '') {
+        /**
+         * Manually entered field names must already be valid WordPress-style keys.
+         *
+         * Do not silently alter what the developer entered. For example:
+         *
+         * yes?     -> invalid
+         * my field -> invalid
+         * $#$      -> invalid
+         * my_field -> valid
+         * my-field -> valid
+         */
+        if (
+            $name_raw !== ''
+            && $name_raw !== $name
+        ) {
+
+            $has_save_errors = true;
+
+            $error_messages[] = sprintf(
+                'Field "%s" needs a valid name. Use only lowercase letters, numbers, hyphens, or underscores.',
+                $label
+            );
+
+            continue;
+        }
+
+        /**
+         * A genuinely blank field name may be generated from the label.
+         */
+        if ($name_raw === '' && $name === '') {
             $name = sanitize_key(
                 strtolower(
                     str_replace(' ', '_', $label)
@@ -722,12 +738,90 @@ function ff_handle_field_group_save()
             }
         }
 
-        $row = [
-            'name'  => $name,
-            'label' => $label,
-            'type'  => $type,
+        /**
+         * Sanitize optional field settings.
+         */
+        $default_value = isset($field_raw['default_value'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['default_value']
+                )
+            )
+            : '';
+
+        $required = ! empty($field_raw['required'])
+            ? 1
+            : 0;
+
+        /**
+         * True/False always has a state, so Required does not apply.
+         */
+        if ($type === 'true_false') {
+            $required = 0;
+        }
+
+        $character_limit = isset($field_raw['character_limit'])
+            ? absint($field_raw['character_limit'])
+            : 0;
+
+        $prepend = isset($field_raw['prepend'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['prepend']
+                )
+            )
+            : '';
+
+        $append = isset($field_raw['append'])
+            ? sanitize_text_field(
+                wp_unslash(
+                    (string) $field_raw['append']
+                )
+            )
+            : '';
+
+        $prepend_append_types = [
+            'text',
+            'number',
+            'email',
+            'password',
         ];
 
+        if (! in_array($type, $prepend_append_types, true)) {
+            $prepend = '';
+            $append  = '';
+        }
+        /**
+         * Character limits only apply to compatible text-based fields.
+         */
+        $character_limit_types = [
+            'text',
+            'textarea',
+            'email',
+            'url',
+            'password',
+        ];
+
+        if (! in_array($type, $character_limit_types, true)) {
+            $character_limit = 0;
+        }
+
+        /**
+         * Build the sanitized field definition.
+         */
+        $row = [
+            'name'            => $name,
+            'label'           => $label,
+            'type'            => $type,
+            'default_value'   => $default_value,
+            'required'        => $required,
+            'character_limit' => $character_limit,
+            'prepend'         => $prepend,
+            'append'          => $append,
+        ];
+        /**
+         * Choice-based fields also store their normalized choices.
+         */
         if (in_array($type, $choice_types, true)) {
             $row['choices'] = $choices_to_save;
         }
@@ -778,11 +872,35 @@ function ff_handle_field_group_save()
 
     if ($has_save_errors) {
 
-        $error_key = 'ff_save_errors_' . get_current_user_id();
+        $user_id = get_current_user_id();
 
+        $error_key = 'ff_save_errors_' . $user_id;
+        $form_key  = 'ff_save_form_' . $user_id;
+
+        /**
+         * Preserve validation messages for the redirected edit screen.
+         */
         set_transient(
             $error_key,
             $error_messages,
+            60
+        );
+
+        /**
+         * Preserve the submitted Field Group state so validation errors
+         * do not discard unsaved user changes.
+         */
+        set_transient(
+            $form_key,
+            [
+                'id'              => $posted_group_id,
+                'title'           => $title,
+                'location'        => $location,
+                'location_target' => $location_target
+                    ? (string) $location_target
+                    : '',
+                'fields'          => $fields_raw,
+            ],
             60
         );
 
@@ -824,6 +942,43 @@ function ff_handle_field_group_save()
         $posted_group_id = ff_generate_group_id();
     }
 
+    /**
+     * Determine which previously saved fields have been removed
+     * from this Field Group.
+     */
+    $existing_field_names = [];
+
+    foreach ($existing_fields as $existing_field) {
+
+        $existing_name = isset($existing_field['name'])
+            ? sanitize_key((string) $existing_field['name'])
+            : '';
+
+        if ($existing_name !== '') {
+            $existing_field_names[] = $existing_name;
+        }
+    }
+
+    $new_field_names = [];
+
+    foreach ($fields as $new_field) {
+
+        $new_name = isset($new_field['name'])
+            ? sanitize_key((string) $new_field['name'])
+            : '';
+
+        if ($new_name !== '') {
+            $new_field_names[] = $new_name;
+        }
+    }
+
+    $removed_field_names = array_values(
+        array_diff(
+            $existing_field_names,
+            $new_field_names
+        )
+    );
+
     $group = [
         'id'              => $posted_group_id,
         'title'           => $title,
@@ -839,6 +994,17 @@ function ff_handle_field_group_save()
     $groups[$posted_group_id] = $group;
 
     ff_save_all_groups($groups);
+
+    /**
+     * A removed field no longer belongs to this Field Group.
+     * Delete only this group's namespaced values for that field.
+     */
+    foreach ($removed_field_names as $removed_field_name) {
+        ff_delete_group_field_values(
+            $posted_group_id,
+            $removed_field_name
+        );
+    }
 
     $redirect_url = add_query_arg(
         [
@@ -1309,7 +1475,7 @@ function ff_render_field_groups_list()
                     name="ff_search"
                     value="<?php echo esc_attr($search_term); ?>"
                     class="regular-text ff-search-input"
-                    placeholder="Search field groups..." />
+                    placeholder="" />
 
                 <?php if ($search_term !== '') : ?>
                     <a href="<?php echo esc_url($search_base_url); ?>"
@@ -1371,7 +1537,37 @@ function ff_render_field_groups_list()
             });
         }
 
+        /**
+         * Paginate Field Groups.
+         *
+         * The list displays a maximum of 10 groups per page after
+         * filtering, searching, and sorting have been applied.
+         */
         $visible_count = count($display_groups);
+
+        $per_page     = 10;
+        $current_page = isset($_GET['paged'])
+            ? max(1, absint($_GET['paged']))
+            : 1;
+
+        $total_pages = max(
+            1,
+            (int) ceil($visible_count / $per_page)
+        );
+
+        /**
+         * Prevent an invalid page number from producing an empty list.
+         */
+        $current_page = min($current_page, $total_pages);
+
+        $offset = ($current_page - 1) * $per_page;
+
+        $paged_groups = array_slice(
+            $display_groups,
+            $offset,
+            $per_page,
+            true
+        );
 
         if (empty($display_groups)) : ?>
             <p>No field groups found for this view. Click “Add New” to create one.</p>
@@ -1399,7 +1595,16 @@ function ff_render_field_groups_list()
                     ];
                 }
 
-                $render_bulk = function ($position) use ($bulk_actions, $visible_count) {
+                $render_bulk = function ($position) use (
+                    $bulk_actions,
+                    $visible_count,
+                    $current_page,
+                    $total_pages,
+                    $current_view,
+                    $orderby,
+                    $order,
+                    $search_term
+                ) {
                     $id = $position === 'top'
                         ? 'ff-bulk-action-selector-top'
                         : 'ff-bulk-action-selector-bottom';
@@ -1425,7 +1630,8 @@ function ff_render_field_groups_list()
                         </div>
 
                         <?php if ($position === 'bottom') : ?>
-                            <div class="tablenav-pages one-page">
+                            <div class="tablenav-pages">
+
                                 <span class="displaying-num">
                                     <?php
                                     if ($visible_count === 1) {
@@ -1435,6 +1641,87 @@ function ff_render_field_groups_list()
                                     }
                                     ?>
                                 </span>
+
+                                <?php if ($total_pages > 1) : ?>
+                                    <?php
+                                    $pagination_base = admin_url(
+                                        'admin.php?page=forge-fields'
+                                    );
+
+                                    if ($current_view !== 'all') {
+                                        $pagination_base = add_query_arg(
+                                            'ff_view',
+                                            $current_view,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($orderby) {
+                                        $pagination_base = add_query_arg(
+                                            'orderby',
+                                            $orderby,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($order) {
+                                        $pagination_base = add_query_arg(
+                                            'order',
+                                            $order,
+                                            $pagination_base
+                                        );
+                                    }
+
+                                    if ($search_term !== '') {
+                                        $pagination_base = add_query_arg(
+                                            'ff_search',
+                                            $search_term,
+                                            $pagination_base
+                                        );
+                                    }
+                                    ?>
+
+                                    <span class="pagination-links">
+
+                                        <?php if ($current_page > 1) : ?>
+                                            <a
+                                                class="prev-page button"
+                                                href="<?php echo esc_url(
+                                                            add_query_arg(
+                                                                'paged',
+                                                                $current_page - 1,
+                                                                $pagination_base
+                                                            )
+                                                        ); ?>">
+                                                ‹
+                                            </a>
+                                        <?php endif; ?>
+
+                                        <span class="paging-input">
+                                            <?php echo intval($current_page); ?>
+                                            of
+                                            <span class="total-pages">
+                                                <?php echo intval($total_pages); ?>
+                                            </span>
+                                        </span>
+
+                                        <?php if ($current_page < $total_pages) : ?>
+                                            <a
+                                                class="next-page button"
+                                                href="<?php echo esc_url(
+                                                            add_query_arg(
+                                                                'paged',
+                                                                $current_page + 1,
+                                                                $pagination_base
+                                                            )
+                                                        ); ?>">
+                                                ›
+                                            </a>
+                                        <?php endif; ?>
+
+                                    </span>
+                                <?php endif; ?>
+
                             </div>
                         <?php endif; ?>
 
@@ -1475,7 +1762,7 @@ function ff_render_field_groups_list()
                             </a>
                         </th>
 
-                        <th scope="col" class="manage-column ff-bar-title">Forge Key</th>
+                        <th scope="col" class="manage-column ff-bar-title">Forge Group Key</th>
                         <th scope="col" class="manage-column ff-bar-title">Location</th>
                         <th scope="col" class="manage-column ff-bar-title">Fields</th>
                         <th scope="col" class="manage-column ff-bar-title">Status</th>
@@ -1489,7 +1776,7 @@ function ff_render_field_groups_list()
                         <?php $render_header_row(); ?>
                     </thead>
                     <tbody>
-                        <?php foreach ($display_groups as $group_id => $group) :
+                        <?php foreach ($paged_groups as $group_id => $group) :
 
                             $title    = ! empty($group['title']) ? $group['title'] : '(no title)';
                             $location = isset($group['location']) ? $group['location'] : 'page';
@@ -1960,16 +2247,30 @@ function ff_render_global_field_row(array $field, array $stored)
 
                 case 'true_false':
                     $checked = ! empty($value);
-                    printf(
-                        '<label>
-                            <input type="checkbox" name="ff_global[%1$s]" id="%2$s" value="1" %3$s>
-                            %4$s
-                        </label>',
-                        esc_attr($name),
-                        esc_attr($id),
-                        checked($checked, true, false),
-                        esc_html__('Enabled', 'forge-fields')
-                    );
+
+                    echo '<div class="ff-true-false-control">';
+
+                    echo '<label class="ff-toggle-field">';
+
+                    echo '<input
+        type="checkbox"
+        class="ff-true-false-input"
+        name="ff_global[' . esc_attr($name) . ']"
+        id="' . esc_attr($id) . '"
+        value="1"'
+                        . checked($checked, true, false)
+                        . '>';
+
+                    echo '<span class="ff-toggle" aria-hidden="true"></span>';
+
+                    echo '</label>';
+
+                    echo '<span class="ff-true-false-label">'
+                        . ($checked ? 'True' : 'False')
+                        . '</span>';
+
+                    echo '</div>';
+
                     break;
             }
             ?>
@@ -2324,8 +2625,11 @@ function ff_normalize_choices_textarea($raw_text)
 }
 
 /**
- * Replace the default plugin Delete action with the Forge Fields
- * controlled uninstall flow.
+ * Replace the normal Forge Fields Deactivate action with a controlled
+ * deactivation flow.
+ *
+ * This allows administrators to explicitly choose whether Forge Fields
+ * data should be preserved or permanently removed before deactivation.
  */
 add_filter(
     'plugin_action_links_forge-fields/forge-fields.php',
@@ -2334,90 +2638,201 @@ add_filter(
 
 function ff_plugin_action_links($actions)
 {
+    if (isset($actions['deactivate'])) {
 
-    if (isset($actions['delete'])) {
-
-        $delete_url = wp_nonce_url(
-            admin_url('admin.php?page=forge-fields-uninstall'),
-            'ff_uninstall_plugin'
+        $deactivate_url = wp_nonce_url(
+            admin_url('admin.php?page=forge-fields-deactivate'),
+            'ff_deactivate_plugin'
         );
 
-        $actions['delete'] = sprintf(
-            '<a href="%s" class="delete">%s</a>',
-            esc_url($delete_url),
-            esc_html__('Delete', 'forge-fields')
+        $actions['deactivate'] = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url($deactivate_url),
+            esc_html__('Deactivate', 'forge-fields')
         );
     }
 
     return $actions;
 }
 
-/**
- * Render the Forge Fields uninstall confirmation screen.
- *
- * Allows administrators to choose whether plugin data should also be
- * removed before the plugin itself is deleted.
- */
-function ff_render_uninstall_page()
-{
 
+/**
+ * Render the Forge Fields deactivation confirmation screen.
+ */
+function ff_render_deactivate_page()
+{
     if (! current_user_can('activate_plugins')) {
-        wp_die(esc_html__('You do not have permission to delete plugins.', 'forge-fields'));
+        wp_die(
+            esc_html__(
+                'You do not have permission to deactivate plugins.',
+                'forge-fields'
+            )
+        );
     }
 
-    check_admin_referer('ff_uninstall_plugin');
-
+    check_admin_referer('ff_deactivate_plugin');
 ?>
     <div class="wrap">
-        <h1>Delete Forge Fields</h1>
+        <h1>Deactivate Forge Fields</h1>
 
         <p>
-            Forge Fields can preserve its data in case the plugin is installed again later.
+            Choose what should happen to your Forge Fields data
+            before the plugin is deactivated.
+        </p>
+
+        <p>
+            <strong>Keep Data</strong> preserves your field groups,
+            global values, and saved post/page values so they are
+            available if Forge Fields is activated again.
+        </p>
+
+        <p>
+            <strong>Delete All Data</strong> permanently removes all
+            Forge Fields data from the database. This cannot be undone.
         </p>
 
         <form method="post">
-            <?php wp_nonce_field('ff_confirm_uninstall', 'ff_uninstall_nonce'); ?>
-
-            <input
-                type="hidden"
-                name="ff_confirm_delete"
-                value="1">
-
-            <p>
-                <label>
-                    <input
-                        type="checkbox"
-                        name="ff_delete_plugin_data"
-                        value="1">
-
-                    <strong>
-                        Also permanently delete all Forge Fields data
-                    </strong>
-                </label>
-            </p>
-
-            <p class="description">
-                This includes field groups, global field values,
-                and Forge Fields values saved to posts and pages.
-                This cannot be undone.
-            </p>
+            <?php
+            wp_nonce_field(
+                'ff_confirm_deactivate',
+                'ff_deactivate_nonce'
+            );
+            ?>
 
             <p class="submit">
+                <button
+                    type="submit"
+                    name="ff_deactivate_choice"
+                    value="keep"
+                    class="button button-primary">
+                    Keep Data &amp; Deactivate
+                </button>
+
+                <button
+                    type="submit"
+                    name="ff_deactivate_choice"
+                    value="delete"
+                    class="button">
+                    Delete All Data &amp; Deactivate
+                </button>
+
                 <a
                     href="<?php echo esc_url(admin_url('plugins.php')); ?>"
                     class="button">
                     Cancel
                 </a>
-
-                <button
-                    type="submit"
-                    class="button button-primary">
-                    Delete Forge Fields
-                </button>
             </p>
         </form>
     </div>
 <?php
+}
+
+
+/**
+ * Handle the confirmed Forge Fields deactivation request.
+ */
+add_action('admin_init', 'ff_handle_plugin_deactivation');
+
+function ff_handle_plugin_deactivation()
+{
+    $page = isset($_GET['page'])
+        ? sanitize_key(wp_unslash($_GET['page']))
+        : '';
+
+    if ($page !== 'forge-fields-deactivate') {
+        return;
+    }
+
+    if (! isset($_POST['ff_deactivate_choice'])) {
+        return;
+    }
+
+    if (! current_user_can('activate_plugins')) {
+        wp_die(
+            esc_html__(
+                'You do not have permission to deactivate plugins.',
+                'forge-fields'
+            )
+        );
+    }
+
+    check_admin_referer(
+        'ff_confirm_deactivate',
+        'ff_deactivate_nonce'
+    );
+
+    $choice = sanitize_key(
+        wp_unslash($_POST['ff_deactivate_choice'])
+    );
+
+    if (! in_array($choice, ['keep', 'delete'], true)) {
+        wp_die(
+            esc_html__(
+                'Invalid Forge Fields deactivation choice.',
+                'forge-fields'
+            )
+        );
+    }
+
+    /**
+     * Preserve data unless permanent removal was explicitly selected.
+     */
+    if ($choice === 'keep') {
+
+        update_option(
+            'ff_delete_data_on_uninstall',
+            0
+        );
+    }
+
+    /**
+     * Permanently remove Forge Fields database data before
+     * deactivating the plugin.
+     */
+    if ($choice === 'delete') {
+
+        delete_option('ff_field_groups');
+        delete_option('ff_global_fields');
+
+        /**
+         * Legacy Forge Fields option.
+         */
+        delete_option('ff_field_group');
+
+        /**
+         * Remove all Forge Fields post/page metadata.
+         */
+        global $wpdb;
+
+        $meta_key_pattern =
+            $wpdb->esc_like('_ff_') . '%';
+
+        $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$wpdb->postmeta}
+                 WHERE meta_key LIKE %s",
+                $meta_key_pattern
+            )
+        );
+
+        delete_option(
+            'ff_delete_data_on_uninstall'
+        );
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+    deactivate_plugins(
+        'forge-fields/forge-fields.php',
+        false,
+        false
+    );
+
+    wp_safe_redirect(
+        admin_url('plugins.php?deactivate=true')
+    );
+
+    exit;
 }
 
 add_action('admin_init', 'ff_handle_plugin_uninstall');
@@ -2499,6 +2914,69 @@ function ff_render_field_group_edit()
     $is_new   = true;
     $notices  = [];
 
+    $ff_other_group_field_names = [
+        'global'     => [],
+        'non_global' => [],
+    ];
+
+    foreach ($groups as $existing_group_id => $existing_group) {
+
+        if ((string) $existing_group_id === (string) $group_id) {
+            continue;
+        }
+
+        if (! is_array($existing_group)) {
+            continue;
+        }
+
+        $existing_status = isset($existing_group['status'])
+            ? (string) $existing_group['status']
+            : 'active';
+
+        /**
+         * Trashed groups are not active naming conflicts.
+         */
+        if ($existing_status === 'trash') {
+            continue;
+        }
+
+        if (
+            empty($existing_group['fields'])
+            || ! is_array($existing_group['fields'])
+        ) {
+            continue;
+        }
+
+        $existing_location = isset($existing_group['location'])
+            ? sanitize_key((string) $existing_group['location'])
+            : 'page';
+
+        $scope = $existing_location === 'global'
+            ? 'global'
+            : 'non_global';
+
+        foreach ($existing_group['fields'] as $existing_field) {
+
+            $existing_name = isset($existing_field['name'])
+                ? sanitize_key((string) $existing_field['name'])
+                : '';
+
+            if ($existing_name === '') {
+                continue;
+            }
+
+            $ff_other_group_field_names[$scope][$existing_name] = true;
+        }
+    }
+
+    $ff_other_group_field_names['global'] = array_keys(
+        $ff_other_group_field_names['global']
+    );
+
+    $ff_other_group_field_names['non_global'] = array_keys(
+        $ff_other_group_field_names['non_global']
+    );
+
     if (isset($_GET['ff_notice'])) {
 
         $notice_code = sanitize_key(
@@ -2533,23 +3011,138 @@ function ff_render_field_group_edit()
     }
 
     $group = [
-        'id'       => '',
-        'title'    => '',
-        'location' => 'page',
+        'id'              => '',
+        'title'           => '',
+        'location'        => 'page',
         'location_target' => '',
-        'fields'   => [],
-        'status'   => 'active',
+        'fields'          => [],
+        'status'          => 'active',
     ];
 
-    if ($group_id && isset($groups[$group_id]) && is_array($groups[$group_id])) {
-        $group   = $groups[$group_id];
-        $is_new  = false;
+    /**
+     * Start with the last successfully saved Field Group.
+     */
+    if (
+        $group_id
+        && isset($groups[$group_id])
+        && is_array($groups[$group_id])
+    ) {
+        $group  = $groups[$group_id];
+        $is_new = false;
     }
 
-    $title           = isset($group['title']) ? $group['title'] : '';
-    $location        = isset($group['location']) ? $group['location'] : 'page';
-    $location_target = isset($group['location_target']) ? (string) $group['location_target'] : '';
-    $fields          = isset($group['fields']) && is_array($group['fields']) ? $group['fields'] : [];
+    /**
+     * After a validation failure, restore the user's submitted form state
+     * instead of reverting the editor to the last saved database version.
+     */
+    if (
+        isset($_GET['ff_notice'])
+        && sanitize_key(
+            wp_unslash($_GET['ff_notice'])
+        ) === 'save_error'
+    ) {
+
+        $form_key = 'ff_save_form_' . get_current_user_id();
+
+        $saved_form = get_transient($form_key);
+
+        if (is_array($saved_form)) {
+
+            /**
+             * Remove WordPress request slashes from the preserved values.
+             */
+            $saved_form = wp_unslash($saved_form);
+
+            $submitted_fields =
+                isset($saved_form['fields'])
+                && is_array($saved_form['fields'])
+                ? $saved_form['fields']
+                : [];
+
+            /**
+             * Normalize field names before displaying them again.
+             *
+             * If an invalid value such as "#$#%" was entered,
+             * sanitize_key() reduces it to an empty string. This leaves the
+             * Name field blank so the user can enter a valid key manually.
+             */
+            foreach ($submitted_fields as &$submitted_field) {
+
+                if (! is_array($submitted_field)) {
+                    continue;
+                }
+
+                $submitted_name = isset($submitted_field['name'])
+                    ? trim((string) $submitted_field['name'])
+                    : '';
+
+                $sanitized_name = substr(
+                    sanitize_key($submitted_name),
+                    0,
+                    50
+                );
+
+                /**
+                 * If the submitted name contains some valid key characters,
+                 * preserve exactly what the user typed so they can see and fix
+                 * the invalid portion.
+                 *
+                 * If sanitization removes everything, leave the field blank.
+                 */
+                $submitted_field['name'] =
+                    $sanitized_name === ''
+                    ? ''
+                    : $submitted_name;
+            }
+
+            unset($submitted_field);
+
+            $group['title'] = isset($saved_form['title'])
+                ? sanitize_text_field(
+                    (string) $saved_form['title']
+                )
+                : '';
+
+            $group['location'] = isset($saved_form['location'])
+                ? sanitize_key(
+                    (string) $saved_form['location']
+                )
+                : 'page';
+
+            $group['location_target'] =
+                isset($saved_form['location_target'])
+                ? (string) absint(
+                    $saved_form['location_target']
+                )
+                : '';
+
+            $group['fields'] = $submitted_fields;
+
+            /**
+             * The preserved state is only needed for this one redirected
+             * request.
+             */
+            delete_transient($form_key);
+        }
+    }
+
+    $title = isset($group['title'])
+        ? $group['title']
+        : '';
+
+    $location = isset($group['location'])
+        ? $group['location']
+        : 'page';
+
+    $location_target = isset($group['location_target'])
+        ? (string) $group['location_target']
+        : '';
+
+    $fields =
+        isset($group['fields'])
+        && is_array($group['fields'])
+        ? $group['fields']
+        : [];
 
     $page_options = get_posts([
         'post_type'      => 'page',
@@ -2602,13 +3195,20 @@ function ff_render_field_group_edit()
 
 
         <form method="post" action="" id="ff-edit-form">
+            <script>
+                window.ffFieldNameRegistry = <?php
+                                                echo wp_json_encode(
+                                                    $ff_other_group_field_names
+                                                );
+                                                ?>;
+            </script>
             <?php wp_nonce_field('ff_save_field_group'); ?>
             <input type="hidden" name="ff_group_id"
                 value="<?php echo esc_attr(isset($group['id']) ? $group['id'] : ''); ?>">
 
             <table class="form-table" role="presentation">
                 <tr>
-                    <th scope="row"><label for="ff_group_title">Group Title</label></th>
+                    <th scope="row"><label for="ff_group_title">Group Title <span class="ff-required-indicator">*</span></label></th>
                     <td>
                         <input type="text"
                             id="ff_group_title"
@@ -2616,7 +3216,7 @@ function ff_render_field_group_edit()
                             class="regular-text"
                             maxlength="75"
                             value="<?php echo esc_attr($title); ?>">
-                        <p class="description">e.g. “Landing Page – Hero Section”.</p>
+                        <p class="description">Add a descriptive title for this field group.</p>
                     </td>
                 </tr>
 
@@ -2664,10 +3264,42 @@ function ff_render_field_group_edit()
                         </p>
                     </td>
                 </tr>
+
+                <?php if (! empty($group_id)) : ?>
+                    <tr class="ff-group-key-row">
+                        <th scope="row">
+                            Forge Group Key
+                        </th>
+
+                        <td>
+                            <div class="ff-edit-group-key">
+                                <code
+                                    class="ff-group-key"
+                                    data-key="<?php echo esc_attr($group_id); ?>">
+                                    <?php echo esc_html($group_id); ?>
+                                </code>
+
+                                <button
+                                    type="button"
+                                    class="button-link ff-copy-key"
+                                    data-key="<?php echo esc_attr($group_id); ?>"
+                                    aria-label="Copy Forge Key"
+                                    title="Copy to clipboard">
+                                    <span class="screen-reader-text">Copy</span>
+                                </button>
+
+                                <span class="ff-edit-group-key__help">
+                                    Use with <code>ff_get_field()</code> when field names exist in multiple Field Groups.
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                <?php endif; ?>
             </table>
 
             <h2>Fields</h2>
             <p>Define your fields (label, name, type). Add or remove rows as needed.</p>
+
 
             <table class="widefat fixed striped">
                 <thead>
@@ -2685,26 +3317,45 @@ function ff_render_field_group_edit()
                         <th class="ff-bar-title">Label</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th style="width:80px;"></th>
+                        <th style="width:150px;"></th>
                     </tr>
                 </thead>
 
                 <tbody id="ff-fields-body">
-                    <?php
-                    if (empty($fields)) {
-                        $fields = [
-                            [
-                                'label' => '',
-                                'name'  => '',
-                                'type'  => 'text',
-                            ],
-                        ];
-                    }
+                    <?php if (empty($fields)) : ?>
+                        <tr class="ff-fields-empty-state">
+                            <td colspan="6">
+                                <div class="ff-fields-empty-state__inner">
+                                    <strong>No fields added yet.</strong>
+                                    <p>Add your first field to start building this Field Group.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
 
+                    <?php
                     foreach ($fields as $index => $field) :
                         $label = isset($field['label']) ? $field['label'] : '';
                         $name  = isset($field['name'])  ? $field['name']  : '';
                         $type  = isset($field['type'])  ? $field['type']  : 'text';
+
+                        $default_value = isset($field['default_value'])
+                            ? (string) $field['default_value']
+                            : '';
+
+                        $required = ! empty($field['required']);
+
+                        $character_limit = isset($field['character_limit'])
+                            ? absint($field['character_limit'])
+                            : 0;
+
+                        $prepend = isset($field['prepend'])
+                            ? (string) $field['prepend']
+                            : '';
+
+                        $append = isset($field['append'])
+                            ? (string) $field['append']
+                            : '';
                     ?>
                         <?php
                         $choice_types = ['select', 'checkbox', 'radio', 'button_group'];
@@ -2777,24 +3428,192 @@ function ff_render_field_group_edit()
                                 </div>
                             </td>
 
-                            <td>
-                                <a href="#" class="ff-field-remove">Remove</a>
+                            <td class="ff-field-actions">
+                                <button
+                                    type="button"
+                                    class="button-link ff-field-options-toggle"
+                                    aria-expanded="false">
+                                    Options
+                                </button>
+
+                                <span class="ff-field-action-separator">|</span>
+
+                                <a href="#" class="ff-field-remove">
+                                    Remove
+                                </a>
                             </td>
                         </tr>
                         <tr
-                            class="ff-field-settings<?php echo $is_choice ? '' : ' is-hidden'; ?>"
+                            class="ff-field-settings is-hidden"
                             data-index="<?php echo esc_attr($index); ?>"
                             data-ff-settings
-                            <?php echo $is_choice ? '' : 'style="display:none"'; ?>>
+                            style="display:none;">
 
                             <td colspan="6">
-                                <div class="ff-field-setting ff-setting-choices">
-                                    <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
-                                    <textarea name="ff_fields[<?php echo $index; ?>][choices]" rows="3" class="large-text" placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea($choices_raw); ?></textarea>
-                                    <p class="description" style="margin-top:6px;">
-                                        Supported formats: <code>value : Label</code> or <code>value</code>.
-                                    </p>
+
+                                <div class="ff-field-options-panel">
+
+                                    <div class="ff-field-options-header">
+                                        <strong>Field Options</strong>
+                                    </div>
+
+                                    <div class="ff-field-options-grid">
+
+                                        <div
+                                            class="ff-field-option ff-option-default"
+                                            data-ff-option="default">
+
+                                            <label>
+                                                Default Value
+                                            </label>
+
+                                            <div class="ff-default-standard">
+                                                <input
+                                                    type="text"
+                                                    id="ff-default-value-<?php echo esc_attr($index); ?>"
+                                                    name="ff_fields[<?php echo esc_attr($index); ?>][default_value]"
+                                                    value="<?php echo esc_attr($default_value); ?>"
+                                                    class="regular-text">
+
+                                                <p class="description">
+                                                    Used when no value has been saved yet.
+                                                </p>
+                                            </div>
+
+                                            <div class="ff-default-true-false">
+                                                <label class="ff-toggle-field">
+                                                    <input
+                                                        type="checkbox"
+                                                        class="ff-true-false-default-toggle"
+                                                        <?php checked((string) $default_value, '1'); ?>>
+
+                                                    <span class="ff-toggle" aria-hidden="true"></span>
+                                                </label>
+
+                                                <span class="ff-true-false-default-label">
+                                                    <?php echo (string) $default_value === '1' ? 'True' : 'False'; ?>
+                                                </span>
+                                            </div>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-character-limit"
+                                            data-ff-option="character-limit">
+
+                                            <label
+                                                for="ff-character-limit-<?php echo esc_attr($index); ?>">
+                                                Character Limit
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                id="ff-character-limit-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][character_limit]"
+                                                value="<?php echo esc_attr($character_limit); ?>"
+                                                min="0"
+                                                step="1">
+
+                                            <p class="description">
+                                                Leave at 0 for no limit.
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-required"
+                                            data-ff-option="required">
+
+                                            <label>
+                                                Required
+                                            </label>
+
+                                            <label class="ff-toggle-field">
+                                                <input
+                                                    type="checkbox"
+                                                    name="ff_fields[<?php echo esc_attr($index); ?>][required]"
+                                                    value="1"
+                                                    <?php checked($required); ?>>
+
+                                                <span class="ff-toggle" aria-hidden="true"></span>
+                                            </label>
+
+                                            <p class="description">
+                                                Is this field required?
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-prepend"
+                                            data-ff-option="prepend">
+
+                                            <label
+                                                for="ff-prepend-<?php echo esc_attr($index); ?>">
+                                                Prepend
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ff-prepend-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][prepend]"
+                                                value="<?php echo esc_attr($prepend); ?>"
+                                                class="regular-text">
+
+                                            <p class="description">
+                                                Appears before the input.
+                                            </p>
+
+                                        </div>
+
+                                        <div
+                                            class="ff-field-option ff-option-append"
+                                            data-ff-option="append">
+
+                                            <label
+                                                for="ff-append-<?php echo esc_attr($index); ?>">
+                                                Append
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ff-append-<?php echo esc_attr($index); ?>"
+                                                name="ff_fields[<?php echo esc_attr($index); ?>][append]"
+                                                value="<?php echo esc_attr($append); ?>"
+                                                class="regular-text">
+
+                                            <p class="description">
+                                                Appears after the input.
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div
+                                        class="ff-field-setting ff-setting-choices"
+                                        data-ff-option="choices">
+
+                                        <label>
+                                            Choices <span class="ff-required-indicator">*</span>
+                                        </label>
+
+                                        <textarea
+                                            name="ff_fields[<?php echo esc_attr($index); ?>][choices]"
+                                            rows="4"
+                                            class="large-text"
+                                            placeholder="value : Label&#10;pro : Pro Plan&#10;enterprise : Enterprise"><?php echo esc_textarea($choices_raw); ?></textarea>
+
+                                        <p class="description">
+                                            <strong>Required.</strong> Add at least one choice, one per line. Use
+                                            <code>value : Label</code> or
+                                            <code>value|Label</code>. If only <code>value</code> is entered, Forge Fields will still generate a safe stored value automatically.
+                                        </p>
+
+                                    </div>
+
                                 </div>
+
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -2814,7 +3633,7 @@ function ff_render_field_group_edit()
                         <th class="ff-bar-title">Label</th>
                         <th>Name</th>
                         <th>Type</th>
-                        <th style="width:80px;"></th>
+                        <th style="width:150px;"></th>
                     </tr>
                 </tfoot>
             </table>
@@ -2901,22 +3720,145 @@ function ff_render_field_group_edit()
                     </td>
 
                     <td class="ff-field-actions">
-                        <a href="#" class="ff-field-remove">Remove</a>
+                        <button
+                            type="button"
+                            class="button-link ff-field-options-toggle"
+                            aria-expanded="false">
+                            Options
+                        </button>
+
+                        <span class="ff-field-action-separator">|</span>
+
+                        <a href="#" class="ff-field-remove">
+                            Remove
+                        </a>
                     </td>
                 </tr>
 
-                <tr class="ff-field-settings is-hidden" data-index="__INDEX__" data-ff-settings style="display:none">
+                <tr
+                    class="ff-field-settings is-hidden"
+                    data-index="__INDEX__"
+                    data-ff-settings
+                    style="display:none">
+
                     <td colspan="6">
-                        <div class="ff-field-setting ff-setting-choices">
-                            <label style="display:block;font-weight:600;margin:6px 0;">Choices (one per line)</label>
-                            <textarea name="ff_fields[__INDEX__][choices]"
-                                rows="3"
-                                class="large-text"
-                                placeholder="value : Label&#10;"></textarea>
-                            <p class="description" style="margin-top:6px;">
-                                Supported formats: <code>value : Label</code>, <code>value|Label</code> or <code>value</code>.
-                            </p>
+
+                        <div class="ff-field-options-panel">
+
+                            <div class="ff-field-options-header">
+                                <strong>Field Options</strong>
+                            </div>
+
+                            <div class="ff-field-options-grid">
+
+                                <div
+                                    class="ff-field-option ff-option-default"
+                                    data-ff-option="default">
+
+                                    <label>
+                                        Default Value
+                                    </label>
+
+                                    <div class="ff-default-standard">
+                                        <input
+                                            type="text"
+                                            id="ff-default-value-__INDEX__"
+                                            name="ff_fields[__INDEX__][default_value]"
+                                            value=""
+                                            class="regular-text">
+
+                                        <p class="description">
+                                            Used when no value has been saved yet.
+                                        </p>
+                                    </div>
+
+                                    <div class="ff-default-true-false">
+                                        <label class="ff-toggle-field">
+                                            <input
+                                                type="checkbox"
+                                                class="ff-true-false-default-toggle">
+
+                                            <span class="ff-toggle" aria-hidden="true"></span>
+                                        </label>
+
+                                        <span class="ff-true-false-default-label">
+                                            False
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-character-limit"
+                                    data-ff-option="character-limit">
+
+                                    <label for="ff-character-limit-__INDEX__">
+                                        Character Limit
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        id="ff-character-limit-__INDEX__"
+                                        name="ff_fields[__INDEX__][character_limit]"
+                                        value="0"
+                                        min="0"
+                                        step="1">
+
+                                    <p class="description">
+                                        Leave at 0 for no limit.
+                                    </p>
+
+                                </div>
+
+                                <div
+                                    class="ff-field-option ff-option-required"
+                                    data-ff-option="required">
+
+                                    <label>
+                                        Required
+                                    </label>
+
+                                    <label class="ff-toggle-field">
+                                        <input
+                                            type="checkbox"
+                                            name="ff_fields[__INDEX__][required]"
+                                            value="1">
+
+                                        <span class="ff-toggle" aria-hidden="true"></span>
+                                    </label>
+                                    <p class="description">
+                                        Is this field required?
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="ff-field-setting ff-setting-choices"
+                                data-ff-option="choices">
+
+                                <label>
+                                    Choices <span class="ff-required-indicator">*</span>
+                                </label>
+
+                                <textarea
+                                    name="ff_fields[__INDEX__][choices]"
+                                    rows="4"
+                                    class="large-text"
+                                    placeholder="value : Label&#10;"></textarea>
+
+                                <p class="description">
+                                    <strong>Required.</strong> Add at least one choice, one per line.
+                                    Supported formats:
+                                    <code>value : Label</code>,
+                                    <code>value|Label</code>,
+                                    or <code>value</code>.
+                                </p>
+
+                            </div>
+
                         </div>
+
                     </td>
                 </tr>
             </script>
@@ -2942,3 +3884,48 @@ function ff_render_field_group_edit()
     </div>
 <?php
 }
+
+/**
+ * Remove transient Forge Fields notice parameters from the browser URL.
+ *
+ * Notices are rendered once after redirects using query parameters such
+ * as ff_notice. Once the page is displayed, those parameters are removed
+ * so refreshing the browser does not display the same notice again.
+ */
+add_action('admin_footer', function () {
+
+    $page = isset($_GET['page'])
+        ? sanitize_key(wp_unslash($_GET['page']))
+        : '';
+
+    $forge_pages = [
+        'forge-fields',
+        'forge-fields-edit',
+        'forge-fields-global',
+        'forge-fields-settings',
+    ];
+
+    if (! in_array($page, $forge_pages, true)) {
+        return;
+    }
+
+    if (! isset($_GET['ff_notice'])) {
+        return;
+    }
+?>
+    <script>
+        (function() {
+            const url = new URL(window.location.href);
+
+            url.searchParams.delete('ff_notice');
+            url.searchParams.delete('imported');
+            url.searchParams.delete('skipped');
+
+            window.history.replaceState({},
+                document.title,
+                url.pathname + url.search + url.hash
+            );
+        })();
+    </script>
+<?php
+});

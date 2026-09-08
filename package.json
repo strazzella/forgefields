@@ -1,0 +1,19 @@
+{
+  "name": "forge-fields",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "esbuild assets/css/admin-fields.css --minify --outfile=assets/css/admin-fields.min.css",
+    "build:admin": "esbuild assets/js/admin-fields.js --minify --outfile=assets/js/admin-fields.min.js",
+    "build:controls": "esbuild assets/js/admin-controls.js --minify --outfile=assets/js/admin-controls.min.js",
+    "build:js": "npm run build:admin && npm run build:controls",
+    "build": "npm run build:css && npm run build:js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

@@ -85,6 +85,23 @@ function ff_render_settings_page()
             </div>
         <?php endif; ?>
 
+        <?php if ($notice !== '') : ?>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const url = new URL(window.location.href);
+
+                    url.searchParams.delete('ff_notice');
+                    url.searchParams.delete('imported');
+                    url.searchParams.delete('skipped');
+
+                    window.history.replaceState({},
+                        document.title,
+                        url.pathname + url.search + url.hash
+                    );
+                });
+            </script>
+        <?php endif; ?>
+
         <div class="ff-settings-grid">
 
             <div class="ff-settings-card">
@@ -192,9 +209,9 @@ function ff_render_settings_page()
                 <h2>Feedback</h2>
 
                 <p>
-                    Found a bug or have an idea for Forge Fields? Send feedback directly from WordPress.
-                    Your WordPress version, PHP version, Forge Fields version, site URL, and account email
-                    will be included to help diagnose issues.
+                    Found a bug, have an idea, or need help with Forge Fields?
+                    Send us a message directly from WordPress.
+                    Bug reports can include additional site information to help diagnose the issue.
                 </p>
 
                 <form method="post">
@@ -214,10 +231,62 @@ function ff_render_settings_page()
                             <select
                                 id="ff_feedback_type"
                                 name="ff_feedback_type">
-                                <option value="bug">Bug Report</option>
+                                <option value="general">General Inquiry</option>
                                 <option value="feature">Feature Request</option>
-                                <option value="general">General Feedback</option>
+                                <option value="bug">Bug Report</option>
                             </select>
+                        </div>
+
+                        <div
+                            id="ff_feedback_bug_details"
+                            style="display: none;padding-top: 15px;">
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_php_version">
+                                    PHP Version
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ff_feedback_php_version"
+                                    name="ff_feedback_php_version"
+                                    value="<?php echo esc_attr(PHP_VERSION); ?>">
+
+                            </div>
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_plugin_version">
+                                    Forge Fields Version
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ff_feedback_plugin_version"
+                                    name="ff_feedback_plugin_version"
+                                    value="<?php echo esc_attr(
+                                                defined('FF_VERSION')
+                                                    ? FF_VERSION
+                                                    : ''
+                                            ); ?>">
+
+                            </div>
+
+                            <div class="ff-settings-field">
+
+                                <label for="ff_feedback_site_url">
+                                    Site URL
+                                </label>
+
+                                <input
+                                    type="url"
+                                    id="ff_feedback_site_url"
+                                    name="ff_feedback_site_url"
+                                    value="<?php echo esc_url(home_url()); ?>">
+
+                            </div>
+
                         </div>
 
                     </div>
@@ -247,7 +316,27 @@ function ff_render_settings_page()
                     </button>
 
                 </form>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const typeSelect = document.getElementById('ff_feedback_type');
+                        const bugDetails = document.getElementById('ff_feedback_bug_details');
 
+                        if (!typeSelect || !bugDetails) {
+                            return;
+                        }
+
+                        function syncBugFields() {
+                            bugDetails.style.display =
+                                typeSelect.value === 'bug' ?
+                                'block' :
+                                'none';
+                        }
+
+                        syncBugFields();
+
+                        typeSelect.addEventListener('change', syncBugFields);
+                    });
+                </script>
             </div>
 
         </div>
@@ -310,6 +399,7 @@ function ff_handle_field_group_export()
      */
     $export = [
         'format'               => 'forge-fields',
+        'signature'            => 'forge-fields-export',
         'schema_version'       => 1,
         'forge_fields_version' => $plugin_version,
         'exported_at'          => wp_date(
@@ -431,29 +521,6 @@ function ff_handle_field_group_import()
         ? sanitize_file_name($file['name'])
         : '';
 
-    $filetype = wp_check_filetype_and_ext(
-        $file['tmp_name'],
-        $filename,
-        [
-            'json' => 'application/json',
-        ]
-    );
-
-    if (
-        empty($filetype['ext'])
-        || $filetype['ext'] !== 'json'
-    ) {
-        wp_safe_redirect(
-            add_query_arg(
-                'ff_notice',
-                'invalid_file',
-                $settings_url
-            )
-        );
-
-        exit;
-    }
-
     $extension = strtolower(
         pathinfo($filename, PATHINFO_EXTENSION)
     );
@@ -526,11 +593,33 @@ function ff_handle_field_group_import()
      */
     $data = json_decode($json, true);
 
+    /**
+     * Verify that the uploaded JSON matches a supported
+     * Forge Fields export structure.
+     *
+     * Backward compatibility:
+     * - Legacy schema-1 Forge Fields exports may not contain
+     *   the newer signature value and are still accepted.
+     * - Newer schema-1 exports must use the expected signature
+     *   when a signature is present.
+     */
+    $is_forge_export =
+        is_array($data)
+        && ($data['format'] ?? '') === 'forge-fields'
+        && isset($data['schema_version'])
+        && (int) $data['schema_version'] === 1
+        && isset($data['field_groups'])
+        && is_array($data['field_groups']);
+
+    $has_signature = isset($data['signature']);
+
+    $has_valid_signature =
+        ! $has_signature
+        || $data['signature'] === 'forge-fields-export';
+
     if (
-        ! is_array($data)
-        || ($data['format'] ?? '') !== 'forge-fields'
-        || empty($data['field_groups'])
-        || ! is_array($data['field_groups'])
+        ! $is_forge_export
+        || ! $has_valid_signature
     ) {
         wp_safe_redirect(
             add_query_arg(
@@ -541,6 +630,156 @@ function ff_handle_field_group_import()
         );
 
         exit;
+    }
+
+    /**
+     * Validate the structure of every imported Forge Fields group
+     * before any existing data is modified.
+     *
+     * Schema 1 compatibility rules are intentionally conservative:
+     * - A group must be an array.
+     * - Its ID may come from either the group's id property or its array key.
+     * - A title must be present.
+     * - Location must be one of the supported Forge Fields locations.
+     * - Fields must be provided as an array, but the array may be empty.
+     *
+     * Newer optional field properties are not required here so exports
+     * from older Forge Fields versions remain compatible.
+     */
+    $valid_group_structure = true;
+
+    foreach ($data['field_groups'] as $group_key => $group) {
+
+        if (! is_array($group)) {
+            $valid_group_structure = false;
+            break;
+        }
+
+        $group_id = ! empty($group['id'])
+            ? sanitize_text_field((string) $group['id'])
+            : sanitize_text_field((string) $group_key);
+
+        if ($group_id === '') {
+            $valid_group_structure = false;
+            break;
+        }
+
+        if (
+            ! isset($group['title'])
+            || ! is_scalar($group['title'])
+        ) {
+            $valid_group_structure = false;
+            break;
+        }
+
+        if (
+            ! isset($group['location'])
+            || ! is_scalar($group['location'])
+            || ! in_array(
+                sanitize_key((string) $group['location']),
+                ['page', 'post', 'global'],
+                true
+            )
+        ) {
+            $valid_group_structure = false;
+            break;
+        }
+
+        if (
+            ! isset($group['fields'])
+            || ! is_array($group['fields'])
+        ) {
+            $valid_group_structure = false;
+            break;
+        }
+    }
+
+    if (! $valid_group_structure) {
+        wp_safe_redirect(
+            add_query_arg(
+                'ff_notice',
+                'invalid_file',
+                $settings_url
+            )
+        );
+
+        exit;
+    }
+
+    /**
+     * Strictly validate field types in modern signed Forge Fields exports.
+     *
+     * Signed exports are generated by a known Forge Fields schema, so an
+     * unknown field type indicates that the file has been altered or is not
+     * valid for the current schema.
+     *
+     * Legacy unsigned schema-1 exports remain tolerant for backward
+     * compatibility and are normalized later during import.
+     */
+    if ($has_signature) {
+
+        $allowed_signed_field_types = [
+            'text',
+            'textarea',
+            'number',
+            'email',
+            'url',
+            'range',
+            'password',
+            'image',
+            'file',
+            'wysiwyg',
+            'select',
+            'checkbox',
+            'radio',
+            'button_group',
+            'true_false',
+            'tab',
+        ];
+
+        $valid_signed_fields = true;
+
+        foreach ($data['field_groups'] as $group) {
+
+            foreach ($group['fields'] as $field) {
+
+                if (
+                    ! is_array($field)
+                    || ! isset($field['type'])
+                    || ! is_scalar($field['type'])
+                ) {
+                    $valid_signed_fields = false;
+                    break 2;
+                }
+
+                $field_type = sanitize_key(
+                    (string) $field['type']
+                );
+
+                if (
+                    ! in_array(
+                        $field_type,
+                        $allowed_signed_field_types,
+                        true
+                    )
+                ) {
+                    $valid_signed_fields = false;
+                    break 2;
+                }
+            }
+        }
+
+        if (! $valid_signed_fields) {
+            wp_safe_redirect(
+                add_query_arg(
+                    'ff_notice',
+                    'invalid_file',
+                    $settings_url
+                )
+            );
+
+            exit;
+        }
     }
 
     /**
@@ -611,7 +850,7 @@ function ff_handle_field_group_import()
             ? sanitize_key($group['status'])
             : 'active';
 
-        if (! in_array($group['location'], ['page', 'post'], true)) {
+        if (! in_array($group['location'], ['page', 'post', 'global'], true)) {
             $group['location'] = 'page';
         }
 
@@ -689,10 +928,71 @@ function ff_handle_field_group_import()
                     continue;
                 }
 
+                /**
+                 * Preserve supported Forge Fields schema-1 field options.
+                 *
+                 * Missing options receive safe defaults so older exports
+                 * continue to import correctly.
+                 */
+                $default_value = isset($field['default_value'])
+                    ? sanitize_text_field(
+                        (string) $field['default_value']
+                    )
+                    : '';
+
+                $required = ! empty($field['required'])
+                    ? 1
+                    : 0;
+
+                $character_limit = isset($field['character_limit'])
+                    ? absint($field['character_limit'])
+                    : 0;
+
+                $prepend = isset($field['prepend'])
+                    ? sanitize_text_field(
+                        (string) $field['prepend']
+                    )
+                    : '';
+
+                $append = isset($field['append'])
+                    ? sanitize_text_field(
+                        (string) $field['append']
+                    )
+                    : '';
+
+                $prepend_append_types = [
+                    'text',
+                    'number',
+                    'email',
+                    'password',
+                ];
+
+                if (! in_array($field_type, $prepend_append_types, true)) {
+                    $prepend = '';
+                    $append  = '';
+                }
+
+                $character_limit_types = [
+                    'text',
+                    'textarea',
+                    'email',
+                    'url',
+                    'password',
+                ];
+
+                if (! in_array($field_type, $character_limit_types, true)) {
+                    $character_limit = 0;
+                }
+
                 $clean_field = [
-                    'name'  => $field_name,
-                    'label' => $field_label,
-                    'type'  => $field_type,
+                    'name'            => $field_name,
+                    'label'           => $field_label,
+                    'type'            => $field_type,
+                    'default_value'   => $default_value,
+                    'required'        => $required,
+                    'character_limit' => $character_limit,
+                    'prepend'         => $prepend,
+                    'append'          => $append,
                 ];
 
                 if (
@@ -869,10 +1169,39 @@ function ff_handle_feedback_submission()
     $type_labels = [
         'bug'     => 'Bug Report',
         'feature' => 'Feature Request',
-        'general' => 'General Feedback',
+        'general' => 'General Inquiry',
     ];
 
     $type_label = $type_labels[$type];
+
+    $php_version = PHP_VERSION;
+
+    $plugin_version = defined('FF_VERSION')
+        ? FF_VERSION
+        : 'Unknown';
+
+    $site_url = home_url();
+
+    if ($type === 'bug') {
+
+        $php_version = isset($_POST['ff_feedback_php_version'])
+            ? sanitize_text_field(
+                wp_unslash($_POST['ff_feedback_php_version'])
+            )
+            : $php_version;
+
+        $plugin_version = isset($_POST['ff_feedback_plugin_version'])
+            ? sanitize_text_field(
+                wp_unslash($_POST['ff_feedback_plugin_version'])
+            )
+            : $plugin_version;
+
+        $site_url = isset($_POST['ff_feedback_site_url'])
+            ? esc_url_raw(
+                wp_unslash($_POST['ff_feedback_site_url'])
+            )
+            : $site_url;
+    }
 
     $subject = sprintf(
         '[Forge Fields] %s',
@@ -889,10 +1218,10 @@ function ff_handle_feedback_submission()
             "User: %s <%s>\n\n" .
             "Message:\n%s",
         $type_label,
-        defined('FF_VERSION') ? FF_VERSION : 'Unknown',
+        $plugin_version,
         get_bloginfo('version'),
-        PHP_VERSION,
-        home_url(),
+        $php_version,
+        $site_url,
         $current_user->display_name,
         $current_user->user_email,
         $message
