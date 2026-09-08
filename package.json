@@ -7,7 +7,8 @@
     "build:admin": "esbuild assets/js/admin-fields.js --minify --outfile=assets/js/admin-fields.min.js",
     "build:controls": "esbuild assets/js/admin-controls.js --minify --outfile=assets/js/admin-controls.min.js",
     "build:js": "npm run build:admin && npm run build:controls",
-    "build": "npm run build:css && npm run build:js"
+    "build": "npm run build:css && npm run build:js",
+    "release": "node scripts/build-release.js"
   },
   "keywords": [],
   "author": "",
