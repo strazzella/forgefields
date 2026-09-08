@@ -47,11 +47,9 @@ Create reusable Field Groups for Pages and Posts, define Global Fields, and retr
 4. Open **Forge Fields** in the WordPress admin menu.
 5. Create your first Field Group.
 
-## Basic Usage
+## Developer Usage
 
-Create a Field Group, add your fields, and assign the group to Pages or Posts.
-
-Retrieve a field in your theme:
+Retrieve a field from the current Page or Post:
 
 ```php
 $value = ff_get_field('field_name');
