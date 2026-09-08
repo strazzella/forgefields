@@ -522,17 +522,6 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
         ? (string) $field['append']
         : '';
 
-    $maxlength_attr = $character_limit > 0
-        ? ' maxlength="' . esc_attr($character_limit) . '"'
-        : '';
-
-    $prepend_html = $prepend !== ''
-        ? '<span class="ff-input-affix ff-input-prepend">' . esc_html($prepend) . '</span>'
-        : '';
-
-    $append_html = $append !== ''
-        ? '<span class="ff-input-affix ff-input-append">' . esc_html($append) . '</span>'
-        : '';
     /**
      * Prefer the new group-scoped post meta key.
      *
@@ -653,10 +642,6 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
     echo '</th>';
     echo '<td>';
 
-    $required_attr = $required
-        ? ' required aria-required="true"'
-        : '';
-
     switch ($type) {
         case 'wysiwyg':
             $editor_id = 'ff_' . sanitize_key($name);
@@ -760,14 +745,25 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
                 }
             }
 
-            echo '<input type="' . esc_attr($input) . '"'
-                . ' class="' . ($supports_affixes && ($prepend !== '' || $append !== '') ? 'ff-affix-input__field' : 'regular-text') . '"'
-                . ' name="' . esc_attr($meta_key) . '"'
-                . ' id="' . esc_attr($meta_key) . '"'
-                . ' value="' . esc_attr((string) $value) . '"'
-                . $required_attr
-                . $maxlength_attr
-                . '>';
+            ?>
+            <input
+                type="<?php echo esc_attr($input); ?>"
+                class="<?php echo esc_attr(
+                            $supports_affixes && ($prepend !== '' || $append !== '')
+                                ? 'ff-affix-input__field'
+                                : 'regular-text'
+                        ); ?>"
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                value="<?php echo esc_attr((string) $value); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>
+                <?php if ($character_limit > 0) : ?>
+                maxlength="<?php echo esc_attr($character_limit); ?>"
+                <?php endif; ?>>
+            <?php
 
             if ($supports_affixes && ($prepend !== '' || $append !== '')) {
                 if ($append !== '') {
@@ -812,7 +808,7 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
                 <?php if ($character_limit > 0) : ?>
                 maxlength="<?php echo esc_attr($character_limit); ?>"
                 <?php endif; ?>>
-<?php
+            <?php
 
             echo '<button type="button" class="ff-password-toggle"'
                 . ' data-target="#' . esc_attr($meta_key) . '"'
@@ -891,7 +887,15 @@ function ff_render_metabox_field_row(array $field, WP_Post $post, $group_id)
             $current     = is_scalar($value) ? (string) $value : '';
 
             echo '<div class="ff-select-wrap">';
-            echo '<select name="' . esc_attr($meta_key) . '" id="' . esc_attr($meta_key) . '"' . $required_attr . '>';
+            ?>
+            <select
+                name="<?php echo esc_attr($meta_key); ?>"
+                id="<?php echo esc_attr($meta_key); ?>"
+                <?php if ($required) : ?>
+                required
+                aria-required="true"
+                <?php endif; ?>>
+    <?php
             foreach ($choices_map as $v => $lbl) {
                 printf(
                     '<option value="%1$s"%3$s>%2$s</option>',
@@ -1434,7 +1438,7 @@ function ff_get_field($field_name, $post_id = null, $group_id = null)
             trigger_error(
                 sprintf(
                     'Forge Fields: Field "%s" exists in multiple applicable Field Groups. Choose a unique name or specify a Forge Key as the third argument to ff_get_field().',
-                    $field_name
+                    esc_html($field_name)
                 ),
                 E_USER_WARNING
             );
@@ -1764,7 +1768,7 @@ function ff_get_field_choices(
             trigger_error(
                 sprintf(
                     'Forge Fields: Choice field "%s" exists in multiple applicable Field Groups. Specify a Forge Group Key as the third argument to ff_get_field_choices().',
-                    $field_name
+                    esc_html($field_name)
                 ),
                 E_USER_WARNING
             );

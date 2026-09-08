@@ -4,7 +4,7 @@ Tags: custom fields, metadata, field groups, global fields, developer tools
 Requires at least: 6.8.2
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.1
+Stable tag: 0.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -98,10 +98,10 @@ Saved Page, Post, and Global Field values are not included in Field Group export
 
 == Changelog ==
 
-= 0.2.1 =
+= 0.2.3 =
 * Initial public beta release.
 
 == Upgrade Notice ==
 
-= 0.2.1 =
+= 0.2.3 =
 Initial public beta release.

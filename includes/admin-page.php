@@ -360,7 +360,7 @@ function ff_render_admin_subbar($title, $cta_url = '', $cta_label = 'Add New', $
             <div class="ff-subbar__actions">
                 <?php
                 if ($right_html) {
-                    echo $right_html;
+                    echo wp_kses_post($right_html);
                 } elseif ($cta_url) { ?>
                     <a class="button button-primary ff-subbar__btn"
                         href="<?php echo esc_url($cta_url); ?>">
@@ -1948,21 +1948,39 @@ function ff_render_field_groups_list()
 
                                 <td>
                                     <?php
-                                    $count_html = '<span class="ff-chip" title="Fields">' . intval($field_cnt) . '</span>';
                                     if ($current_view === 'trash') {
-                                        echo $count_html;
+                                        echo '<span class="ff-chip" title="Fields">'
+                                            . esc_html((string) intval($field_cnt))
+                                            . '</span>';
                                     } else {
-                                        echo '<a href="' . esc_url($edit_url) . '" class="ff-count-link">' . $count_html . '</a>';
+                                        echo '<a href="' . esc_url($edit_url) . '" class="ff-count-link">';
+                                        echo '<span class="ff-chip" title="Fields">'
+                                            . esc_html((string) intval($field_cnt))
+                                            . '</span>';
+                                        echo '</a>';
                                     }
                                     ?>
                                 </td>
 
                                 <td>
                                     <?php
-                                    $status_key   = strtolower($status);
-                                    $status_label = ($status_key === 'active') ? 'Active' : ($status_key === 'inactive' ? 'Inactive' : ucfirst($status_key));
-                                    $status_class = 'ff-status ff-status--' . esc_attr($status_key);
-                                    echo '<span class="' . $status_class . '">' . esc_html($status_label) . '</span>';
+                                    $status_key = sanitize_html_class(
+                                        strtolower((string) $status)
+                                    );
+
+                                    $status_label = ($status_key === 'active')
+                                        ? 'Active'
+                                        : (
+                                            $status_key === 'inactive'
+                                            ? 'Inactive'
+                                            : ucfirst($status_key)
+                                        );
+
+                                    echo '<span class="'
+                                        . esc_attr('ff-status ff-status--' . $status_key)
+                                        . '">'
+                                        . esc_html($status_label)
+                                        . '</span>';
                                     ?>
                                 </td>
                             </tr>
@@ -2026,7 +2044,7 @@ function ff_render_global_field_row(array $field, array $stored)
 ?>
     <tr>
         <th scope="row">
-            <label for="<?php echo $id; ?>">
+            <label for="<?php echo esc_attr($id); ?>">
                 <?php echo esc_html($label); ?>
             </label>
         </th>
@@ -3456,7 +3474,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <input type="text"
-                                    name="ff_fields[<?php echo $index; ?>][label]"
+                                    name="ff_fields[<?php echo esc_attr($index); ?>][label]"
                                     value="<?php echo esc_attr($label); ?>"
                                     class="regular-text ff-field-label"
                                     maxlength="50"
@@ -3466,7 +3484,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <input type="text"
-                                    name="ff_fields[<?php echo $index; ?>][name]"
+                                    name="ff_fields[<?php echo esc_attr($index); ?>][name]"
                                     value="<?php echo esc_attr($name); ?>"
                                     class="regular-text ff-field-name"
                                     maxlength="50"
@@ -3476,7 +3494,7 @@ function ff_render_field_group_edit()
 
                             <td>
                                 <div class="ff-select-wrap">
-                                    <select name="ff_fields[<?php echo $index; ?>][type]" class="ff-field-type" data-field-part="type">
+                                    <select name="ff_fields[<?php echo esc_attr($index); ?>][type]" class="ff-field-type" data-field-part="type">
                                         <?php foreach ($type_groups as $group_label => $opts) : ?>
                                             <optgroup label="<?php echo esc_attr($group_label); ?>">
                                                 <?php foreach ($opts as $t) : ?>

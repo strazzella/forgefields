@@ -44,8 +44,8 @@ function ff_render_settings_page()
                     <?php
                     printf(
                         'Field groups imported successfully. Imported: %d. Skipped: %d.',
-                        $imported,
-                        $skipped
+                        absint($imported),
+                        absint($skipped)
                     );
                     ?>
                 </p>
