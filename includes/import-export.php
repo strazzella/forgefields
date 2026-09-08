@@ -1034,8 +1034,7 @@ add_action('admin_init', 'ff_handle_feedback_submission');
  * Handle Forge Fields feedback submissions.
  *
  * Verifies permissions and the feedback nonce, sanitizes the submitted
- * feedback, adds basic environment information, and sends the message
- * through the WordPress mail system.
+ * feedback, and sends it to the Forge Fields feedback service.
  */
 function ff_handle_feedback_submission()
 {
@@ -1092,21 +1091,13 @@ function ff_handle_feedback_submission()
 
     $current_user = wp_get_current_user();
 
-    $type_labels = [
-        'bug'     => 'Bug Report',
-        'feature' => 'Feature Request',
-        'general' => 'General Inquiry',
+    $payload = [
+        'type'       => $type,
+        'message'    => $message,
+        'user_email' => sanitize_email(
+            $current_user->user_email
+        ),
     ];
-
-    $type_label = $type_labels[$type];
-
-    $php_version = PHP_VERSION;
-
-    $plugin_version = defined('FF_VERSION')
-        ? FF_VERSION
-        : 'Unknown';
-
-    $site_url = home_url();
 
     if ($type === 'bug') {
 
@@ -1114,55 +1105,69 @@ function ff_handle_feedback_submission()
             ? sanitize_text_field(
                 wp_unslash($_POST['ff_feedback_php_version'])
             )
-            : $php_version;
+            : PHP_VERSION;
 
         $plugin_version = isset($_POST['ff_feedback_plugin_version'])
             ? sanitize_text_field(
                 wp_unslash($_POST['ff_feedback_plugin_version'])
             )
-            : $plugin_version;
+            : (
+                defined('FF_VERSION')
+                ? FF_VERSION
+                : 'Unknown'
+            );
 
         $site_url = isset($_POST['ff_feedback_site_url'])
             ? esc_url_raw(
                 wp_unslash($_POST['ff_feedback_site_url'])
             )
-            : $site_url;
+            : home_url();
+
+        $payload['plugin_version'] = $plugin_version;
+        $payload['wordpress_version'] = get_bloginfo('version');
+        $payload['php_version'] = $php_version;
+        $payload['site_url'] = $site_url;
     }
 
-    $subject = sprintf(
-        '[Forge Fields] %s',
-        $type_label
+    $response = wp_remote_post(
+        'https://forge-fields-feedback.useforgedev.workers.dev/',
+        [
+            'timeout' => 15,
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+            'body' => wp_json_encode($payload),
+        ]
     );
 
-    $body = sprintf(
-        "Forge Fields Feedback\n\n" .
-            "Type: %s\n" .
-            "Plugin Version: %s\n" .
-            "WordPress Version: %s\n" .
-            "PHP Version: %s\n" .
-            "Site URL: %s\n" .
-            "User: %s <%s>\n\n" .
-            "Message:\n%s",
-        $type_label,
-        $plugin_version,
-        get_bloginfo('version'),
-        $php_version,
-        $site_url,
-        $current_user->display_name,
-        $current_user->user_email,
-        $message
-    );
+    $sent = false;
 
-    $to = 'useforgedev@gmail.com';
+    if (is_wp_error($response)) {
 
-    $sent = wp_mail(
-        $to,
-        $subject,
-        $body
-    );
+        error_log(
+            'Forge Fields feedback request failed: ' .
+                $response->get_error_message()
+        );
+    } else {
 
-    if (! $sent) {
-        error_log('Forge Fields feedback email failed to send.');
+        $status_code = wp_remote_retrieve_response_code($response);
+
+        $response_body = json_decode(
+            wp_remote_retrieve_body($response),
+            true
+        );
+
+        $sent =
+            $status_code >= 200
+            && $status_code < 300
+            && is_array($response_body)
+            && ! empty($response_body['success']);
+
+        if (! $sent) {
+            error_log(
+                'Forge Fields feedback service returned an unsuccessful response.'
+            );
+        }
     }
 
     wp_safe_redirect(
