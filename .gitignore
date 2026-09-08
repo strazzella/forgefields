@@ -13,6 +13,8 @@
 .phpstan-cache/
 .phpunit.result.cache
 .php-cs-fixer.cache
+.phpunit.cache/
+coverage/
 
 
 # ---------------------------------------------------------
@@ -30,6 +32,10 @@
 *.bak
 *.swp
 *.swo
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 
 # ---------------------------------------------------------
@@ -65,11 +71,3 @@ desktop.ini
 debug.log
 wp-debug.log
 error_log
-
-
-# ---------------------------------------------------------
-# OPTIONAL LOCAL TOOLING
-# ---------------------------------------------------------
-
-.phpunit.cache/
-coverage/

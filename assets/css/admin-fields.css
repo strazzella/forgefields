@@ -4584,3 +4584,16 @@ input#_ff_range_slider {
 #poststuff .postbox[id^="ff_field_group_"] .handle-order-lower {
   display: none !important;
 }
+
+.ff-settings-docs {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ff-settings-docs:hover,
+.ff-settings-docs:focus {
+  color: #111827;
+  text-decoration: underline;
+}
