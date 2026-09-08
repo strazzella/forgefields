@@ -60,13 +60,10 @@ for (const item of releaseItems) {
 console.log("Creating forge-fields.zip...");
 
 if (process.platform === "win32") {
-  execSync(
-    `powershell -NoProfile -Command "Compress-Archive -Path '${pluginDir}' -DestinationPath '${zipPath}' -Force"`,
-    {
-      cwd: root,
-      stdio: "inherit",
-    },
-  );
+  execSync(`tar.exe -a -c -f "${zipPath}" -C "${distDir}" forge-fields`, {
+    cwd: root,
+    stdio: "inherit",
+  });
 } else {
   execSync(`cd "${distDir}" && zip -rq "forge-fields.zip" "forge-fields"`, {
     cwd: root,
