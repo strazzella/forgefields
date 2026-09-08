@@ -279,7 +279,7 @@ add_action('in_admin_header', function () {
             Documentation
         </a>',
             esc_html(FF_VERSION),
-            esc_url('https://github.com/strazzella/forgefields#documentation')
+            esc_url('https://github.com/strazzella/forgefields/blob/main/docs/usage.md')
         );
 
         ff_render_admin_subbar(
