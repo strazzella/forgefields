@@ -270,8 +270,16 @@ add_action('in_admin_header', function () {
     if ($page === 'forge-fields-settings') {
 
         $version_html = sprintf(
-            '<span class="ff-settings-version">Forge Fields - Version %s</span>',
-            esc_html(FF_VERSION)
+            '<span class="ff-settings-version">Forge Fields - Version %s</span>
+        <a
+            class="ff-settings-docs"
+            href="%s"
+            target="_blank"
+            rel="noopener noreferrer">
+            Documentation
+        </a>',
+            esc_html(FF_VERSION),
+            esc_url('https://github.com/strazzella/forgefields#documentation')
         );
 
         ff_render_admin_subbar(
