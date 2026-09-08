@@ -59,16 +59,21 @@ Retrieve a Global Field:
 
 ```php
 $value = ff_get_global('field_name');
+```
 
 Output text safely:
+
+```php
 <h1>
     <?php echo esc_html(ff_get_field('hero_title')); ?>
 </h1>
+```
 
 Retrieve a field from a specific Page or Post:
 
 ```php
 $value = ff_get_field('field_name', 123);
+```
 
 If the same field name exists in multiple Field Groups, specify the Forge Group Key:
 
@@ -78,5 +83,6 @@ $value = ff_get_field(
     null,
     'ff_group_example'
 );
+```
 
 More examples are available in Developer Usage.
