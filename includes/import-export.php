@@ -239,7 +239,7 @@ function ff_render_settings_page()
 
                         <div
                             id="ff_feedback_bug_details"
-                            style="display: none;">
+                            style="display: none;padding-top: 15px;">
 
                             <div class="ff-settings-field">
 
