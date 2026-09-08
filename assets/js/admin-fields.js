@@ -525,6 +525,12 @@ document.addEventListener("DOMContentLoaded", function () {
         attachRowEvents(newRow);
       }
 
+      const emptyState = tbody.querySelector(".ff-fields-empty-state");
+
+      if (emptyState) {
+        emptyState.remove();
+      }
+
       renumberRows();
     }
 

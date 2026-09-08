@@ -3291,7 +3291,7 @@ function ff_render_field_group_edit()
                         <tr class="ff-fields-empty-state">
                             <td colspan="6">
                                 <div class="ff-fields-empty-state__inner">
-                                    <strong>No fields added yet.</strong>
+                                    <strong>There are currently no fields.</strong>
                                     <p>Add your first field to start building this Field Group.</p>
                                 </div>
                             </td>
