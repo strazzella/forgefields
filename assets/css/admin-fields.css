@@ -534,6 +534,16 @@ input.button.action {
   color: #18181a !important;
 }
 
+.ff-subbar #ff-add-field:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.ff-subbar #ff-add-field:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(54, 54, 55, 0.18);
+}
+
 .wrap.ff-admin.ff-list table.ff-list-table {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
