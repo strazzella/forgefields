@@ -3597,6 +3597,11 @@ input#_ff_range_slider {
   user-select: none;
 }
 
+.wrap.ff-admin.ff-edit .ff-option-required .ff-toggle-field {
+  width: fit-content;
+  max-width: max-content;
+}
+
 /**
  * Keep the native checkbox for form semantics while the adjacent
  * .ff-toggle provides the visible switch UI.
