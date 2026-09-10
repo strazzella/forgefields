@@ -55,15 +55,16 @@ if (! function_exists('ff_parse_choices_string')) {
  */
 function ff_normalize_choices_string($raw)
 {
-
-    $lines     = preg_split('/\r\n|\r|\n/', (string) $raw);
+    $lines      = preg_split('/\r\n|\r|\n/', (string) $raw);
     $normalized = [];
     $errors     = [];
     $warnings   = [];
+    $used_values = [];
 
     foreach ($lines as $i => $line) {
 
         $line = trim($line);
+
         if ($line === '') {
             continue;
         }
@@ -72,32 +73,55 @@ function ff_normalize_choices_string($raw)
         $label = '';
 
         if (strpos($line, '|') !== false) {
-            [$value, $label] = array_map('trim', explode('|', $line, 2));
+            [$value, $label] = array_map(
+                'trim',
+                explode('|', $line, 2)
+            );
         } elseif (strpos($line, ':') !== false) {
-            [$value, $label] = array_map('trim', explode(':', $line, 2));
+            [$value, $label] = array_map(
+                'trim',
+                explode(':', $line, 2)
+            );
         } else {
             $value = $line;
             $label = '';
         }
 
         $value = sanitize_key($value);
+
         if ($value === '') {
             $errors[] = sprintf(
                 'Line %d is invalid. Each choice must have a value.',
                 $i + 1
             );
+
             continue;
         }
+
+        if (isset($used_values[$value])) {
+            $errors[] = sprintf(
+                'Line %d uses the duplicate choice value "%s". Each choice must have a unique value.',
+                $i + 1,
+                $value
+            );
+
+            continue;
+        }
+
+        $used_values[$value] = true;
 
         if ($label === '') {
             $normalized[] = $value;
         } else {
+
             $label = sanitize_text_field($label);
+
             if ($label === '') {
                 $errors[] = sprintf(
                     'Line %d has an empty label.',
                     $i + 1
                 );
+
                 continue;
             }
 
@@ -115,9 +139,6 @@ function ff_normalize_choices_string($raw)
         'warnings'   => $warnings,
     ];
 }
-
-
-
 
 /**
  * Customize Forge Fields admin screens before the standard admin header.

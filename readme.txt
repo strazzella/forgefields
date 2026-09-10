@@ -4,7 +4,7 @@ Tags: custom fields, metadata, field groups, global fields, developer tools
 Requires at least: 6.8.2
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.6
+Stable tag: 0.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,9 +12,9 @@ Create and manage custom fields, field groups, global fields, media fields, and 
 
 == Description ==
 
-Forge Fields is a lightweight custom fields plugin for WordPress.
+Forge Fields is a lightweight custom-fields framework for WordPress focused on straightforward field groups, global fields, group-scoped metadata, and developer-friendly template APIs without the broader content-modeling feature set of larger custom-field suites.
 
-Create reusable Field Groups for Pages and Posts, define Global Fields, and retrieve saved values in your theme or plugin using simple developer-friendly functions.
+Forge Fields lets you create custom field groups, assign them to posts and pages, define global fields, work with media and choice fields, and retrieve values in templates using simple helper functions.
 
 Features include:
 
@@ -98,10 +98,10 @@ Saved Page, Post, and Global Field values are not included in Field Group export
 
 == Changelog ==
 
-= 0.2.6 =
+= 0.2.7 =
 * Initial public beta release.
 
 == Upgrade Notice ==
 
-= 0.2.6 =
+= 0.2.7 =
 Initial public beta release.
