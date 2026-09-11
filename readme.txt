@@ -47,6 +47,41 @@ Features include:
 Developer documentation is available on GitHub:
 https://github.com/strazzella/forgefields
 
+== External services ==
+
+Forge Fields includes an optional feedback form in the WordPress admin area.
+
+When an administrator submits the feedback form, the plugin sends the submitted feedback to the Forge Fields feedback service at:
+
+https://forge-fields-feedback.useforgedev.workers.dev/
+
+The service is hosted using Cloudflare Workers.
+
+The following data is sent when feedback is submitted:
+
+* Feedback type
+* Feedback message
+* The current WordPress user's email address
+
+For bug reports, the following additional diagnostic information is also sent:
+
+* Forge Fields plugin version
+* WordPress version
+* PHP version
+* Site URL
+
+No feedback data is sent automatically. Data is only transmitted when an administrator explicitly submits the feedback form.
+
+The feedback service uses Postmark to deliver the submitted feedback by email.
+
+Cloudflare:
+Terms: https://www.cloudflare.com/website-terms/
+Privacy: https://www.cloudflare.com/privacypolicy/
+
+Postmark:
+Terms: https://postmarkapp.com/terms-of-service
+Privacy: https://postmarkapp.com/privacy-policy
+
 == Installation ==
 
 1. Upload the `forge-fields` folder to the `/wp-content/plugins/` directory, or install the plugin through the WordPress Plugins screen.
