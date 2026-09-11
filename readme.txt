@@ -1,7 +1,7 @@
 === Forge Fields ===
 Contributors: strazzella
 Tags: custom fields, metadata, field groups, global fields, developer tools
-Requires at least: 6.8.2
+Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 0.2.7

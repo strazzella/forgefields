@@ -9,7 +9,7 @@
  * Author URI:        https://github.com/strazzella
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Requires at least: 6.8.2
+ * Requires at least: 6.8
  * Requires PHP:      8.0
  * Text Domain:       forge-fields
  */
