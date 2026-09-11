@@ -82,22 +82,29 @@ function ff_render_settings_page()
             </div>
         <?php endif; ?>
 
-        <?php if ($notice !== '') : ?>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const url = new URL(window.location.href);
+        <?php
+        if ($notice !== '') {
 
-                    url.searchParams.delete('ff_notice');
-                    url.searchParams.delete('imported');
-                    url.searchParams.delete('skipped');
+            wp_add_inline_script(
+                'ff-admin-fields',
+                "
+        document.addEventListener('DOMContentLoaded', function() {
+            const url = new URL(window.location.href);
 
-                    window.history.replaceState({},
-                        document.title,
-                        url.pathname + url.search + url.hash
-                    );
-                });
-            </script>
-        <?php endif; ?>
+            url.searchParams.delete('ff_notice');
+            url.searchParams.delete('imported');
+            url.searchParams.delete('skipped');
+
+            window.history.replaceState(
+                {},
+                document.title,
+                url.pathname + url.search + url.hash
+            );
+        });
+        "
+            );
+        }
+        ?>
 
         <div class="ff-settings-grid">
 
@@ -313,27 +320,32 @@ function ff_render_settings_page()
                     </button>
 
                 </form>
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const typeSelect = document.getElementById('ff_feedback_type');
-                        const bugDetails = document.getElementById('ff_feedback_bug_details');
+                <?php
+                wp_add_inline_script(
+                    'ff-admin-fields',
+                    "
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('ff_feedback_type');
+        const bugDetails = document.getElementById('ff_feedback_bug_details');
 
-                        if (!typeSelect || !bugDetails) {
-                            return;
-                        }
+        if (! typeSelect || ! bugDetails) {
+            return;
+        }
 
-                        function syncBugFields() {
-                            bugDetails.style.display =
-                                typeSelect.value === 'bug' ?
-                                'block' :
-                                'none';
-                        }
+        function syncBugFields() {
+            bugDetails.style.display =
+                typeSelect.value === 'bug'
+                    ? 'block'
+                    : 'none';
+        }
 
-                        syncBugFields();
+        syncBugFields();
 
-                        typeSelect.addEventListener('change', syncBugFields);
-                    });
-                </script>
+        typeSelect.addEventListener('change', syncBugFields);
+    });
+    "
+                );
+                ?>
             </div>
 
         </div>

@@ -169,17 +169,28 @@ add_action('in_admin_header', function () {
         return trim($classes . ' ff-has-brandbar ff-has-subbar');
     });
 
-    add_action('admin_head', function () {
-        $page = isset($_GET['page']) ? sanitize_key($_GET['page']) : '';
-        if (!in_array($page, ['forge-fields', 'forge-fields-edit'], true)) {
+    add_action('admin_enqueue_scripts', function () {
+
+        $page = isset($_GET['page'])
+            ? sanitize_key(wp_unslash($_GET['page']))
+            : '';
+
+        if (! in_array($page, ['forge-fields', 'forge-fields-edit'], true)) {
             return;
         }
-        echo '<style>
-            
-            tr.ff-field-settings { display:none !important; }
-            
-            tr.ff-field-settings.is-visible { display:table-row !important; }
-        </style>';
+
+        wp_add_inline_style(
+            'ff-admin-fields',
+            '
+        tr.ff-field-settings {
+            display: none !important;
+        }
+
+        tr.ff-field-settings.is-visible {
+            display: table-row !important;
+        }
+        '
+        );
     });
 
     $is_new   = ($page === 'forge-fields-edit' && empty($_GET['group']));
@@ -884,6 +895,59 @@ function ff_handle_field_group_save()
         }
     }
 
+    /**
+     * Build a sanitized copy of the submitted field definitions for temporary
+     * form restoration after a validation error.
+     *
+     * This is separate from the validated field data used for the actual save.
+     */
+    $fields_form_state = [];
+
+    foreach ($fields_raw as $field_raw) {
+
+        if (! is_array($field_raw)) {
+            continue;
+        }
+
+        $fields_form_state[] = [
+            'name' => isset($field_raw['name'])
+                ? sanitize_text_field((string) $field_raw['name'])
+                : '',
+
+            'label' => isset($field_raw['label'])
+                ? sanitize_text_field((string) $field_raw['label'])
+                : '',
+
+            'type' => isset($field_raw['type'])
+                ? sanitize_key((string) $field_raw['type'])
+                : 'text',
+
+            'choices' => isset($field_raw['choices'])
+                ? sanitize_textarea_field((string) $field_raw['choices'])
+                : '',
+
+            'default_value' => isset($field_raw['default_value'])
+                ? sanitize_text_field((string) $field_raw['default_value'])
+                : '',
+
+            'required' => ! empty($field_raw['required'])
+                ? 1
+                : 0,
+
+            'character_limit' => isset($field_raw['character_limit'])
+                ? absint($field_raw['character_limit'])
+                : 0,
+
+            'prepend' => isset($field_raw['prepend'])
+                ? sanitize_text_field((string) $field_raw['prepend'])
+                : '',
+
+            'append' => isset($field_raw['append'])
+                ? sanitize_text_field((string) $field_raw['append'])
+                : '',
+        ];
+    }
+
     if ($has_save_errors) {
 
         $user_id = get_current_user_id();
@@ -911,7 +975,7 @@ function ff_handle_field_group_save()
                 'location_target' => $location_target
                     ? (string) $location_target
                     : '',
-                'fields'          => $fields_raw,
+                'fields'          => $fields_form_state,
             ],
             60
         );
@@ -3188,9 +3252,6 @@ function ff_render_field_group_edit()
 
         if (is_array($saved_form)) {
 
-
-            $saved_form = wp_unslash($saved_form);
-
             $submitted_fields =
                 isset($saved_form['fields'])
                 && is_array($saved_form['fields'])
@@ -3332,14 +3393,16 @@ function ff_render_field_group_edit()
         <?php endforeach; ?>
 
 
+        <?php
+        wp_add_inline_script(
+            'ff-admin-fields',
+            'window.ffFieldNameRegistry = ' .
+                wp_json_encode($ff_other_group_field_names) .
+                ';',
+            'before'
+        );
+        ?>
         <form method="post" action="" id="ff-edit-form">
-            <script>
-                window.ffFieldNameRegistry = <?php
-                                                echo wp_json_encode(
-                                                    $ff_other_group_field_names
-                                                );
-                                                ?>;
-            </script>
             <?php wp_nonce_field('ff_save_field_group'); ?>
             <input type="hidden" name="ff_group_id"
                 value="<?php echo esc_attr(isset($group['id']) ? $group['id'] : ''); ?>">
@@ -4090,20 +4153,23 @@ add_action('admin_footer', function () {
     if (! isset($_GET['ff_notice'])) {
         return;
     }
-?>
-    <script>
-        (function() {
-            const url = new URL(window.location.href);
 
-            url.searchParams.delete('ff_notice');
-            url.searchParams.delete('imported');
-            url.searchParams.delete('skipped');
+    wp_add_inline_script(
+        'ff-admin-fields',
+        "
+    (function() {
+        const url = new URL(window.location.href);
 
-            window.history.replaceState({},
-                document.title,
-                url.pathname + url.search + url.hash
-            );
-        })();
-    </script>
-<?php
+        url.searchParams.delete('ff_notice');
+        url.searchParams.delete('imported');
+        url.searchParams.delete('skipped');
+
+        window.history.replaceState(
+            {},
+            document.title,
+            url.pathname + url.search + url.hash
+        );
+    })();
+    "
+    );
 });
